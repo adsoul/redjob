@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+   <modelVersion>4.0.0</modelVersion>
+   <groupId>com.s24</groupId>
+   <artifactId>spring-rescue</artifactId>
+   <name>${project.groupId}.${project.artifactId}</name>
+   <version>0.0.1-SNAPSHOT</version>
+   <packaging>jar</packaging>
+
+   <description>Spring based implementation of Rescue.</description>
+
+   <organization>
+      <name>Shopping24 GmbH</name>
+      <url>http://www.s24.com</url>
+   </organization>
+
+   <prerequisites>
+      <maven>3.2</maven>
+   </prerequisites>
+
+   <properties>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+      <maven.compiler.source>1.8</maven.compiler.source>
+      <maven.compiler.target>1.8</maven.compiler.target>
+      <plugin.exec-maven-plugin.version>1.4.0</plugin.exec-maven-plugin.version>
+
+      <dependency.assertj.version>3.4.1</dependency.assertj.version>
+      <dependency.jedis.version>2.8.1</dependency.jedis.version>
+      <dependency.junit.version>4.12</dependency.junit.version>
+      <dependency.mockito.version>1.10.19</dependency.mockito.version>
+      <dependency.spring.version>4.2.5.RELEASE</dependency.spring.version>
+      <dependency.spring-data-redis.version>1.7.1.RELEASE</dependency.spring-data-redis.version>
+   </properties>
+
+   <repositories>
+      <repository>
+         <!-- This project depends on internal libraries -->
+         <id>s24-internal</id>
+         <name>S24 internal artifactory</name>
+         <url>https://artifactory.s24.com/artifactory/s24-internal</url>
+      </repository>
+   </repositories>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-core</artifactId>
+         <version>${dependency.spring.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-beans</artifactId>
+         <version>${dependency.spring.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-context</artifactId>
+         <version>${dependency.spring.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.data</groupId>
+         <artifactId>spring-data-redis</artifactId>
+         <version>${dependency.spring-data-redis.version}</version>
+      </dependency>
+
+      <!-- Tests -->
+      <dependency>
+         <groupId>junit</groupId>
+         <artifactId>junit</artifactId>
+         <version>${dependency.junit.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.assertj</groupId>
+         <artifactId>assertj-core</artifactId>
+         <version>${dependency.assertj.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mockito</groupId>
+         <artifactId>mockito-core</artifactId>
+         <version>${dependency.mockito.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-test</artifactId>
+         <version>${dependency.spring.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>redis.clients</groupId>
+         <artifactId>jedis</artifactId>
+         <version>${dependency.jedis.version}</version>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <pluginManagement>
+         <plugins>
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-compiler-plugin</artifactId>
+               <configuration>
+                  <source>${maven.compiler.source}</source>
+                  <target>${maven.compiler.target}</target>
+               </configuration>
+               <version>3.3</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-surefire-plugin</artifactId>
+               <version>2.19</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.apache.maven.plugins</groupId>
+               <artifactId>maven-failsafe-plugin</artifactId>
+               <version>2.19</version>
+            </plugin>
+
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>build-helper-maven-plugin</artifactId>
+               <executions>
+                  <execution>
+                     <id>maven-version</id>
+                     <phase>initialize</phase>
+                     <inherited>false</inherited>
+                     <goals>
+                        <goal>maven-version</goal>
+                     </goals>
+                  </execution>
+                  <execution>
+                     <id>add-integration-test-sources</id>
+                     <phase>initialize</phase>
+                     <goals>
+                        <goal>add-test-source</goal>
+                     </goals>
+                     <configuration>
+                        <sources>
+                           <source>src/integration-test/java</source>
+                        </sources>
+                     </configuration>
+                  </execution>
+                  <execution>
+                     <id>add-integration-test-resources</id>
+                     <phase>initialize</phase>
+                     <goals>
+                        <goal>add-test-resource</goal>
+                     </goals>
+                     <configuration>
+                        <resources>
+                           <resource>
+                              <directory>src/integration-test/resources</directory>
+                           </resource>
+                        </resources>
+                     </configuration>
+                  </execution>
+               </executions>
+            </plugin>
+         </plugins>
+      </pluginManagement>
+   </build>
+
+   <profiles>
+      <!-- integration-test -->
+      <profile>
+         <id>it</id>
+         <properties>
+            <integrationTest.redisPort>16379</integrationTest.redisPort>
+            <integrationTest.sentinelPort>26379</integrationTest.sentinelPort>
+         </properties>
+         <build>
+            <plugins>
+               <!-- Run a Redis with Sentinel-->
+               <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>exec-maven-plugin</artifactId>
+                  <version>${plugin.exec-maven-plugin.version}</version>
+                  <executions>
+                     <execution>
+                        <id>launch-redis</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                           <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                           <executable>redis-server</executable>
+                           <arguments>
+                              <argument>${project.basedir}/src/integration-test/redis/redis.conf</argument>
+                              <argument>--port</argument>
+                              <argument>${integrationTest.redisPort}</argument>
+                           </arguments>
+                        </configuration>
+                     </execution>
+                     <execution>
+                        <id>launch-redis-sentinel</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                           <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                           <executable>redis-server</executable>
+                           <arguments>
+                              <argument>${project.basedir}/src/integration-test/redis/redis-sentinel.conf</argument>
+                              <argument>--sentinel</argument>
+                              <argument>--port</argument>
+                              <argument>${integrationTest.sentinelPort}</argument>
+                           </arguments>
+                        </configuration>
+                     </execution>
+                     <execution>
+                        <id>shutdown-redis-sentinel</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                           <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                           <executable>redis-cli</executable>
+                           <arguments>
+                              <argument>-p</argument>
+                              <argument>${integrationTest.sentinelPort}</argument>
+                              <argument>shutdown</argument>
+                           </arguments>
+                        </configuration>
+                     </execution>
+                     <execution>
+                        <id>shutdown-redis</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                           <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                           <executable>redis-cli</executable>
+                           <arguments>
+                              <argument>-p</argument>
+                              <argument>${integrationTest.redisPort}</argument>
+                              <argument>shutdown</argument>
+                           </arguments>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
+
+               <!-- Execute integration tests -->
+               <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-failsafe-plugin</artifactId>
+                  <executions>
+                     <execution>
+                        <goals>
+                           <goal>integration-test</goal>
+                           <goal>verify</goal>
+                        </goals>
+                     </execution>
+                  </executions>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
+
+</project>
+
