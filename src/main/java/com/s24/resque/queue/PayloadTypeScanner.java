@@ -8,9 +8,9 @@ import org.springframework.util.Assert;
 import javax.annotation.PostConstruct;
 
 /**
- * Scans the classpath and registers JSON subtypes at a {@link ObjectMapper}.
+ * Scans the classpath and registers JSON subtypes (@link {@link JsonTypeName}) at a {@link ObjectMapper}.
  */
-public class PayloadTypeScanner {
+public class PayloadTypeScanner extends AnnotatedTypeScanner {
     /**
      * JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
      */
@@ -26,8 +26,14 @@ public class PayloadTypeScanner {
         Assert.notNull(json, "Precondition violated: json != null.");
         Assert.notNull(basePackages, "Precondition violated: basePackages != null.");
 
-        AnnotatedTypeScanner scanner = new AnnotatedTypeScanner(JsonTypeName.class);
-        scanner.findTypes(basePackages).forEach(json::registerSubtypes);
+        findTypes(basePackages).forEach(json::registerSubtypes);
+    }
+
+    /**
+     * Constructor.
+     */
+    public PayloadTypeScanner() {
+        super(JsonTypeName.class);
     }
 
     /**
