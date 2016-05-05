@@ -6,6 +6,7 @@ import com.s24.resque.TestConnection;
 import org.junit.Before;
 import org.junit.Test;
 
+import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.*;
 
 /**
@@ -21,7 +22,8 @@ public class QueueDaoImplIT {
     public void setUp() throws Exception {
         dao.setConnectionFactory(TestConnection.connectionFactory());
         dao.setNamespace("namespace");
-        dao.getJson().registerSubtypes(TestPayload.class);
+
+        scanForJsonSubtypes(dao.getJson(), getClass());
     }
 
     @Test
