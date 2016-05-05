@@ -22,9 +22,9 @@ public class PayloadTypeScannerTest {
 
     @Test
     public void afterPropertiesSet() {
-        scanForJsonSubtypes(json, getClass());
+        scanForJsonSubtypes(json, TestPayload.class);
 
-        verify(json).registerSubtypes(ScanPayload.class);
+        verify(json).registerSubtypes(TestPayload.class);
     }
 
     /**
@@ -48,12 +48,5 @@ public class PayloadTypeScannerTest {
         scanner.setJson(json);
         scanner.setBasePackages(basePackages);
         scanner.afterPropertiesSet();
-    }
-
-    /**
-     * Scan payload.
-     */
-    @JsonTypeName("scanPayload")
-    public static class ScanPayload {
     }
 }
