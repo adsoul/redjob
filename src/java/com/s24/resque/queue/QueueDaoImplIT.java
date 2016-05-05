@@ -1,7 +1,6 @@
 package com.s24.resque.queue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.s24.resque.TestConnection;
 import org.junit.Before;
