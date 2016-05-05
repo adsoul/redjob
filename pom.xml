@@ -35,7 +35,9 @@
       <dependency.jackson.version>2.7.0</dependency.jackson.version>
       <dependency.jedis.version>2.8.1</dependency.jedis.version>
       <dependency.junit.version>4.12</dependency.junit.version>
+      <dependency.log4j.version>2.5</dependency.log4j.version>
       <dependency.mockito.version>1.10.19</dependency.mockito.version>
+      <dependency.slf4j.version>1.7.21</dependency.slf4j.version>
       <dependency.spring.version>4.2.5.RELEASE</dependency.spring.version>
       <dependency.spring-data-redis.version>1.7.1.RELEASE</dependency.spring-data-redis.version>
    </properties>
@@ -87,7 +89,30 @@
          <version>${dependency.jackson.version}</version>
       </dependency>
 
-      <!-- Tests -->
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>slf4j-api</artifactId>
+         <version>${dependency.slf4j.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.slf4j</groupId>
+         <artifactId>jcl-over-slf4j</artifactId>
+         <version>${dependency.slf4j.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-core</artifactId>
+         <version>${dependency.log4j.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.apache.logging.log4j</groupId>
+         <artifactId>log4j-slf4j-impl</artifactId>
+         <version>${dependency.log4j.version}</version>
+         <scope>test</scope>
+      </dependency>
       <dependency>
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>

@@ -162,7 +162,7 @@ public class QueueDaoImpl {
         byte[] jobBytes = json.writeValueAsBytes(job);
 
         if (log.isDebugEnabled()) {
-            log.debug("Serialized job: " + new String(jobBytes, StandardCharsets.UTF_8));
+            log.error("Serialized job: " + new String(jobBytes, StandardCharsets.UTF_8));
         }
 
         return jobBytes;
