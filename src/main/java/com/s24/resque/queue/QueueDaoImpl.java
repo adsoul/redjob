@@ -214,7 +214,7 @@ public class QueueDaoImpl {
      *
      * @param <R> Type of commands result.
      */
-    protected static interface RedisCommands<R> {
+    protected interface RedisCommands<R> {
         /**
          * Execute commands.
          *
