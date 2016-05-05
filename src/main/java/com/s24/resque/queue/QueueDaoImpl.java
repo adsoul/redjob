@@ -91,7 +91,7 @@ public class QueueDaoImpl {
 
             connection.sAdd(key(QUEUES), value(queue));
             byte[] queueBytes = key(QUEUE, queue);
-            byte[] jobBytes = json.writeValueAsBytes(job);
+            byte[] jobBytes = toJson(job);
             if (front) {
                 connection.lPush(queueBytes, jobBytes);
             } else {
@@ -162,7 +162,7 @@ public class QueueDaoImpl {
         byte[] jobBytes = json.writeValueAsBytes(job);
 
         if (log.isDebugEnabled()) {
-            log.error("Serialized job: " + new String(jobBytes, StandardCharsets.UTF_8));
+            log.debug("Serialized job: " + new String(jobBytes, StandardCharsets.UTF_8));
         }
 
         return jobBytes;
