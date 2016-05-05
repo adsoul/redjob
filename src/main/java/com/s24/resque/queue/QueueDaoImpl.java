@@ -255,4 +255,18 @@ public class QueueDaoImpl {
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
+
+    /**
+     * JSON mapper.
+     */
+    public ObjectMapper getJson() {
+        return json;
+    }
+
+    /**
+     * JSON mapper.
+     */
+    public void setJson(ObjectMapper json) {
+        this.json = json;
+    }
 }

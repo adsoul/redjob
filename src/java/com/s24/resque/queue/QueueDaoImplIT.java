@@ -1,5 +1,6 @@
 package com.s24.resque.queue;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeId;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.s24.resque.TestConnection;
@@ -21,7 +22,7 @@ public class QueueDaoImplIT {
     public void setUp() throws Exception {
         dao.setConnectionFactory(TestConnection.connectionFactory());
         dao.setNamespace("namespace");
-
+        dao.getJson().registerSubtypes(TestPayload.class);
     }
 
     @Test
@@ -47,6 +48,7 @@ public class QueueDaoImplIT {
         /**
          * A value.
          */
+        @JsonProperty("value")
         private String value;
 
         /**
@@ -54,7 +56,7 @@ public class QueueDaoImplIT {
          *
          * @param value A value.
          */
-        public TestPayload(String value) {
+        public TestPayload(@JsonProperty("value") String value) {
             this.value = value;
         }
 
