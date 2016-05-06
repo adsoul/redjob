@@ -45,7 +45,12 @@ public class QueueDaoImpl {
     /**
      * Redis key part for the hash of id -> job.
      */
-    public static final String JOBS = "jobs";
+    public static final String JOB = "job";
+
+    /**
+     * Redis key part for the list of all job ids of a queue.
+     */
+    public static final String INFLIGHT = "inflight";
 
     /**
      * {@link RedisConnectionFactory} to access Redis.
@@ -72,6 +77,9 @@ public class QueueDaoImpl {
      */
     private String namespace = DEFAULT_NAMESPACE;
 
+    /**
+     * Init.
+     */
     @PostConstruct
     public void afterPropertiesSet() {
         Assert.notNull(connectionFactory, "Precondition violated: connectionFactory != null.");
@@ -97,7 +105,7 @@ public class QueueDaoImpl {
 
             connection.sAdd(key(QUEUES), value(queue));
             byte[] idBytes = value(id);
-            connection.hSet(key(JOBS, queue), idBytes, toJson(job));
+            connection.hSet(key(JOB, queue), idBytes, toJson(job));
             if (front) {
                 connection.lPush(key(QUEUE, queue), idBytes);
             } else {
@@ -118,7 +126,7 @@ public class QueueDaoImpl {
         execute(connection -> {
             byte[] idBytes = value(id);
             connection.lRem(key(QUEUE, queue), 0, idBytes);
-            connection.hDel(key(JOBS, queue), idBytes);
+            connection.hDel(key(JOB, queue), idBytes);
             return null;
         });
     }
@@ -131,16 +139,18 @@ public class QueueDaoImpl {
      * Pop first job from queue.
      *
      * @param queue Queue name.
+     * @param worker Name of worker.
      * @return Job or null, if none is in the queue.
      */
-    public Job pop(String queue) {
+    public Job pop(String queue, String worker) {
         return execute(connection -> {
             byte[] idBytes = connection.lPop(key(QUEUE, queue));
             if (idBytes == null) {
                 return null;
             }
+            connection.lPush(key(INFLIGHT, worker, queue), idBytes);
 
-            byte[] jobBytes = connection.hGet(key(JOBS, queue), idBytes);
+            byte[] jobBytes = connection.hGet(key(JOB, queue), idBytes);
             if (jobBytes == null) {
                 return null;
             }
@@ -253,7 +263,7 @@ public class QueueDaoImpl {
     }
 
     //
-    // Injections
+    // Injections.
     //
 
     /**
