@@ -38,12 +38,12 @@ public class QueueDaoImpl {
     public static final String QUEUES = "queues";
 
     /**
-     * Redis key part for list of all jobs of a queue.
+     * Redis key part for the list of all job ids of a queue.
      */
     public static final String QUEUE = "queue";
 
     /**
-     * Redis key part for set of all queue names.
+     * Redis key part for the hash of id -> job.
      */
     public static final String JOBS = "jobs";
 
@@ -97,7 +97,7 @@ public class QueueDaoImpl {
 
             connection.sAdd(key(QUEUES), value(queue));
             byte[] idBytes = value(id);
-            connection.hSet(key(JOBS), idBytes, toJson(job));
+            connection.hSet(key(JOBS, queue), idBytes, toJson(job));
             if (front) {
                 connection.lPush(key(QUEUE, queue), idBytes);
             } else {
@@ -118,7 +118,7 @@ public class QueueDaoImpl {
         execute(connection -> {
             byte[] idBytes = value(id);
             connection.lRem(key(QUEUE, queue), 0, idBytes);
-            connection.hDel(key(JOBS), idBytes);
+            connection.hDel(key(JOBS, queue), idBytes);
             return null;
         });
     }
@@ -140,7 +140,7 @@ public class QueueDaoImpl {
                 return null;
             }
 
-            byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
+            byte[] jobBytes = connection.hGet(key(JOBS, queue), idBytes);
             if (jobBytes == null) {
                 return null;
             }
