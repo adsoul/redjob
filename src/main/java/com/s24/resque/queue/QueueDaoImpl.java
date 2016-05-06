@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisConnectionUtils;
@@ -25,7 +25,7 @@ public class QueueDaoImpl {
     /**
      * Log.
      */
-    private static final Log log = LogFactory.getLog(QueueDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(QueueDaoImpl.class);
 
     /**
      * Redis key part for id sequence.
@@ -199,9 +199,7 @@ public class QueueDaoImpl {
     protected byte[] toJson(Job job) throws JsonProcessingException {
         byte[] jobBytes = json.writeValueAsBytes(job);
 
-        if (log.isDebugEnabled()) {
-            log.debug("Serialized job:\n" + new String(jobBytes, StandardCharsets.UTF_8));
-        }
+        log.debug("Serialized job:\n{}", new String(jobBytes, StandardCharsets.UTF_8));
 
         return jobBytes;
     }
@@ -218,9 +216,7 @@ public class QueueDaoImpl {
             return null;
         }
 
-        if (log.isDebugEnabled()) {
-            log.debug("Deserialize job:\n" + new String(jobBytes, StandardCharsets.UTF_8));
-        }
+        log.debug("Deserialize job:\n{}", new String(jobBytes, StandardCharsets.UTF_8));
 
         return json.readValue(jobBytes, Job.class);
     }
