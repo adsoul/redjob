@@ -2,12 +2,13 @@ package com.s24.resque;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+
 import redis.clients.jedis.JedisShardInfo;
 
 /**
  * Creates connection factories for the integration test Redis.
  */
-public class TestConnection {
+public class TestRedis {
     /**
      * Connection factory for the integration test Redis.
      */

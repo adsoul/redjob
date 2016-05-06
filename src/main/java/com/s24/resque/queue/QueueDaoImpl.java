@@ -1,7 +1,12 @@
 package com.s24.resque.queue;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -10,11 +15,8 @@ import org.springframework.data.redis.core.RedisConnectionUtils;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Dao for accessing job queues.
@@ -39,6 +41,11 @@ public class QueueDaoImpl {
      * Redis key part for list of all jobs of a queue.
      */
     public static final String QUEUE = "queue";
+
+    /**
+     * Redis key part for set of all queue names.
+     */
+    public static final String JOBS = "jobs";
 
     /**
      * {@link RedisConnectionFactory} to access Redis.
@@ -89,12 +96,12 @@ public class QueueDaoImpl {
             Job job = new Job(id, payload);
 
             connection.sAdd(key(QUEUES), value(queue));
-            byte[] queueBytes = key(QUEUE, queue);
-            byte[] jobBytes = toJson(job);
+            byte[] idBytes = value(id);
+            connection.hSet(key(JOBS), idBytes, toJson(job));
             if (front) {
-                connection.lPush(queueBytes, jobBytes);
+                connection.lPush(key(QUEUE, queue), idBytes);
             } else {
-                connection.rPush(queueBytes, jobBytes);
+                connection.rPush(key(QUEUE, queue), idBytes);
             }
 
             return id;
@@ -109,9 +116,9 @@ public class QueueDaoImpl {
      */
     public void dequeue(String queue, long id) {
         execute(connection -> {
-            byte[] jobBytes = null;
-            connection.lRange(key(QUEUE, queue), 0, -1);
-            connection.lRem(key(QUEUE, queue), 1, jobBytes);
+            byte[] idBytes = value(id);
+            connection.lRem(key(QUEUE, queue), 0, idBytes);
+            connection.hDel(key(JOBS), idBytes);
             return null;
         });
     }
@@ -127,7 +134,19 @@ public class QueueDaoImpl {
      * @return Job or null, if none is in the queue.
      */
     public Job pop(String queue) {
-        return execute(connection -> fromJson(connection.lPop(key(QUEUE, queue))));
+        return execute(connection -> {
+            byte[] idBytes = connection.lPop(key(QUEUE, queue));
+            if (idBytes == null) {
+                return null;
+            }
+
+            byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
+            if (jobBytes == null) {
+                return null;
+            }
+
+            return fromJson(jobBytes);
+        });
     }
 
     //
@@ -142,6 +161,16 @@ public class QueueDaoImpl {
     protected byte[] key(String... parts) {
         Assert.notEmpty(parts, "Precondition violated: parts are not empty.");
         return string.serialize(Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", "")));
+    }
+
+    /**
+     * Serialize long value.
+     *
+     * @param value Long.
+     * @return Serialized long.
+     */
+    protected byte[] value(long value) {
+        return value(Long.toString(value));
     }
 
     /**

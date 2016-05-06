@@ -1,11 +1,12 @@
 package com.s24.resque.queue;
 
-import com.s24.resque.TestConnection;
+import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.*;
+import com.s24.resque.TestRedis;
 
 /**
  * Integration test for {@link QueueDaoImpl}.
@@ -18,7 +19,7 @@ public class QueueDaoImplIT {
 
     @Before
     public void setUp() throws Exception {
-        dao.setConnectionFactory(TestConnection.connectionFactory());
+        dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
 
         scanForJsonSubtypes(dao.getJson(), getClass());
