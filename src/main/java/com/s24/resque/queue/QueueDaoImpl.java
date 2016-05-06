@@ -159,6 +159,35 @@ public class QueueDaoImpl {
         });
     }
 
+    /**
+     * Remove job from inflight queue.
+     *
+     * @param queue Queue name.
+     * @param worker Name of worker.
+     */
+    public void removeInflight(String queue, String worker) {
+        execute(connection -> {
+            connection.lPop(key(INFLIGHT, worker, queue));
+            return null;
+        });
+    }
+
+    /**
+     * Restore job from inflight queue.
+     *
+     * @param queue Queue name.
+     * @param worker Name of worker.
+     */
+    public void restoreInflight(String queue, String worker) {
+        execute(connection -> {
+            byte[] idBytes = connection.lPop(key(INFLIGHT, worker, queue));
+            if (idBytes != null) {
+                connection.lPush(key(QUEUE, queue), idBytes);
+            }
+            return null;
+        });
+    }
+
     //
     // Helper.
     //
