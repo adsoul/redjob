@@ -32,12 +32,11 @@ public class QueueDaoImplIT {
         long id = dao.enqueue(queue, new TestPayload("value"), false);
         assertTrue(id > 0);
 
-        Job job = dao.pop(queue);
+        Job job = dao.pop(queue, "worker");
         assertNotNull(job);
         assertEquals(id, job.getId());
         TestPayload payload = (TestPayload) job.getPayload();
         assertNotNull(payload);
         assertEquals("value", payload.getValue());
     }
-
 }
