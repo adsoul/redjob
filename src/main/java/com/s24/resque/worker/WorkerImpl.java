@@ -1,13 +1,17 @@
 package com.s24.resque.worker;
 
+import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.s24.resque.queue.Job;
 import com.s24.resque.queue.QueueDaoImpl;
@@ -30,6 +34,16 @@ public class WorkerImpl implements Runnable {
      * Queue dao.
      */
     private QueueDaoImpl queueDao;
+
+    /**
+     * Sequence for worker ids.
+     */
+    private static final AtomicInteger IDS = new AtomicInteger();
+
+    /**
+     * Worker id.
+     */
+    private int id;
 
     /**
      * Name of this worker.
@@ -61,11 +75,16 @@ public class WorkerImpl implements Runnable {
      * Init.
      */
     @PostConstruct
-    public void afterPropertiesSet() {
+    public void afterPropertiesSet() throws Exception {
         Assert.notEmpty(queues, "Precondition violated: queues not empty.");
         Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
         Assert.notNull(jobRunnerFactory, "Precondition violated: jobRunnerFactory != null.");
         Assert.isTrue(emptyQueuesSleepMillis > 0, "Precondition violated: emptyQueuesSleepMillis > 0.");
+
+        id = IDS.incrementAndGet();
+        name = InetAddress.getLocalHost().getHostName() + ":" +
+                id + ":" +
+                StringUtils.collectionToCommaDelimitedString(queues);
     }
 
     @Override
@@ -142,6 +161,13 @@ public class WorkerImpl implements Runnable {
      */
     public List<String> getQueues() {
         return queues;
+    }
+
+    /**
+     * Queues to listen to.
+     */
+    public void setQueues(String... queues) {
+        setQueues(Arrays.asList(queues));
     }
 
     /**

@@ -29,4 +29,14 @@ public class TestPayload {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TestPayload && value.equals(((TestPayload) o).value);
+    }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
 }

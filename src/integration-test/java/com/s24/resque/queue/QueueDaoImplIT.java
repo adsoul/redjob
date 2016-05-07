@@ -22,7 +22,7 @@ public class QueueDaoImplIT {
         dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
 
-        scanForJsonSubtypes(dao.getJson(), getClass());
+        scanForJsonSubtypes(dao.getJson(), TestPayload.class);
     }
 
     @Test
