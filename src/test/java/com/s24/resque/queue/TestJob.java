@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
- * Test payload.
+ * Test job.
  */
-@JsonTypeName("testPayload")
-public class TestPayload {
+@JsonTypeName("testJob")
+public class TestJob {
     /**
      * A value.
      */
@@ -19,7 +19,7 @@ public class TestPayload {
      *
      * @param value A value.
      */
-    public TestPayload(@JsonProperty("value") String value) {
+    public TestJob(@JsonProperty("value") String value) {
         this.value = value;
     }
 
@@ -32,7 +32,7 @@ public class TestPayload {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof TestPayload && value.equals(((TestPayload) o).value);
+        return o instanceof TestJob && value.equals(((TestJob) o).value);
     }
 
     @Override

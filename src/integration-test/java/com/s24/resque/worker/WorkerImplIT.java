@@ -1,25 +1,24 @@
 package com.s24.resque.worker;
 
 import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.concurrent.TimeUnit;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.s24.resque.TestRedis;
 import com.s24.resque.queue.QueueDaoImpl;
-import com.s24.resque.queue.TestPayload;
+import com.s24.resque.queue.TestJob;
+import com.s24.resque.queue.TestJobRunner;
+import com.s24.resque.queue.TestJobRunnerFactory;
 
 /**
  * Integration test for {@link WorkerImpl}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class WorkerImplIT {
     /**
      * Queue DAO.
@@ -27,22 +26,9 @@ public class WorkerImplIT {
     private QueueDaoImpl dao = new QueueDaoImpl();
 
     /**
-     * Job runner factory.
-     */
-    @Mock
-    private JobRunnerFactory jobRunnerFactory;
-
-    /**
-     * Job runner.
-     */
-    @Mock
-    private Runnable jobRunner;
-
-    /**
      * Worker under test.
      */
-    @InjectMocks
-    private WorkerImpl worker;
+    private WorkerImpl worker = new WorkerImpl();
 
     /**
      * Worker thread.
@@ -54,10 +40,11 @@ public class WorkerImplIT {
         dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
 
-        scanForJsonSubtypes(dao.getJson(), TestPayload.class);
+        scanForJsonSubtypes(dao.getJson(), TestJob.class);
 
-        worker.setQueueDao(dao);
         worker.setQueues("test-queue");
+        worker.setQueueDao(dao);
+        worker.setJobRunnerFactory(new TestJobRunnerFactory());
 
         workerThread = new Thread(worker, "test-worker");
     }
@@ -69,15 +56,13 @@ public class WorkerImplIT {
 
     @Test
     public void poll() throws Exception {
-        TestPayload payload = new TestPayload("worker");
-        when(jobRunnerFactory.runnerFor(payload)).thenReturn(jobRunner);
-
-        dao.enqueue("test-queue", payload, false);
+        TestJobRunner.resetLatch(1);
+        TestJob job = new TestJob("worker");
+        dao.enqueue("test-queue", job, false);
 
         workerThread.start();
-        Thread.sleep(3000);
 
-        verify(jobRunnerFactory).runnerFor(payload);
-        verify(jobRunner).run();
+        assertTrue(TestJobRunner.awaitLatch(10, TimeUnit.SECONDS));
+        assertEquals(job, TestJobRunner.getJob());
     }
 }

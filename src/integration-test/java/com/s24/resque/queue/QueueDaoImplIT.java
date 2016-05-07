@@ -22,20 +22,20 @@ public class QueueDaoImplIT {
         dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
 
-        scanForJsonSubtypes(dao.getJson(), TestPayload.class);
+        scanForJsonSubtypes(dao.getJson(), TestJob.class);
     }
 
     @Test
     public void enqueue() {
         String queue = "test";
 
-        long id = dao.enqueue(queue, new TestPayload("value"), false);
+        long id = dao.enqueue(queue, new TestJob("value"), false);
         assertTrue(id > 0);
 
         Job job = dao.pop(queue, "worker");
         assertNotNull(job);
         assertEquals(id, job.getId());
-        TestPayload payload = (TestPayload) job.getPayload();
+        TestJob payload = (TestJob) job.getPayload();
         assertNotNull(payload);
         assertEquals("value", payload.getValue());
     }

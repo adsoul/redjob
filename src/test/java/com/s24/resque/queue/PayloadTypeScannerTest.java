@@ -1,13 +1,14 @@
 package com.s24.resque.queue;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.mockito.Mockito.verify;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.verify;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test of {@link PayloadTypeScanner}.
@@ -22,9 +23,9 @@ public class PayloadTypeScannerTest {
 
     @Test
     public void afterPropertiesSet() {
-        scanForJsonSubtypes(json, TestPayload.class);
+        scanForJsonSubtypes(json, TestJob.class);
 
-        verify(json).registerSubtypes(TestPayload.class);
+        verify(json).registerSubtypes(TestJob.class);
     }
 
     /**

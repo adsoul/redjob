@@ -5,10 +5,10 @@ package com.s24.resque.worker;
  */
 public interface JobRunnerFactory {
     /**
-     * Get job runner for payload.
+     * Get runner for job.
      *
-     * @param payload Payload.
+     * @param job Job.
      * @return Job runner.
      */
-    Runnable runnerFor(Object payload);
+    Runnable runnerFor(Object job);
 }
