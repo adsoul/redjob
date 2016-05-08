@@ -87,6 +87,13 @@ public class WorkerImpl implements Runnable {
                 StringUtils.collectionToCommaDelimitedString(queues);
     }
 
+    /**
+     * Stop worker.
+     */
+    public void stop() {
+        run.set(false);
+    }
+
     @Override
     public void run() {
         poll();

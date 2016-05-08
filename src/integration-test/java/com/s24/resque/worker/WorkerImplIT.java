@@ -45,12 +45,15 @@ public class WorkerImplIT {
         worker.setQueues("test-queue");
         worker.setQueueDao(dao);
         worker.setJobRunnerFactory(new TestJobRunnerFactory());
+        worker.afterPropertiesSet();
 
         workerThread = new Thread(worker, "test-worker");
     }
 
     @After
     public void tearDown() throws Exception {
+        worker.stop();
+        workerThread.join(1000);
         workerThread.stop();
     }
 
