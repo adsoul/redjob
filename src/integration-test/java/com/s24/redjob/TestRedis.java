@@ -1,4 +1,4 @@
-package com.s24.resque;
+package com.s24.redjob;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;

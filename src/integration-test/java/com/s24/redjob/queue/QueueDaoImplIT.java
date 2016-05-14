@@ -1,12 +1,12 @@
-package com.s24.resque.queue;
+package com.s24.redjob.queue;
 
-import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.s24.resque.TestRedis;
+import com.s24.redjob.TestRedis;
 
 /**
  * Integration test for {@link QueueDaoImpl}.

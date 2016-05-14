@@ -1,4 +1,4 @@
-package com.s24.resque.worker;
+package com.s24.redjob.worker;
 
 /**
  * Interface for factories creating job runners.

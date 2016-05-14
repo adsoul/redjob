@@ -1,4 +1,4 @@
-package com.s24.resque.queue;
+package com.s24.redjob.queue;
 
 import static org.mockito.Mockito.verify;
 

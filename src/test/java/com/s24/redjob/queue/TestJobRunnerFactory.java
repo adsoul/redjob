@@ -1,8 +1,8 @@
-package com.s24.resque.queue;
+package com.s24.redjob.queue;
 
 import org.springframework.util.Assert;
 
-import com.s24.resque.worker.JobRunnerFactory;
+import com.s24.redjob.worker.JobRunnerFactory;
 
 /**
  * {@link JobRunnerFactory} for {@link TestJob}s.

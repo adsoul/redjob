@@ -1,6 +1,6 @@
-package com.s24.resque.worker;
+package com.s24.redjob.worker;
 
-import static com.s24.resque.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -10,11 +10,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.s24.resque.TestRedis;
-import com.s24.resque.queue.QueueDaoImpl;
-import com.s24.resque.queue.TestJob;
-import com.s24.resque.queue.TestJobRunner;
-import com.s24.resque.queue.TestJobRunnerFactory;
+import com.s24.redjob.TestRedis;
+import com.s24.redjob.queue.QueueDaoImpl;
+import com.s24.redjob.queue.TestJob;
+import com.s24.redjob.queue.TestJobRunner;
+import com.s24.redjob.queue.TestJobRunnerFactory;
 
 /**
  * Integration test for {@link WorkerImpl}.

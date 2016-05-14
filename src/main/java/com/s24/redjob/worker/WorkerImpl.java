@@ -1,4 +1,4 @@
-package com.s24.resque.worker;
+package com.s24.redjob.worker;
 
 import java.net.InetAddress;
 import java.util.Arrays;
@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.resque.queue.Job;
-import com.s24.resque.queue.QueueDaoImpl;
+import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.QueueDaoImpl;
 
 /**
  * Worker.
