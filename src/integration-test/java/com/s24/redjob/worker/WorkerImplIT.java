@@ -1,20 +1,19 @@
 package com.s24.redjob.worker;
 
-import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.QueueDaoImpl;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
+
+import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration test for {@link WorkerImpl}.
@@ -39,6 +38,7 @@ public class WorkerImplIT {
     public void setUp() throws Exception {
         dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
+        dao.afterPropertiesSet();
 
         scanForJsonSubtypes(dao.getJson(), TestJob.class);
 

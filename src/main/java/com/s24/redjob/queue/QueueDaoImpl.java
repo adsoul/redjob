@@ -1,32 +1,21 @@
 package com.s24.redjob.queue;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisConnectionUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 /**
  * Dao for accessing job queues.
  */
 public class QueueDaoImpl {
-    /**
-     * Log.
-     */
-    private static final Logger log = LoggerFactory.getLogger(QueueDaoImpl.class);
-
     /**
      * Redis key part for id sequence.
      */
@@ -60,7 +49,17 @@ public class QueueDaoImpl {
     /**
      * Redis serializer for strings.
      */
-    private final StringRedisSerializer string = new StringRedisSerializer();
+    private final StringRedisSerializer strings = new StringRedisSerializer();
+
+    /**
+     * Redis serializer for jobs.
+     */
+    private GenericJackson2JsonRedisSerializer jobs;
+
+    /**
+     * Redis access.
+     */
+    private RedisTemplate<String, String> redis;
 
     /**
      * JSON mapper.
@@ -84,6 +83,16 @@ public class QueueDaoImpl {
     public void afterPropertiesSet() {
         Assert.notNull(connectionFactory, "Precondition violated: connectionFactory != null.");
         Assert.hasLength(namespace, "Precondition violated: namespace has length.");
+
+        jobs = new GenericJackson2JsonRedisSerializer(json);
+
+        redis = new RedisTemplate<>();
+        redis.setConnectionFactory(connectionFactory);
+        redis.setKeySerializer(strings);
+        redis.setValueSerializer(strings);
+        redis.setHashKeySerializer(strings);
+        redis.setHashValueSerializer(jobs);
+        redis.afterPropertiesSet();
     }
 
     //
@@ -99,13 +108,13 @@ public class QueueDaoImpl {
      * @return Id assigned to the job.
      */
     public long enqueue(String queue, Object payload, boolean front) {
-        return execute(connection -> {
+        return redis.execute((RedisConnection connection) -> {
             Long id = connection.incr(key(ID));
             Job job = new Job(id, payload);
 
             connection.sAdd(key(QUEUES), value(queue));
             byte[] idBytes = value(id);
-            connection.hSet(key(JOB, queue), idBytes, toJson(job));
+            connection.hSet(key(JOB, queue), idBytes, jobs.serialize(job));
             if (front) {
                 connection.lPush(key(QUEUE, queue), idBytes);
             } else {
@@ -123,7 +132,7 @@ public class QueueDaoImpl {
      * @param id Id of the job.
      */
     public void dequeue(String queue, long id) {
-        execute(connection -> {
+        redis.execute((RedisConnection connection) -> {
             byte[] idBytes = value(id);
             connection.lRem(key(QUEUE, queue), 0, idBytes);
             connection.hDel(key(JOB, queue), idBytes);
@@ -143,7 +152,7 @@ public class QueueDaoImpl {
      * @return Job or null, if none is in the queue.
      */
     public Job pop(String queue, String worker) {
-        return execute(connection -> {
+        return redis.execute((RedisConnection connection) -> {
             byte[] idBytes = connection.lPop(key(QUEUE, queue));
             if (idBytes == null) {
                 return null;
@@ -155,7 +164,7 @@ public class QueueDaoImpl {
                 return null;
             }
 
-            return fromJson(jobBytes);
+            return jobs.deserialize(jobBytes, Job.class);
         });
     }
 
@@ -166,7 +175,7 @@ public class QueueDaoImpl {
      * @param worker Name of worker.
      */
     public void removeInflight(String queue, String worker) {
-        execute(connection -> {
+        redis.execute((RedisConnection connection) -> {
             connection.lPop(key(INFLIGHT, worker, queue));
             return null;
         });
@@ -179,7 +188,7 @@ public class QueueDaoImpl {
      * @param worker Name of worker.
      */
     public void restoreInflight(String queue, String worker) {
-        execute(connection -> {
+        redis.execute((RedisConnection connection) -> {
             byte[] idBytes = connection.lPop(key(INFLIGHT, worker, queue));
             if (idBytes != null) {
                 connection.lPush(key(QUEUE, queue), idBytes);
@@ -199,7 +208,7 @@ public class QueueDaoImpl {
      */
     protected byte[] key(String... parts) {
         Assert.notEmpty(parts, "Precondition violated: parts are not empty.");
-        return string.serialize(Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", "")));
+        return strings.serialize(Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", "")));
     }
 
     /**
@@ -219,72 +228,7 @@ public class QueueDaoImpl {
      * @return Serialized string.
      */
     protected byte[] value(String value) {
-        return string.serialize(value);
-    }
-
-    /**
-     * Serialize job.
-     */
-    protected byte[] toJson(Job job) throws JsonProcessingException {
-        byte[] jobBytes = json.writeValueAsBytes(job);
-
-        log.debug("Serialized job:\n{}", new String(jobBytes, StandardCharsets.UTF_8));
-
-        return jobBytes;
-    }
-
-    /**
-     * Deserialize job. Null-safe.
-     *
-     * @param jobBytes Serialized job.
-     * @return Deserialized job.
-     * @throws IOException In case of any IO errors.
-     */
-    protected Job fromJson(byte[] jobBytes) throws IOException {
-        if (jobBytes == null) {
-            return null;
-        }
-
-        log.debug("Deserialize job:\n{}", new String(jobBytes, StandardCharsets.UTF_8));
-
-        return json.readValue(jobBytes, Job.class);
-    }
-
-    /**
-     * Execute commands NOT pipelined.
-     *
-     * @param commands Redis commands.
-     * @param <R> Type of result.
-     * @return Result of commands.
-     */
-    protected <R> R execute(RedisCommands<R> commands) {
-        Assert.notNull(commands, "Precondition violated: commands != null.");
-
-        RedisConnection connection = RedisConnectionUtils.getConnection(connectionFactory);
-        try {
-            return commands.execute(connection);
-        } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("JSON serialization problems.", e);
-        } catch (IOException e) {
-            throw new IllegalArgumentException("IO problems.", e);
-        } finally {
-            RedisConnectionUtils.releaseConnection(connection, connectionFactory);
-        }
-    }
-
-    /**
-     * Redis commands.
-     *
-     * @param <R> Type of commands result.
-     */
-    protected interface RedisCommands<R> {
-        /**
-         * Execute commands.
-         *
-         * @param connection Redis connection.
-         * @return Result of commands.
-         */
-        R execute(RedisConnection connection) throws IOException;
+        return strings.serialize(value);
     }
 
     //

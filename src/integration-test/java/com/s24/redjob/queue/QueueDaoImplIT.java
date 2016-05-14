@@ -1,12 +1,11 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.*;
-
+import com.s24.redjob.TestRedis;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.s24.redjob.TestRedis;
+import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.*;
 
 /**
  * Integration test for {@link QueueDaoImpl}.
@@ -21,6 +20,7 @@ public class QueueDaoImplIT {
     public void setUp() throws Exception {
         dao.setConnectionFactory(TestRedis.connectionFactory());
         dao.setNamespace("namespace");
+        dao.afterPropertiesSet();
 
         scanForJsonSubtypes(dao.getJson(), TestJob.class);
     }
