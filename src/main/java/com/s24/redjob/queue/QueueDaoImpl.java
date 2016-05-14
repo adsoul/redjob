@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
 
@@ -54,7 +54,7 @@ public class QueueDaoImpl {
     /**
      * Redis serializer for jobs.
      */
-    private GenericJackson2JsonRedisSerializer jobs;
+    private final Jackson2JsonRedisSerializer<Job> jobs = new Jackson2JsonRedisSerializer<>(Job.class);
 
     /**
      * Redis access.
@@ -84,7 +84,7 @@ public class QueueDaoImpl {
         Assert.notNull(connectionFactory, "Precondition violated: connectionFactory != null.");
         Assert.hasLength(namespace, "Precondition violated: namespace has length.");
 
-        jobs = new GenericJackson2JsonRedisSerializer(json);
+        jobs.setObjectMapper(json);
 
         redis = new RedisTemplate<>();
         redis.setConnectionFactory(connectionFactory);
@@ -164,7 +164,7 @@ public class QueueDaoImpl {
                 return null;
             }
 
-            return jobs.deserialize(jobBytes, Job.class);
+            return jobs.deserialize(jobBytes);
         });
     }
 
