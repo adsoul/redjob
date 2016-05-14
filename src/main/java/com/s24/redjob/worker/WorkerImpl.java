@@ -1,25 +1,28 @@
 package com.s24.redjob.worker;
 
-import java.net.InetAddress;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.eventbus.EventBus;
+import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.QueueDaoImpl;
+import com.s24.redjob.worker.events.WorkerError;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.queue.Job;
-import com.s24.redjob.queue.QueueDaoImpl;
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Worker.
+ * Default implementation of {@link Worker}.
  */
-public class WorkerImpl implements Runnable {
+public class WorkerImpl implements Runnable, Worker {
     /**
      * Log.
      */
@@ -72,6 +75,11 @@ public class WorkerImpl implements Runnable {
     private AtomicBoolean run = new AtomicBoolean(true);
 
     /**
+     * Event bus.
+     */
+    private EventBus eventBus = new EventBus();
+
+    /**
      * Init.
      */
     @PostConstruct
@@ -80,23 +88,39 @@ public class WorkerImpl implements Runnable {
         Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
         Assert.notNull(jobRunnerFactory, "Precondition violated: jobRunnerFactory != null.");
         Assert.isTrue(emptyQueuesSleepMillis > 0, "Precondition violated: emptyQueuesSleepMillis > 0.");
+        Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
         id = IDS.incrementAndGet();
-        name = InetAddress.getLocalHost().getHostName() + ":" +
-                id + ":" +
+        name = ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
                 StringUtils.collectionToCommaDelimitedString(queues);
     }
 
-    /**
-     * Stop worker.
-     */
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
     public void stop() {
         run.set(false);
     }
 
     @Override
     public void run() {
-        poll();
+        try {
+            eventBus.post(new WorkerStart(this));
+            poll();
+        } catch (Throwable t) {
+            log.error("Worker {}: Uncaught exception in worker. Worker stopped.", name, t);
+            eventBus.post(new WorkerError(this, t));
+        } finally {
+            eventBus.post(new WorkerStopped(this));
+        }
     }
 
     /**
@@ -121,6 +145,7 @@ public class WorkerImpl implements Runnable {
      */
     protected void pollQueues() throws Throwable {
         for (String queue : queues) {
+            eventBus.post(new WorkerPoll(this, queue));
             Job job = queueDao.pop(queue, name);
             if (job != null) {
                 execute(job);
@@ -226,5 +251,19 @@ public class WorkerImpl implements Runnable {
      */
     public void setEmptyQueuesSleepMillis(long emptyQueuesSleepMillis) {
         this.emptyQueuesSleepMillis = emptyQueuesSleepMillis;
+    }
+
+    /**
+     * Event bus.
+     */
+    public EventBus getEventBus() {
+        return eventBus;
+    }
+
+    /**
+     * Event bus.
+     */
+    public void setEventBus(EventBus eventBus) {
+        this.eventBus = eventBus;
     }
 }
