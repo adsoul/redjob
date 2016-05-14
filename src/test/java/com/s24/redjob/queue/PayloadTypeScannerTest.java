@@ -31,17 +31,27 @@ public class PayloadTypeScannerTest {
     /**
      * Scan packages for JSON subtypes. Useful for tests.
      *
-     * @param json JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
-     * @param basePackage Class in base package to scan.
+     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
+     * @param basePackage Class in package to scan recursively.
      */
     public static void scanForJsonSubtypes(ObjectMapper json, Class<?> basePackage) {
-        scanForJsonSubtypes(json, basePackage.getPackage().getName());
+        scanForJsonSubtypes(json, basePackage.getPackage());
     }
 
     /**
      * Scan packages for JSON subtypes. Useful for tests.
      *
-     * @param json JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
+     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
+     * @param basePackage Package to scan recursively.
+     */
+    public static void scanForJsonSubtypes(ObjectMapper json, Package basePackage) {
+        scanForJsonSubtypes(json, basePackage.getName());
+    }
+
+    /**
+     * Scan packages for JSON subtypes. Useful for tests.
+     *
+     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
      * @param basePackages Base packages to scan.
      */
     public static void scanForJsonSubtypes(ObjectMapper json, String... basePackages) {
