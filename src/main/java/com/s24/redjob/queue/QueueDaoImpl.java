@@ -1,21 +1,17 @@
 package com.s24.redjob.queue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.s24.redjob.AbstractDao;
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 /**
  * Dao for accessing job queues.
  */
-public class QueueDaoImpl {
+public class QueueDaoImpl extends AbstractDao {
     /**
      * Redis key part for id sequence.
      */
@@ -42,14 +38,9 @@ public class QueueDaoImpl {
     public static final String INFLIGHT = "inflight";
 
     /**
-     * {@link RedisConnectionFactory} to access Redis.
+     * JSON mapper.
      */
-    private RedisConnectionFactory connectionFactory;
-
-    /**
-     * Redis serializer for strings.
-     */
-    private final StringRedisSerializer strings = new StringRedisSerializer();
+    private ObjectMapper json = new ObjectMapper();
 
     /**
      * Redis serializer for jobs.
@@ -61,28 +52,10 @@ public class QueueDaoImpl {
      */
     private RedisTemplate<String, String> redis;
 
-    /**
-     * JSON mapper.
-     */
-    private ObjectMapper json = new ObjectMapper();
-
-    /**
-     * Default namespace.
-     */
-    public static final String DEFAULT_NAMESPACE = "redjob";
-
-    /**
-     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value #DEFAULT_NAMESPACE}.
-     */
-    private String namespace = DEFAULT_NAMESPACE;
-
-    /**
-     * Init.
-     */
+    @Override
     @PostConstruct
     public void afterPropertiesSet() {
-        Assert.notNull(connectionFactory, "Precondition violated: connectionFactory != null.");
-        Assert.hasLength(namespace, "Precondition violated: namespace has length.");
+        super.afterPropertiesSet();
 
         jobs.setObjectMapper(json);
 
@@ -198,70 +171,8 @@ public class QueueDaoImpl {
     }
 
     //
-    // Helper.
-    //
-
-    /**
-     * Construct Redis key name. Created by joining the namespace and the parts together with ':'.
-     *
-     * @param parts Parts of the key name.
-     */
-    protected byte[] key(String... parts) {
-        Assert.notEmpty(parts, "Precondition violated: parts are not empty.");
-        return strings.serialize(Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", "")));
-    }
-
-    /**
-     * Serialize long value.
-     *
-     * @param value Long.
-     * @return Serialized long.
-     */
-    protected byte[] value(long value) {
-        return value(Long.toString(value));
-    }
-
-    /**
-     * Serialize string value.
-     *
-     * @param value String.
-     * @return Serialized string.
-     */
-    protected byte[] value(String value) {
-        return strings.serialize(value);
-    }
-
-    //
     // Injections.
     //
-
-    /**
-     * {@link RedisConnectionFactory} to access Redis.
-     */
-    public RedisConnectionFactory getConnectionFactory() {
-        return connectionFactory;
-    }
-
-    /**
-     * {@link RedisConnectionFactory} to access Redis.
-     */
-    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-    }
-
-    /**
-     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value #DEFAULT_NAMESPACE}.
-     */
-    public String getNamespace() {
-        return namespace;
-    }
-
-    /**
-     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value #DEFAULT_NAMESPACE}.
-     */
-    public void setNamespace(String namespace) {
-        this.namespace = namespace;
-    }
 
     /**
      * JSON mapper.
