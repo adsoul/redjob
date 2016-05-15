@@ -62,46 +62,46 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
     }
 
     @Override
-    public void start(Worker worker) {
-        checkNotNull(worker, "Precondition violated: worker != null");
+    public void start(String name) {
+        checkNotNull(name, "Precondition violated: name != null");
 
         redis.execute((RedisConnection connection) -> {
-            connection.sAdd(key(WORKERS), value(worker.getName()));
-            connection.set(key(WORKER, worker.getName(), STARTED), value(LocalDateTime.now()));
+            connection.sAdd(key(WORKERS), value(name));
+            connection.set(key(WORKER, name, STARTED), value(LocalDateTime.now()));
             return null;
         });
     }
 
     @Override
-    public void stop(Worker worker) {
-        checkNotNull(worker, "Precondition violated: worker != null");
+    public void stop(String name) {
+        checkNotNull(name, "Precondition violated: name != null");
 
         redis.execute((RedisConnection connection) -> {
-            connection.sRem(key(WORKERS), value(worker.getName()));
-            connection.del(key(WORKER, worker.getName(), STARTED), key(WORKER, worker.getName()),
-                    key(STAT, PROCESSED, worker.getName()), key(STAT, FAILED, worker.getName()));
+            connection.sRem(key(WORKERS), value(name));
+            connection.del(key(WORKER, name, STARTED), key(WORKER, name),
+                    key(STAT, PROCESSED, name), key(STAT, FAILED, name));
             return null;
         });
     }
 
     @Override
-    public void success(Worker worker) {
-        checkNotNull(worker, "Precondition violated: worker != null");
+    public void success(String name) {
+        checkNotNull(name, "Precondition violated: name != null");
 
         redis.execute((RedisConnection connection) -> {
             connection.incr(key(STAT, PROCESSED));
-            connection.incr(key(STAT, PROCESSED, worker.getName()));
+            connection.incr(key(STAT, PROCESSED, name));
             return null;
         });
     }
 
     @Override
-    public void failure(Worker worker) {
-        checkNotNull(worker, "Precondition violated: worker != null");
+    public void failure(String name) {
+        checkNotNull(name, "Precondition violated: name != null");
 
         redis.execute((RedisConnection connection) -> {
             connection.incr(key(STAT, FAILED));
-            connection.incr(key(STAT, FAILED, worker.getName()));
+            connection.incr(key(STAT, FAILED, name));
             return null;
         });
     }

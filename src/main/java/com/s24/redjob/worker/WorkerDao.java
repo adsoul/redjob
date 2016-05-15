@@ -6,21 +6,29 @@ package com.s24.redjob.worker;
 public interface WorkerDao {
     /**
      * Start of worker.
+     *
+     * @param name Name of worker.
      */
-    void start(Worker worker);
+    void start(String name);
 
     /**
      * Stop of worker.
+     *
+     * @param name Name of worker.
      */
-    void stop(Worker worker);
+    void stop(String name);
 
     /**
      * Job has been successfully been processed.
+     *
+     * @param name Name of worker.
      */
-    void success(Worker worker);
+    void success(String name);
 
     /**
      * Job execution failed.
+     *
+     * @param name Name of worker.
      */
-    void failure(Worker worker);
+    void failure(String name);
 }

@@ -115,7 +115,7 @@ public class WorkerImpl implements Runnable, Worker {
     @Override
     public void run() {
         try {
-            workerDao.start(this);
+            workerDao.start(name);
             eventBus.post(new WorkerStart(this));
             poll();
         } catch (Throwable t) {
@@ -123,7 +123,7 @@ public class WorkerImpl implements Runnable, Worker {
             eventBus.post(new WorkerError(this, t));
         } finally {
             eventBus.post(new WorkerStopped(this));
-            workerDao.stop(this);
+            workerDao.stop(name);
         }
     }
 
@@ -196,11 +196,11 @@ public class WorkerImpl implements Runnable, Worker {
         try {
            runner.run();
             log.info("Worker {}: Job {}: Success.", name, job.getId());
-            workerDao.success(this);
+            workerDao.success(name);
             eventBus.post(new JobSuccess(this, queue, payload, runner));
         } catch (Throwable t) {
             log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
-            workerDao.failure(this);
+            workerDao.failure(name);
             eventBus.post(new JobFailed(this, queue, payload, runner));
             throw new IllegalArgumentException("Failed to execute.", t);
         } finally {
