@@ -2,7 +2,7 @@ package com.s24.redjob.worker;
 
 import com.google.common.eventbus.EventBus;
 import com.s24.redjob.queue.Job;
-import com.s24.redjob.queue.QueueDaoImpl;
+import com.s24.redjob.queue.QueueDao;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
@@ -36,7 +36,7 @@ public class WorkerImpl implements Runnable, Worker {
     /**
      * Queue dao.
      */
-    private QueueDaoImpl queueDao;
+    private QueueDao queueDao;
 
     /**
      * Sequence for worker ids.
@@ -212,14 +212,14 @@ public class WorkerImpl implements Runnable, Worker {
     /**
      * Queue dao.
      */
-    public QueueDaoImpl getQueueDao() {
+    public QueueDao getQueueDao() {
         return queueDao;
     }
 
     /**
      * Queue dao.
      */
-    public void setQueueDao(QueueDaoImpl queueDao) {
+    public void setQueueDao(QueueDao queueDao) {
         this.queueDao = queueDao;
     }
 
