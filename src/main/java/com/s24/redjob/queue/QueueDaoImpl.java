@@ -9,9 +9,9 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import javax.annotation.PostConstruct;
 
 /**
- * Dao for accessing job queues.
+ * Default implementation of {@link QueueDao}.
  */
-public class QueueDaoImpl extends AbstractDao {
+public class QueueDaoImpl extends AbstractDao implements QueueDao {
     /**
      * Redis key part for id sequence.
      */
@@ -72,14 +72,7 @@ public class QueueDaoImpl extends AbstractDao {
     // Client related.
     //
 
-    /**
-     * Enqueue the given job to the given queue.
-     *
-     * @param queue Queue name.
-     * @param payload Payload.
-     * @param front Enqueue job at front of the queue, so that the job is the first to be executed?.
-     * @return Id assigned to the job.
-     */
+    @Override
     public long enqueue(String queue, Object payload, boolean front) {
         return redis.execute((RedisConnection connection) -> {
             Long id = connection.incr(key(ID));
@@ -98,12 +91,7 @@ public class QueueDaoImpl extends AbstractDao {
         });
     }
 
-    /**
-     * Dequeue the job with the given id from the given queue.
-     *
-     * @param queue Queue name.
-     * @param id Id of the job.
-     */
+    @Override
     public void dequeue(String queue, long id) {
         redis.execute((RedisConnection connection) -> {
             byte[] idBytes = value(id);
@@ -117,13 +105,7 @@ public class QueueDaoImpl extends AbstractDao {
     // Worker related.
     //
 
-    /**
-     * Pop first job from queue.
-     *
-     * @param queue Queue name.
-     * @param worker Name of worker.
-     * @return Job or null, if none is in the queue.
-     */
+    @Override
     public Job pop(String queue, String worker) {
         return redis.execute((RedisConnection connection) -> {
             byte[] idBytes = connection.lPop(key(QUEUE, queue));
@@ -141,12 +123,7 @@ public class QueueDaoImpl extends AbstractDao {
         });
     }
 
-    /**
-     * Remove job from inflight queue.
-     *
-     * @param queue Queue name.
-     * @param worker Name of worker.
-     */
+    @Override
     public void removeInflight(String queue, String worker) {
         redis.execute((RedisConnection connection) -> {
             connection.lPop(key(INFLIGHT, worker, queue));
@@ -154,12 +131,7 @@ public class QueueDaoImpl extends AbstractDao {
         });
     }
 
-    /**
-     * Restore job from inflight queue.
-     *
-     * @param queue Queue name.
-     * @param worker Name of worker.
-     */
+    @Override
     public void restoreInflight(String queue, String worker) {
         redis.execute((RedisConnection connection) -> {
             byte[] idBytes = connection.lPop(key(INFLIGHT, worker, queue));
