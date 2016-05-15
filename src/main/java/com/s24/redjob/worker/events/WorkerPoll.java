@@ -1,13 +1,13 @@
 package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Worker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker polls one of its queues.
  */
-public class WorkerPoll {
+public class WorkerPoll extends ApplicationEvent {
     /**
      * Worker.
      */
@@ -25,8 +25,11 @@ public class WorkerPoll {
      * @param queue Queue.
      */
     public WorkerPoll(Worker worker, String queue) {
-        this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
-        this.queue = checkNotNull(queue, "Precondition violated: queue != null.");
+        super(worker);
+        Assert.notNull(worker, "Precondition violated: worker != null.");
+        Assert.hasLength(queue, "Precondition violated: queue has length.");
+        this.worker = worker;
+        this.queue = queue;
     }
 
     /**

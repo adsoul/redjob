@@ -1,13 +1,13 @@
 package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Worker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker stopped.
  */
-public class WorkerStopped {
+public class WorkerStopped extends ApplicationEvent {
     /**
      * Worker.
      */
@@ -19,7 +19,9 @@ public class WorkerStopped {
      * @param worker Worker.
      */
     public WorkerStopped(Worker worker) {
-        this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
+        super(worker);
+        Assert.notNull(worker, "Precondition violated: worker != null.");
+        this.worker = worker;
     }
 
     /**

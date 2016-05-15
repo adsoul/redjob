@@ -1,13 +1,13 @@
 package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Worker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker failed to execute a job.
  */
-public class JobFailed implements JobFinished {
+public class JobFailed extends ApplicationEvent implements JobFinished {
     /**
      * Worker.
      */
@@ -34,12 +34,18 @@ public class JobFailed implements JobFinished {
      * @param worker Worker.
      * @param queue Queue.
      * @param job Job.
+     * @param runner Job runner.
      */
     public JobFailed(Worker worker, String queue, Object job, Runnable runner) {
-        this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
-        this.queue = checkNotNull(queue, "Precondition violated: queue != null.");
-        this.job = checkNotNull(job, "Precondition violated: job != null.");
-        this.runner = checkNotNull(runner, "Precondition violated: runner != null.");
+        super(worker);
+        Assert.notNull(worker, "Precondition violated: worker != null.");
+        Assert.hasLength(queue, "Precondition violated: queue has length.");
+        Assert.notNull(job, "Precondition violated: job != null.");
+        Assert.notNull(runner, "Precondition violated: runner != null.");
+        this.worker = worker;
+        this.queue = queue;
+        this.job = job;
+        this.runner = runner;
     }
 
     @Override

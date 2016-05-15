@@ -1,11 +1,12 @@
 package com.s24.redjob.worker;
 
-import com.google.common.eventbus.EventBus;
 import com.s24.redjob.queue.Job;
 import com.s24.redjob.queue.QueueDao;
 import com.s24.redjob.worker.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Default implementation of {@link Worker}.
  */
-public class WorkerImpl implements Runnable, Worker {
+public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAware {
     /**
      * Log.
      */
@@ -79,7 +80,7 @@ public class WorkerImpl implements Runnable, Worker {
     /**
      * Event bus.
      */
-    private EventBus eventBus = new EventBus();
+    private ApplicationEventPublisher eventBus;
 
     /**
      * Init.
@@ -116,13 +117,13 @@ public class WorkerImpl implements Runnable, Worker {
     public void run() {
         try {
             workerDao.start(name);
-            eventBus.post(new WorkerStart(this));
+            eventBus.publishEvent(new WorkerStart(this));
             poll();
         } catch (Throwable t) {
             log.error("Worker {}: Uncaught exception in worker. Worker stopped.", name, t);
-            eventBus.post(new WorkerError(this, t));
+            eventBus.publishEvent(new WorkerError(this, t));
         } finally {
-            eventBus.post(new WorkerStopped(this));
+            eventBus.publishEvent(new WorkerStopped(this));
             workerDao.stop(name);
         }
     }
@@ -149,7 +150,7 @@ public class WorkerImpl implements Runnable, Worker {
      */
     protected void pollQueues() throws Throwable {
         for (String queue : queues) {
-            eventBus.post(new WorkerPoll(this, queue));
+            eventBus.publishEvent(new WorkerPoll(this, queue));
             Job job = queueDao.pop(queue, name);
             if (job != null) {
                 execute(queue, job);
@@ -174,9 +175,9 @@ public class WorkerImpl implements Runnable, Worker {
         }
 
         JobProcess jobProcess = new JobProcess(this, queue, payload);
-        eventBus.post(jobProcess);
+        eventBus.publishEvent(jobProcess);
         if (jobProcess.isVeto()) {
-            eventBus.post(new JobSkipped(this, queue, payload, null));
+            eventBus.publishEvent(new JobSkipped(this, queue, payload, null));
             return;
         }
 
@@ -186,9 +187,9 @@ public class WorkerImpl implements Runnable, Worker {
             throw new IllegalArgumentException("No runner found.");
         }
         JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
-        eventBus.post(jobExecute);
+        eventBus.publishEvent(jobExecute);
         if (jobExecute.isVeto()) {
-            eventBus.post(new JobSkipped(this, queue, payload, runner));
+            eventBus.publishEvent(new JobSkipped(this, queue, payload, runner));
             return;
         }
 
@@ -197,11 +198,11 @@ public class WorkerImpl implements Runnable, Worker {
            runner.run();
             log.info("Worker {}: Job {}: Success.", name, job.getId());
             workerDao.success(name);
-            eventBus.post(new JobSuccess(this, queue, payload, runner));
+            eventBus.publishEvent(new JobSuccess(this, queue, payload, runner));
         } catch (Throwable t) {
             log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
             workerDao.failure(name);
-            eventBus.post(new JobFailed(this, queue, payload, runner));
+            eventBus.publishEvent(new JobFailed(this, queue, payload, runner));
             throw new IllegalArgumentException("Failed to execute.", t);
         } finally {
             log.info("Worker {}: Job {}: End.", name, job.getId());
@@ -291,17 +292,8 @@ public class WorkerImpl implements Runnable, Worker {
         this.emptyQueuesSleepMillis = emptyQueuesSleepMillis;
     }
 
-    /**
-     * Event bus.
-     */
-    public EventBus getEventBus() {
-        return eventBus;
-    }
-
-    /**
-     * Event bus.
-     */
-    public void setEventBus(EventBus eventBus) {
+    @Override
+    public void setApplicationEventPublisher(ApplicationEventPublisher eventBus) {
         this.eventBus = eventBus;
     }
 }

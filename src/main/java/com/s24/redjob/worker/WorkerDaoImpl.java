@@ -3,12 +3,11 @@ package com.s24.redjob.worker;
 import com.s24.redjob.AbstractDao;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Default implementation of {@link WorkerDao}.
@@ -63,7 +62,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
 
     @Override
     public void start(String name) {
-        checkNotNull(name, "Precondition violated: name != null");
+        Assert.notNull(name, "Precondition violated: name != null.");
 
         redis.execute((RedisConnection connection) -> {
             connection.sAdd(key(WORKERS), value(name));
@@ -74,7 +73,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
 
     @Override
     public void stop(String name) {
-        checkNotNull(name, "Precondition violated: name != null");
+        Assert.notNull(name, "Precondition violated: name != null.");
 
         redis.execute((RedisConnection connection) -> {
             connection.sRem(key(WORKERS), value(name));
@@ -86,7 +85,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
 
     @Override
     public void success(String name) {
-        checkNotNull(name, "Precondition violated: name != null");
+        Assert.notNull(name, "Precondition violated: name != null.");
 
         redis.execute((RedisConnection connection) -> {
             connection.incr(key(STAT, PROCESSED));
@@ -97,7 +96,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
 
     @Override
     public void failure(String name) {
-        checkNotNull(name, "Precondition violated: name != null");
+        Assert.notNull(name, "Precondition violated: name != null.");
 
         redis.execute((RedisConnection connection) -> {
             connection.incr(key(STAT, FAILED));
@@ -111,10 +110,10 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
     //
 
     /**
-     * Serialize long value.
+     * Serialize timestamp.
      *
-     * @param value Long.
-     * @return Serialized long.
+     * @param value Timestamp.
+     * @return Serialized timestamp.
      */
     protected byte[] value(LocalDateTime value) {
         return value(value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));

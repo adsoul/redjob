@@ -8,6 +8,11 @@ import com.s24.redjob.queue.TestJobRunnerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.util.concurrent.TimeUnit;
@@ -19,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Integration test for {@link WorkerImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class WorkerImplIT {
     /**
      * Queue DAO.
@@ -30,9 +36,13 @@ public class WorkerImplIT {
      */
     private WorkerDaoImpl workerDao = new WorkerDaoImpl();
 
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
     /**
      * Worker under test.
      */
+    @InjectMocks
     private WorkerImpl worker = new WorkerImpl();
 
     /**

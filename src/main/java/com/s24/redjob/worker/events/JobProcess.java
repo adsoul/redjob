@@ -1,13 +1,13 @@
 package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Worker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker processes a job.
  */
-public class JobProcess {
+public class JobProcess extends ApplicationEvent {
     /**
      * Worker.
      */
@@ -36,9 +36,13 @@ public class JobProcess {
      * @param job Job.
      */
     public JobProcess(Worker worker, String queue, Object job) {
-        this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
-        this.queue = checkNotNull(queue, "Precondition violated: queue != null.");
-        this.job = checkNotNull(job, "Precondition violated: job != null.");
+        super(worker);
+        Assert.notNull(worker, "Precondition violated: worker != null.");
+        Assert.hasLength(queue, "Precondition violated: queue has length.");
+        Assert.notNull(job, "Precondition violated: job != null.");
+        this.worker = worker;
+        this.queue = queue;
+        this.job = job;
     }
 
     /**
