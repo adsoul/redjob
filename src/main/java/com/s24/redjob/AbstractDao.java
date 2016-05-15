@@ -42,7 +42,7 @@ public class AbstractDao {
     }
 
     //
-    // Helper.
+    // Serialization.
     //
 
     /**

@@ -8,6 +8,7 @@ import com.s24.redjob.queue.TestJobRunnerFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,7 +23,12 @@ public class WorkerImplIT {
     /**
      * Queue DAO.
      */
-    private QueueDaoImpl dao = new QueueDaoImpl();
+    private QueueDaoImpl queueDao = new QueueDaoImpl();
+
+    /**
+     * Worker DAO.
+     */
+    private WorkerDaoImpl workerDao = new WorkerDaoImpl();
 
     /**
      * Worker under test.
@@ -36,14 +42,20 @@ public class WorkerImplIT {
 
     @Before
     public void setUp() throws Exception {
-        dao.setConnectionFactory(TestRedis.connectionFactory());
-        dao.setNamespace("namespace");
-        dao.afterPropertiesSet();
+        RedisConnectionFactory redis = TestRedis.connectionFactory();
 
-        scanForJsonSubtypes(dao.getJson(), TestJob.class);
+        queueDao.setConnectionFactory(redis);
+        queueDao.setNamespace("namespace");
+        queueDao.afterPropertiesSet();
+        scanForJsonSubtypes(queueDao.getJson(), TestJob.class);
+
+        workerDao.setConnectionFactory(redis);
+        workerDao.setNamespace("namespace");
+        workerDao.afterPropertiesSet();
 
         worker.setQueues("test-queue");
-        worker.setQueueDao(dao);
+        worker.setQueueDao(queueDao);
+        worker.setWorkerDao(workerDao);
         worker.setJobRunnerFactory(new TestJobRunnerFactory());
         worker.afterPropertiesSet();
 
@@ -61,7 +73,7 @@ public class WorkerImplIT {
     public void poll() throws Exception {
         TestJobRunner.resetLatch(1);
         TestJob job = new TestJob("worker");
-        dao.enqueue("test-queue", job, false);
+        queueDao.enqueue("test-queue", job, false);
 
         workerThread.start();
 

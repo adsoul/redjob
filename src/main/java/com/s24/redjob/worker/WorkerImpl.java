@@ -39,6 +39,11 @@ public class WorkerImpl implements Runnable, Worker {
     private QueueDao queueDao;
 
     /**
+     * Worker dao.
+     */
+    private WorkerDao workerDao;
+
+    /**
      * Sequence for worker ids.
      */
     private static final AtomicInteger IDS = new AtomicInteger();
@@ -113,6 +118,7 @@ public class WorkerImpl implements Runnable, Worker {
     @Override
     public void run() {
         try {
+            workerDao.start(this);
             eventBus.post(new WorkerStart(this));
             poll();
         } catch (Throwable t) {
@@ -120,6 +126,7 @@ public class WorkerImpl implements Runnable, Worker {
             eventBus.post(new WorkerError(this, t));
         } finally {
             eventBus.post(new WorkerStopped(this));
+            workerDao.stop(this);
         }
     }
 
@@ -221,6 +228,20 @@ public class WorkerImpl implements Runnable, Worker {
      */
     public void setQueueDao(QueueDao queueDao) {
         this.queueDao = queueDao;
+    }
+
+    /**
+     * Worker dao.
+     */
+    public WorkerDao getWorkerDao() {
+        return workerDao;
+    }
+
+    /**
+     * Worker dao.
+     */
+    public void setWorkerDao(WorkerDao workerDao) {
+        this.workerDao = workerDao;
     }
 
     /**
