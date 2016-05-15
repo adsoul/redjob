@@ -13,4 +13,14 @@ public interface WorkerDao {
      * Stop of worker.
      */
     void stop(Worker worker);
+
+    /**
+     * Job has been successfully been processed.
+     */
+    void success(Worker worker);
+
+    /**
+     * Job execution failed.
+     */
+    void failure(Worker worker);
 }

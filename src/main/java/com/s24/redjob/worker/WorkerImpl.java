@@ -3,10 +3,7 @@ package com.s24.redjob.worker;
 import com.google.common.eventbus.EventBus;
 import com.s24.redjob.queue.Job;
 import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.worker.events.WorkerError;
-import com.s24.redjob.worker.events.WorkerPoll;
-import com.s24.redjob.worker.events.WorkerStart;
-import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
@@ -155,7 +152,7 @@ public class WorkerImpl implements Runnable, Worker {
             eventBus.post(new WorkerPoll(this, queue));
             Job job = queueDao.pop(queue, name);
             if (job != null) {
-                execute(job);
+                execute(queue, job);
                 return;
             }
         }
@@ -165,26 +162,46 @@ public class WorkerImpl implements Runnable, Worker {
     /**
      * Execute job.
      *
+     * @param queue Name of queue.
      * @param job Job.
      * @throws Throwable In case of errors.
      */
-    protected void execute(Job job) throws Throwable {
-        if (job.getPayload() == null) {
+    protected void execute(String queue, Job job) throws Throwable {
+        Object payload = job.getPayload();
+        if (payload == null) {
             log.error("Worker {}: Job {}: Missing payload.", name, job.getId());
             throw new IllegalArgumentException("Missing payload.");
         }
 
-        Runnable runner = jobRunnerFactory.runnerFor(job.getPayload());
+        JobProcess jobProcess = new JobProcess(this, queue, payload);
+        eventBus.post(jobProcess);
+        if (jobProcess.isVeto()) {
+            eventBus.post(new JobSkipped(this, queue, payload));
+            return;
+        }
+
+        Runnable runner = jobRunnerFactory.runnerFor(payload);
         if (runner == null) {
             log.error("Worker {}: Job {}: No runner found.", name, job.getId());
             throw new IllegalArgumentException("No runner found.");
+        }
+        JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
+        eventBus.post(jobExecute);
+        if (jobExecute.isVeto()) {
+            eventBus.post(new JobSkipped(this, queue, payload));
+            return;
         }
 
         log.info("Worker {}: Job {}: Start.", name, job.getId());
         try {
            runner.run();
+            log.info("Worker {}: Job {}: Success.", name, job.getId());
+            workerDao.success(this);
+            eventBus.post(new JobSuccess(this, queue, payload, runner));
         } catch (Throwable t) {
             log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
+            workerDao.failure(this);
+            eventBus.post(new JobFailed(this, queue, payload, runner));
             throw new IllegalArgumentException("Failed to execute.", t);
         } finally {
             log.info("Worker {}: Job {}: End.", name, job.getId());

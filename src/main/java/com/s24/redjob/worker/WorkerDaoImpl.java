@@ -84,6 +84,28 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
         });
     }
 
+    @Override
+    public void success(Worker worker) {
+        checkNotNull(worker, "Precondition violated: worker != null");
+
+        redis.execute((RedisConnection connection) -> {
+            connection.incr(key(STAT, PROCESSED));
+            connection.incr(key(STAT, PROCESSED, worker.getName()));
+            return null;
+        });
+    }
+
+    @Override
+    public void failure(Worker worker) {
+        checkNotNull(worker, "Precondition violated: worker != null");
+
+        redis.execute((RedisConnection connection) -> {
+            connection.incr(key(STAT, FAILED));
+            connection.incr(key(STAT, FAILED, worker.getName()));
+            return null;
+        });
+    }
+
     //
     // Serialization.
     //
