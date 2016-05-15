@@ -7,7 +7,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Worker successfully executed a job.
  */
-public class JobSuccess {
+public class JobSuccess implements JobFinished {
     /**
      * Worker.
      */
@@ -34,6 +34,7 @@ public class JobSuccess {
      * @param worker Worker.
      * @param queue Queue.
      * @param job Job.
+     * @param runner Job runner.
      */
     public JobSuccess(Worker worker, String queue, Object job, Runnable runner) {
         this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
@@ -42,30 +43,22 @@ public class JobSuccess {
         this.runner = checkNotNull(runner, "Precondition violated: runner != null.");
     }
 
-    /**
-     * Worker.
-     */
+    @Override
     public Worker getWorker() {
         return worker;
     }
 
-    /**
-     * Queue.
-     */
+    @Override
     public String getQueue() {
         return queue;
     }
 
-    /**
-     * Job.
-     */
+    @Override
     public Object getJob() {
         return job;
     }
 
-    /**
-     * Job runner.
-     */
+    @Override
     public Runnable getRunner() {
         return runner;
     }

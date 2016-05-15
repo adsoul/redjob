@@ -7,7 +7,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Worker has skipped a job due to a veto.
  */
-public class JobSkipped {
+public class JobSkipped implements JobFinished {
     /**
      * Worker.
      */
@@ -24,36 +24,42 @@ public class JobSkipped {
     private final Object job;
 
     /**
+     * Job runner.
+     */
+    private final Runnable runner;
+
+    /**
      * Constructor.
      *
      * @param worker Worker.
      * @param queue Queue.
      * @param job Job.
+     * @param runner Job runner, may be null, if execution has been vetoed in process phase.
      */
-    public JobSkipped(Worker worker, String queue, Object job) {
+    public JobSkipped(Worker worker, String queue, Object job, Runnable runner) {
         this.worker = checkNotNull(worker, "Precondition violated: worker != null.");
         this.queue = checkNotNull(queue, "Precondition violated: queue != null.");
         this.job = checkNotNull(job, "Precondition violated: job != null.");
+        this.runner = runner;
     }
 
-    /**
-     * Worker.
-     */
+    @Override
     public Worker getWorker() {
         return worker;
     }
 
-    /**
-     * Queue.
-     */
+    @Override
     public String getQueue() {
         return queue;
     }
 
-    /**
-     * Job.
-     */
+    @Override
     public Object getJob() {
         return job;
+    }
+
+    @Override
+    public Runnable getRunner() {
+        return runner;
     }
 }

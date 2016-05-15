@@ -176,7 +176,7 @@ public class WorkerImpl implements Runnable, Worker {
         JobProcess jobProcess = new JobProcess(this, queue, payload);
         eventBus.post(jobProcess);
         if (jobProcess.isVeto()) {
-            eventBus.post(new JobSkipped(this, queue, payload));
+            eventBus.post(new JobSkipped(this, queue, payload, null));
             return;
         }
 
@@ -188,7 +188,7 @@ public class WorkerImpl implements Runnable, Worker {
         JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
         eventBus.post(jobExecute);
         if (jobExecute.isVeto()) {
-            eventBus.post(new JobSkipped(this, queue, payload));
+            eventBus.post(new JobSkipped(this, queue, payload, runner));
             return;
         }
 
