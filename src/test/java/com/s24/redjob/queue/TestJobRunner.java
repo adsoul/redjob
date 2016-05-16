@@ -1,14 +1,19 @@
 package com.s24.redjob.queue;
 
+import org.springframework.util.Assert;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.util.Assert;
 
 /**
  * Job runner for {@link TestJob}s.
  */
 public class TestJobRunner implements Runnable {
+    /**
+     * If the job's value if {@value #EXCEPTION}, this runner throws an exception when processing it.
+     */
+    public static final String EXCEPTION = "exception";
+
     /**
      * Payload
      */
@@ -40,6 +45,9 @@ public class TestJobRunner implements Runnable {
     @Override
     public void run() {
         latch.countDown();
+        if (EXCEPTION.equals(job.getValue())) {
+            throw new Error("exception");
+        }
     }
 
     /**
