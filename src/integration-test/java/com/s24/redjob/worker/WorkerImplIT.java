@@ -1,18 +1,15 @@
 package com.s24.redjob.worker;
 
+import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.QueueDaoImpl;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
+import com.s24.redjob.worker.events.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import java.util.concurrent.TimeUnit;
@@ -24,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 /**
  * Integration test for {@link WorkerImpl}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class WorkerImplIT {
     /**
      * Queue DAO.
@@ -36,13 +32,14 @@ public class WorkerImplIT {
      */
     private WorkerDaoImpl workerDao = new WorkerDaoImpl();
 
-    @Mock
-    private ApplicationEventPublisher applicationEventPublisher;
+    /**
+     * Recording event publisher.
+     */
+    private TestEventPublisher eventBus = new TestEventPublisher();
 
     /**
      * Worker under test.
      */
-    @InjectMocks
     private WorkerImpl worker = new WorkerImpl();
 
     /**
@@ -67,6 +64,7 @@ public class WorkerImplIT {
         worker.setQueueDao(queueDao);
         worker.setWorkerDao(workerDao);
         worker.setJobRunnerFactory(new TestJobRunnerFactory());
+        worker.setApplicationEventPublisher(eventBus);
         worker.afterPropertiesSet();
 
         workerThread = new Thread(worker, "test-worker");
@@ -80,14 +78,52 @@ public class WorkerImplIT {
     }
 
     @Test
-    public void poll() throws Exception {
-        TestJobRunner.resetLatch(1);
+    public void testLifecycle() throws Exception {
         TestJob job = new TestJob("worker");
-        queueDao.enqueue("test-queue", job, false);
 
+        assertTrue(eventBus.getEvents().isEmpty());
         workerThread.start();
 
-        assertTrue(TestJobRunner.awaitLatch(10, TimeUnit.SECONDS));
+        Object workerStart = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(WorkerStart.class, workerStart.getClass());
+        assertEquals(worker, ((WorkerStart) workerStart).getWorker());
+
+        Object workerPoll = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(WorkerPoll.class, workerPoll.getClass());
+        assertEquals(worker, ((WorkerPoll) workerPoll).getWorker());
+        assertEquals("test-queue", ((WorkerPoll) workerPoll).getQueue());
+
+        queueDao.enqueue("test-queue", job, false);
+
+        workerPoll = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(WorkerPoll.class, workerPoll.getClass());
+        assertEquals(worker, ((WorkerPoll) workerPoll).getWorker());
+        assertEquals("test-queue", ((WorkerPoll) workerPoll).getQueue());
+
+        Object jobProcess = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(JobProcess.class, jobProcess.getClass());
+        assertEquals(worker, ((JobProcess) jobProcess).getWorker());
+        assertEquals("test-queue", ((JobProcess) jobProcess).getQueue());
+        assertEquals(job, ((JobProcess) jobProcess).getJob());
+
+        Object jobExecute = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(JobExecute.class, jobExecute.getClass());
+        assertEquals(worker, ((JobExecute) jobExecute).getWorker());
+        assertEquals("test-queue", ((JobExecute) jobExecute).getQueue());
+        assertEquals(job, ((JobExecute) jobExecute).getJob());
+
+        worker.stop();
+
+        Object jobSuccess = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(JobSuccess.class, jobSuccess.getClass());
+        assertEquals(worker, ((JobSuccess) jobSuccess).getWorker());
+        assertEquals("test-queue", ((JobSuccess) jobSuccess).getQueue());
+        assertEquals(job, ((JobSuccess) jobSuccess).getJob());
+
         assertEquals(job, TestJobRunner.getJob());
+
+        Object workerStopped = eventBus.waitForEvent(1, TimeUnit.SECONDS);
+        assertEquals(WorkerStopped.class, workerStopped.getClass());
+        assertEquals(worker, ((WorkerStopped) workerStopped).getWorker());
     }
 }
