@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker stopped.
  */
@@ -29,5 +31,16 @@ public class WorkerStopped extends ApplicationEvent {
      */
     public Worker getWorker() {
         return worker;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof WorkerStopped &&
+                Objects.equals(worker, ((WorkerStopped) o).worker);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker);
     }
 }

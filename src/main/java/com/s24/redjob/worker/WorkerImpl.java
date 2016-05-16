@@ -209,6 +209,16 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof Worker && id == ((Worker) o).getId();
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
+
     //
     // Injections.
     //

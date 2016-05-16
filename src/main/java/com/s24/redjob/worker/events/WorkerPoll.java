@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker polls one of its queues.
  */
@@ -44,5 +46,17 @@ public class WorkerPoll extends ApplicationEvent {
      */
     public String getQueue() {
         return queue;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof WorkerPoll &&
+                Objects.equals(worker, ((WorkerPoll) o).worker) &&
+                Objects.equals(queue, ((WorkerPoll) o).queue);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker, queue);
     }
 }

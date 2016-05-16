@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker processes a job.
  */
@@ -78,5 +80,18 @@ public class JobProcess extends ApplicationEvent {
      */
     public boolean isVeto() {
         return veto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof JobProcess &&
+                Objects.equals(worker, ((JobProcess) o).worker) &&
+                Objects.equals(queue, ((JobProcess) o).queue) &&
+                Objects.equals(job, ((JobProcess) o).job);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker, queue, job);
     }
 }

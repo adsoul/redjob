@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker has skipped a job due to a veto.
  */
@@ -65,5 +67,19 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
     @Override
     public Runnable getRunner() {
         return runner;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof JobSkipped &&
+                Objects.equals(worker, ((JobSkipped) o).worker) &&
+                Objects.equals(queue, ((JobSkipped) o).queue) &&
+                Objects.equals(job, ((JobSkipped) o).job) &&
+                Objects.equals(runner, ((JobSkipped) o).runner);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker, queue, job, runner);
     }
 }

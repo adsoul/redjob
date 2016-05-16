@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker successfully executed a job.
  */
@@ -66,5 +68,19 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
     @Override
     public Runnable getRunner() {
         return runner;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof JobSuccess &&
+                Objects.equals(worker, ((JobSuccess) o).worker) &&
+                Objects.equals(queue, ((JobSuccess) o).queue) &&
+                Objects.equals(job, ((JobSuccess) o).job) &&
+                Objects.equals(runner, ((JobSuccess) o).runner);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker, queue, job, runner);
     }
 }

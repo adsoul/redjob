@@ -4,6 +4,8 @@ import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import java.util.Objects;
+
 /**
  * Worker executes a job.
  */
@@ -93,5 +95,19 @@ public class JobExecute extends ApplicationEvent {
      */
     public boolean isVeto() {
         return veto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof JobExecute &&
+                Objects.equals(worker, ((JobExecute) o).worker) &&
+                Objects.equals(queue, ((JobExecute) o).queue) &&
+                Objects.equals(job, ((JobExecute) o).job) &&
+                Objects.equals(runner, ((JobExecute) o).runner);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(worker, queue, job, runner);
     }
 }
