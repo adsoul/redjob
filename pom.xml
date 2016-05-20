@@ -29,6 +29,7 @@
       <plugin.exec-maven-plugin.version>1.4.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.5.1</plugin.maven-compiler-plugin.version>
       <plugin.maven-failsafe-plugin.version>2.19.1</plugin.maven-failsafe-plugin.version>
+      <plugin.maven-resources-plugin.version>2.7</plugin.maven-resources-plugin.version>
       <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
 
       <dependency.assertj.version>3.4.1</dependency.assertj.version>
@@ -224,7 +225,28 @@
          </properties>
          <build>
             <plugins>
-               <!-- Run a Redis with Sentinel-->
+               <!-- Run a Redis with Sentinel. Copy conf files, because Redis Sentinel rewrites them... -->
+               <plugin>
+                  <artifactId>maven-resources-plugin</artifactId>
+                  <version>${plugin.maven-resources-plugin.version}</version>
+                  <executions>
+                     <execution>
+                        <id>copy-resources</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                           <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                           <outputDirectory>${basedir}/target/redis</outputDirectory>
+                           <resources>
+                              <resource>
+                                 <directory>${project.basedir}/src/integration-test/redis</directory>
+                              </resource>
+                           </resources>
+                        </configuration>
+                     </execution>
+                  </executions>
+               </plugin>
                <plugin>
                   <groupId>org.codehaus.mojo</groupId>
                   <artifactId>exec-maven-plugin</artifactId>
@@ -239,7 +261,7 @@
                         <configuration>
                            <executable>redis-server</executable>
                            <arguments>
-                              <argument>${project.basedir}/src/integration-test/redis/redis.conf</argument>
+                              <argument>${basedir}/target/redis/redis.conf</argument>
                               <argument>--port</argument>
                               <argument>${integrationTest.redisPort}</argument>
                            </arguments>
@@ -254,7 +276,7 @@
                         <configuration>
                            <executable>redis-server</executable>
                            <arguments>
-                              <argument>${project.basedir}/src/integration-test/redis/redis-sentinel.conf</argument>
+                              <argument>${basedir}/target/redis/redis-sentinel.conf</argument>
                               <argument>--sentinel</argument>
                               <argument>--port</argument>
                               <argument>${integrationTest.sentinelPort}</argument>
