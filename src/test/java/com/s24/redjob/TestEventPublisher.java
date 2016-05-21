@@ -58,6 +58,15 @@ public class TestEventPublisher implements ApplicationEventPublisher {
     }
 
     /**
+     * Wait one second for event.
+     *
+     * @return Event, or null, if no event has been published until the timeout.
+     */
+    public Object waitForEvent() throws InterruptedException {
+        return waitForEvent(1, TimeUnit.SECONDS);
+    }
+
+    /**
      * Wait for event.
      *
      * @param timeout Timeout.

@@ -65,4 +65,14 @@ public class TestJobRunner implements Runnable {
     public static TestJob getJob() {
         return job;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TestJobRunner && job.equals(((TestJobRunner) o).job);
+    }
+
+    @Override
+    public int hashCode() {
+        return job.hashCode();
+    }
 }
