@@ -1,8 +1,13 @@
 package com.s24.redjob.worker;
 
-import com.s24.redjob.queue.Job;
-import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.worker.events.*;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -10,12 +15,9 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.worker.events.*;
 
 /**
  * Default implementation of {@link Worker}.
@@ -94,7 +96,14 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
         Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
         id = IDS.incrementAndGet();
-        name = ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
+        name = createName();
+    }
+
+    /**
+     * Create name for this worker.
+     */
+    protected String createName() {
+        return ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
                 StringUtils.collectionToCommaDelimitedString(queues);
     }
 
