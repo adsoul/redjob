@@ -1,13 +1,8 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue.worker;
 
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-
+import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.queue.worker.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,9 +10,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.queue.Job;
-import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.worker.events.*;
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Default implementation of {@link Worker}.

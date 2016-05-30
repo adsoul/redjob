@@ -1,4 +1,4 @@
-package com.s24.redjob.client;
+package com.s24.redjob.channel.client;
 
 import com.s24.redjob.queue.QueueDao;
 import org.springframework.util.Assert;

@@ -1,4 +1,4 @@
-package com.s24.redjob.client;
+package com.s24.redjob.channel.client;
 
 /**
  * Admin job client.

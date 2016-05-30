@@ -1,15 +1,15 @@
-package com.s24.redjob.worker.events;
+package com.s24.redjob.queue.worker.events;
 
-import com.s24.redjob.worker.Worker;
+import com.s24.redjob.queue.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
 
 /**
- * Worker stopped.
+ * New worker starts.
  */
-public class WorkerStopped extends ApplicationEvent {
+public class WorkerStart extends ApplicationEvent {
     /**
      * Worker.
      */
@@ -20,7 +20,7 @@ public class WorkerStopped extends ApplicationEvent {
      *
      * @param worker Worker.
      */
-    public WorkerStopped(Worker worker) {
+    public WorkerStart(Worker worker) {
         super(worker);
         Assert.notNull(worker, "Precondition violated: worker != null.");
         this.worker = worker;
@@ -35,8 +35,8 @@ public class WorkerStopped extends ApplicationEvent {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof WorkerStopped &&
-                Objects.equals(worker, ((WorkerStopped) o).worker);
+        return o instanceof WorkerStart &&
+                Objects.equals(worker, ((WorkerStart) o).worker);
     }
 
     @Override

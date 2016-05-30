@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue.worker;
 
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
@@ -6,7 +6,7 @@ import com.s24.redjob.queue.QueueDaoImpl;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
-import com.s24.redjob.worker.events.*;
+import com.s24.redjob.queue.worker.events.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

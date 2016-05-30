@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue.worker;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.springframework.beans.factory.annotation.Autowired;

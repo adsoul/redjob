@@ -1,6 +1,6 @@
-package com.s24.redjob.worker.events;
+package com.s24.redjob.queue.worker.events;
 
-import com.s24.redjob.worker.Worker;
+import com.s24.redjob.queue.worker.Worker;
 
 /**
  * Worker finished execution of a job.

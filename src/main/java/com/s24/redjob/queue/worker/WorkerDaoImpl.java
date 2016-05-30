@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue.worker;
 
 import com.s24.redjob.AbstractDao;
 import org.springframework.data.redis.connection.RedisConnection;

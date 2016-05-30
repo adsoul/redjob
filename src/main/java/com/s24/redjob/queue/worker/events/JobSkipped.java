@@ -1,15 +1,15 @@
-package com.s24.redjob.worker.events;
+package com.s24.redjob.queue.worker.events;
 
-import com.s24.redjob.worker.Worker;
+import com.s24.redjob.queue.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
 
 /**
- * Worker successfully executed a job.
+ * Worker has skipped a job due to a veto.
  */
-public class JobSuccess extends ApplicationEvent implements JobFinished {
+public class JobSkipped extends ApplicationEvent implements JobFinished {
     /**
      * Worker.
      */
@@ -36,14 +36,13 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
      * @param worker Worker.
      * @param queue Queue.
      * @param job Job.
-     * @param runner Job runner.
+     * @param runner Job runner, may be null, if execution has been vetoed in process phase.
      */
-    public JobSuccess(Worker worker, String queue, Object job, Runnable runner) {
+    public JobSkipped(Worker worker, String queue, Object job, Runnable runner) {
         super(worker);
         Assert.notNull(worker, "Precondition violated: worker != null.");
         Assert.hasLength(queue, "Precondition violated: queue has length.");
         Assert.notNull(job, "Precondition violated: job != null.");
-        Assert.notNull(runner, "Precondition violated: runner != null.");
         this.worker = worker;
         this.queue = queue;
         this.job = job;
@@ -72,11 +71,11 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof JobSuccess &&
-                Objects.equals(worker, ((JobSuccess) o).worker) &&
-                Objects.equals(queue, ((JobSuccess) o).queue) &&
-                Objects.equals(job, ((JobSuccess) o).job) &&
-                Objects.equals(runner, ((JobSuccess) o).runner);
+        return o instanceof JobSkipped &&
+                Objects.equals(worker, ((JobSkipped) o).worker) &&
+                Objects.equals(queue, ((JobSkipped) o).queue) &&
+                Objects.equals(job, ((JobSkipped) o).job) &&
+                Objects.equals(runner, ((JobSkipped) o).runner);
     }
 
     @Override

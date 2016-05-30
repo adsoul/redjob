@@ -1,15 +1,15 @@
-package com.s24.redjob.worker.events;
+package com.s24.redjob.queue.worker.events;
 
-import com.s24.redjob.worker.Worker;
+import com.s24.redjob.queue.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 import java.util.Objects;
 
 /**
- * Worker executes a job.
+ * Worker failed to execute a job.
  */
-public class JobExecute extends ApplicationEvent {
+public class JobFailed extends ApplicationEvent implements JobFinished {
     /**
      * Worker.
      */
@@ -31,11 +31,6 @@ public class JobExecute extends ApplicationEvent {
     private final Runnable runner;
 
     /**
-     * Veto against job execution?.
-     */
-    private boolean veto = false;
-
-    /**
      * Constructor.
      *
      * @param worker Worker.
@@ -43,7 +38,7 @@ public class JobExecute extends ApplicationEvent {
      * @param job Job.
      * @param runner Job runner.
      */
-    public JobExecute(Worker worker, String queue, Object job, Runnable runner) {
+    public JobFailed(Worker worker, String queue, Object job, Runnable runner) {
         super(worker);
         Assert.notNull(worker, "Precondition violated: worker != null.");
         Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -55,55 +50,33 @@ public class JobExecute extends ApplicationEvent {
         this.runner = runner;
     }
 
-    /**
-     * Worker.
-     */
+    @Override
     public Worker getWorker() {
         return worker;
     }
 
-    /**
-     * Queue.
-     */
+    @Override
     public String getQueue() {
         return queue;
     }
 
-    /**
-     * Job.
-     */
+    @Override
     public Object getJob() {
         return job;
     }
 
-    /**
-     * Job runner.
-     */
+    @Override
     public Runnable getRunner() {
         return runner;
     }
 
-    /**
-     * Veto against execution of the job.
-     */
-    public void veto() {
-        this.veto = true;
-    }
-
-    /**
-     * Has been vetoed against execution of the job?.
-     */
-    public boolean isVeto() {
-        return veto;
-    }
-
     @Override
     public boolean equals(Object o) {
-        return o instanceof JobExecute &&
-                Objects.equals(worker, ((JobExecute) o).worker) &&
-                Objects.equals(queue, ((JobExecute) o).queue) &&
-                Objects.equals(job, ((JobExecute) o).job) &&
-                Objects.equals(runner, ((JobExecute) o).runner);
+        return o instanceof JobFailed &&
+                Objects.equals(worker, ((JobFailed) o).worker) &&
+                Objects.equals(queue, ((JobFailed) o).queue) &&
+                Objects.equals(job, ((JobFailed) o).job) &&
+                Objects.equals(runner, ((JobFailed) o).runner);
     }
 
     @Override
