@@ -155,6 +155,8 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
          try {
             pollQueues();
          } catch (InterruptedException e) {
+            // Just to be sure clear interrupt flag before starting over (if worker has not been requested to stop).
+            Thread.interrupted();
             log.debug("Thread has been interrupted.", name);
          } catch (Throwable e) {
             log.error("Polling queues for jobs failed.", name, e);
