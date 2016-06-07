@@ -1,8 +1,13 @@
 package com.s24.redjob.queue.worker;
 
-import com.s24.redjob.queue.Job;
-import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.queue.worker.events.*;
+import java.lang.management.ManagementFactory;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -10,12 +15,9 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.queue.worker.events.*;
 
 /**
  * Default implementation of {@link Worker}.
@@ -157,11 +159,14 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
      */
     protected void pollQueues() throws Throwable {
         for (String queue : queues) {
-            eventBus.publishEvent(new WorkerPoll(this, queue));
-            Job job = queueDao.pop(queue, name);
-            if (job != null) {
-                execute(queue, job);
-                return;
+            WorkerPoll workerPoll = new WorkerPoll(this, queue);
+            eventBus.publishEvent(workerPoll);
+            if (!workerPoll.isVeto()) {
+                Job job = queueDao.pop(queue, name);
+                if (job != null) {
+                    execute(queue, job);
+                    return;
+                }
             }
         }
         Thread.sleep(emptyQueuesSleepMillis);

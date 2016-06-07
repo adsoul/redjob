@@ -1,10 +1,11 @@
 package com.s24.redjob.queue.worker.events;
 
-import com.s24.redjob.queue.worker.Worker;
+import java.util.Objects;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import java.util.Objects;
+import com.s24.redjob.queue.worker.Worker;
 
 /**
  * Worker polls one of its queues.
@@ -19,6 +20,11 @@ public class WorkerPoll extends ApplicationEvent {
      * Queue.
      */
     private final String queue;
+
+    /**
+     * Veto against job execution?.
+     */
+    private boolean veto = false;
 
     /**
      * Constructor.
@@ -46,6 +52,20 @@ public class WorkerPoll extends ApplicationEvent {
      */
     public String getQueue() {
         return queue;
+    }
+
+    /**
+     * Veto against execution of the job.
+     */
+    public void veto() {
+        this.veto = true;
+    }
+
+    /**
+     * Has been vetoed against execution of the job?.
+     */
+    public boolean isVeto() {
+        return veto;
     }
 
     @Override
