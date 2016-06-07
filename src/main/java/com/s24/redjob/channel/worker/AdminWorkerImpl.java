@@ -9,6 +9,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.Topic;
@@ -16,6 +17,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.s24.redjob.channel.ChannelDao;
+import com.s24.redjob.queue.Execution;
 import com.s24.redjob.queue.worker.JobRunnerFactory;
 
 /**
@@ -72,13 +74,22 @@ public class AdminWorkerImpl {
       name = createName();
 
       listenerContainer.addMessageListener((message, pattern) -> {
+         MDC.put("worker", getName());
          // Deserialize job.
-            try {
-               execute(null);
-            } catch (Throwable throwable) {
-               throwable.printStackTrace();
-            }
-         }, channels);
+         Execution execution = null;
+         Object job = null;
+         try {
+            MDC.put("execution", Long.toString(execution.getId()));
+            MDC.put("job", job.getClass().getSimpleName());
+            execute(null);
+         } catch (Throwable throwable) {
+            throwable.printStackTrace();
+         } finally {
+            MDC.remove("job");
+            MDC.remove("execution");
+            MDC.remove("worker");
+         }
+      }, channels);
    }
 
    /**
@@ -87,6 +98,20 @@ public class AdminWorkerImpl {
    protected String createName() {
       return ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
             StringUtils.collectionToCommaDelimitedString(channels);
+   }
+
+   /**
+    * Local unique id of worker.
+    */
+   public int getId() {
+      return id;
+   }
+
+   /**
+    * Name of worker.
+    */
+   public String getName() {
+      return name;
    }
 
    /**
@@ -99,25 +124,25 @@ public class AdminWorkerImpl {
     */
    protected void execute(Object job) throws Throwable {
       if (job == null) {
-         log.error("AdminWorker {}: Missing job.", name);
+         log.error("Missing job.");
          throw new IllegalArgumentException("Missing job.");
       }
 
       Runnable runner = jobRunnerFactory.runnerFor(job);
       if (runner == null) {
-         log.error("AdminWorker {}: Job {}: No runner found.", name, job.getClass());
-         throw new IllegalArgumentException("No runner found.");
+         log.error("No job runner found.", name, job.getClass());
+         throw new IllegalArgumentException("No job runner found.");
       }
 
-      log.info("AdminWorker {}: Job {}: Start.", name, job.getClass());
+      log.info("Starting job.");
       try {
          runner.run();
-         log.info("AdminWorker {}: Job {}: Success.", name, job.getClass());
+         log.info("Job succeeded.");
       } catch (Throwable t) {
-         log.error("AdminWorker {}: Job {}: Failed to execute.", name, job.getClass(), t);
-         throw new IllegalArgumentException("Failed to execute.", t);
+         log.error("Job failed.", t);
+         throw new IllegalArgumentException("Job failed.", t);
       } finally {
-         log.info("AdminWorker {}: Job {}: End.", name, job.getClass());
+         log.info("Job finished.", name, job.getClass());
       }
    }
 
