@@ -15,49 +15,55 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PayloadTypeScannerTest {
-    /**
-     * JSON mapper.
-     */
-    @Spy
-    private ObjectMapper json;
+   /**
+    * JSON mapper.
+    */
+   @Spy
+   private ObjectMapper json;
 
-    @Test
-    public void afterPropertiesSet() {
-        scanForJsonSubtypes(json, TestJob.class);
+   @Test
+   public void afterPropertiesSet() {
+      scanForJsonSubtypes(json, TestJob.class);
 
-        verify(json).registerSubtypes(TestJob.class);
-    }
+      verify(json).registerSubtypes(TestJob.class);
+   }
 
-    /**
-     * Scan packages for JSON subtypes. Useful for tests.
-     *
-     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
-     * @param basePackage Class in package to scan recursively.
-     */
-    public static void scanForJsonSubtypes(ObjectMapper json, Class<?> basePackage) {
-        scanForJsonSubtypes(json, basePackage.getPackage());
-    }
+   /**
+    * Scan packages for JSON subtypes. Useful for tests.
+    *
+    * @param json
+    *           JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
+    * @param basePackage
+    *           Class in package to scan recursively.
+    */
+   public static void scanForJsonSubtypes(ObjectMapper json, Class<?> basePackage) {
+      scanForJsonSubtypes(json, basePackage.getPackage());
+   }
 
-    /**
-     * Scan packages for JSON subtypes. Useful for tests.
-     *
-     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
-     * @param basePackage Package to scan recursively.
-     */
-    public static void scanForJsonSubtypes(ObjectMapper json, Package basePackage) {
-        scanForJsonSubtypes(json, basePackage.getName());
-    }
+   /**
+    * Scan packages for JSON subtypes. Useful for tests.
+    *
+    * @param json
+    *           JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
+    * @param basePackage
+    *           Package to scan recursively.
+    */
+   public static void scanForJsonSubtypes(ObjectMapper json, Package basePackage) {
+      scanForJsonSubtypes(json, basePackage.getName());
+   }
 
-    /**
-     * Scan packages for JSON subtypes. Useful for tests.
-     *
-     * @param json JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
-     * @param basePackages Base packages to scan.
-     */
-    public static void scanForJsonSubtypes(ObjectMapper json, String... basePackages) {
-        PayloadTypeScanner scanner = new PayloadTypeScanner();
-        scanner.setJson(json);
-        scanner.setBasePackages(basePackages);
-        scanner.afterPropertiesSet();
-    }
+   /**
+    * Scan packages for JSON subtypes. Useful for tests.
+    *
+    * @param json
+    *           JSON mapper to register subtypes (classes annotated with {@link JsonTypeName}) at.
+    * @param basePackages
+    *           Base packages to scan.
+    */
+   public static void scanForJsonSubtypes(ObjectMapper json, String... basePackages) {
+      PayloadTypeScanner scanner = new PayloadTypeScanner();
+      scanner.setJson(json);
+      scanner.setBasePackages(basePackages);
+      scanner.afterPropertiesSet();
+   }
 }

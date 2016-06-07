@@ -23,299 +23,303 @@ import com.s24.redjob.queue.worker.events.*;
  * Default implementation of {@link Worker}.
  */
 public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAware {
-    /**
-     * Log.
-     */
-    private static final Logger log = LoggerFactory.getLogger(WorkerImpl.class);
+   /**
+    * Log.
+    */
+   private static final Logger log = LoggerFactory.getLogger(WorkerImpl.class);
 
-    /**
-     * Queues to listen to.
-     */
-    private List<String> queues;
+   /**
+    * Queues to listen to.
+    */
+   private List<String> queues;
 
-    /**
-     * Queue dao.
-     */
-    private QueueDao queueDao;
+   /**
+    * Queue dao.
+    */
+   private QueueDao queueDao;
 
-    /**
-     * Worker dao.
-     */
-    private WorkerDao workerDao;
+   /**
+    * Worker dao.
+    */
+   private WorkerDao workerDao;
 
-    /**
-     * Sequence for worker ids.
-     */
-    private static final AtomicInteger IDS = new AtomicInteger();
+   /**
+    * Sequence for worker ids.
+    */
+   private static final AtomicInteger IDS = new AtomicInteger();
 
-    /**
-     * Worker id.
-     */
-    private int id;
+   /**
+    * Worker id.
+    */
+   private int id;
 
-    /**
-     * Name of this worker.
-     */
-    private String name;
+   /**
+    * Name of this worker.
+    */
+   private String name;
 
-    /**
-     * Factory for creating job runners.
-     */
-    private JobRunnerFactory jobRunnerFactory;
+   /**
+    * Factory for creating job runners.
+    */
+   private JobRunnerFactory jobRunnerFactory;
 
-    /**
-     * Default: Number of milliseconds the worker pauses, if none of the queues contained a job.
-     */
-    public static final int DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS = 500;
+   /**
+    * Default: Number of milliseconds the worker pauses, if none of the queues contained a job.
+    */
+   public static final int DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS = 500;
 
-    /**
-     * Number of milliseconds the worker pauses, if none of the queues contained a job.
-     * Defaults to {@value DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
-     */
-    private long emptyQueuesSleepMillis = DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS;
+   /**
+    * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
+    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    */
+   private long emptyQueuesSleepMillis = DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS;
 
-    /**
-     * Should worker run?. False stops this worker.
-     */
-    private AtomicBoolean run = new AtomicBoolean(true);
+   /**
+    * Should worker run?. False stops this worker.
+    */
+   private AtomicBoolean run = new AtomicBoolean(true);
 
-    /**
-     * Event bus.
-     */
-    private ApplicationEventPublisher eventBus;
+   /**
+    * Event bus.
+    */
+   private ApplicationEventPublisher eventBus;
 
-    /**
-     * Init.
-     */
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-        Assert.notEmpty(queues, "Precondition violated: queues not empty.");
-        Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
-        Assert.notNull(jobRunnerFactory, "Precondition violated: jobRunnerFactory != null.");
-        Assert.isTrue(emptyQueuesSleepMillis > 0, "Precondition violated: emptyQueuesSleepMillis > 0.");
-        Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
+   /**
+    * Init.
+    */
+   @PostConstruct
+   public void afterPropertiesSet() throws Exception {
+      Assert.notEmpty(queues, "Precondition violated: queues not empty.");
+      Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
+      Assert.notNull(jobRunnerFactory, "Precondition violated: jobRunnerFactory != null.");
+      Assert.isTrue(emptyQueuesSleepMillis > 0, "Precondition violated: emptyQueuesSleepMillis > 0.");
+      Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
-        id = IDS.incrementAndGet();
-        name = createName();
-    }
+      id = IDS.incrementAndGet();
+      name = createName();
+   }
 
-    /**
-     * Create name for this worker.
-     */
-    protected String createName() {
-        return ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
-                StringUtils.collectionToCommaDelimitedString(queues);
-    }
+   /**
+    * Create name for this worker.
+    */
+   protected String createName() {
+      return ManagementFactory.getRuntimeMXBean().getName() + ":" + id + ":" +
+            StringUtils.collectionToCommaDelimitedString(queues);
+   }
 
-    @Override
-    public int getId() {
-        return id;
-    }
+   @Override
+   public int getId() {
+      return id;
+   }
 
-    @Override
-    public String getName() {
-        return name;
-    }
+   @Override
+   public String getName() {
+      return name;
+   }
 
-    @Override
-    public void stop() {
-        run.set(false);
-    }
+   @Override
+   public void stop() {
+      run.set(false);
+   }
 
-    @Override
-    public void run() {
-        try {
-            workerDao.start(name);
-            eventBus.publishEvent(new WorkerStart(this));
-            poll();
-        } catch (Throwable t) {
-            log.error("Worker {}: Uncaught exception in worker. Worker stopped.", name, t);
-            eventBus.publishEvent(new WorkerError(this, t));
-        } finally {
-            eventBus.publishEvent(new WorkerStopped(this));
-            workerDao.stop(name);
-        }
-    }
+   @Override
+   public void run() {
+      try {
+         workerDao.start(name);
+         eventBus.publishEvent(new WorkerStart(this));
+         poll();
+      } catch (Throwable t) {
+         log.error("Worker {}: Uncaught exception in worker. Worker stopped.", name, t);
+         eventBus.publishEvent(new WorkerError(this, t));
+      } finally {
+         eventBus.publishEvent(new WorkerStopped(this));
+         workerDao.stop(name);
+      }
+   }
 
-    /**
-     * Main poll loop.
-     */
-    protected void poll() {
-        while (run.get()) {
-            try {
-                pollQueues();
-            } catch (InterruptedException e) {
-                log.debug("Worker {}: Thread has been interrupted.", name);
-            } catch (Throwable e) {
-                log.error("Worker {}: Polling for jobs failed.", name, e);
+   /**
+    * Main poll loop.
+    */
+   protected void poll() {
+      while (run.get()) {
+         try {
+            pollQueues();
+         } catch (InterruptedException e) {
+            log.debug("Worker {}: Thread has been interrupted.", name);
+         } catch (Throwable e) {
+            log.error("Worker {}: Polling for jobs failed.", name, e);
+         }
+      }
+   }
+
+   /**
+    * Poll all queues.
+    *
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected void pollQueues() throws Throwable {
+      for (String queue : queues) {
+         WorkerPoll workerPoll = new WorkerPoll(this, queue);
+         eventBus.publishEvent(workerPoll);
+         if (!workerPoll.isVeto()) {
+            Job job = queueDao.pop(queue, name);
+            if (job != null) {
+               execute(queue, job);
+               return;
             }
-        }
-    }
+         }
+      }
+      Thread.sleep(emptyQueuesSleepMillis);
+   }
 
-    /**
-     * Poll all queues.
-     *
-     * @throws Throwable In case of errors.
-     */
-    protected void pollQueues() throws Throwable {
-        for (String queue : queues) {
-            WorkerPoll workerPoll = new WorkerPoll(this, queue);
-            eventBus.publishEvent(workerPoll);
-            if (!workerPoll.isVeto()) {
-                Job job = queueDao.pop(queue, name);
-                if (job != null) {
-                    execute(queue, job);
-                    return;
-                }
-            }
-        }
-        Thread.sleep(emptyQueuesSleepMillis);
-    }
+   /**
+    * Execute job.
+    *
+    * @param queue
+    *           Name of queue.
+    * @param job
+    *           Job.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected void execute(String queue, Job job) throws Throwable {
+      Object payload = job.getPayload();
+      if (payload == null) {
+         log.error("Worker {}: Job {}: Missing payload.", name, job.getId());
+         throw new IllegalArgumentException("Missing payload.");
+      }
 
-    /**
-     * Execute job.
-     *
-     * @param queue Name of queue.
-     * @param job Job.
-     * @throws Throwable In case of errors.
-     */
-    protected void execute(String queue, Job job) throws Throwable {
-        Object payload = job.getPayload();
-        if (payload == null) {
-            log.error("Worker {}: Job {}: Missing payload.", name, job.getId());
-            throw new IllegalArgumentException("Missing payload.");
-        }
+      JobProcess jobProcess = new JobProcess(this, queue, payload);
+      eventBus.publishEvent(jobProcess);
+      if (jobProcess.isVeto()) {
+         eventBus.publishEvent(new JobSkipped(this, queue, payload, null));
+         return;
+      }
 
-        JobProcess jobProcess = new JobProcess(this, queue, payload);
-        eventBus.publishEvent(jobProcess);
-        if (jobProcess.isVeto()) {
-            eventBus.publishEvent(new JobSkipped(this, queue, payload, null));
-            return;
-        }
+      Runnable runner = jobRunnerFactory.runnerFor(payload);
+      if (runner == null) {
+         log.error("Worker {}: Job {}: No runner found.", name, job.getId());
+         throw new IllegalArgumentException("No runner found.");
+      }
+      JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
+      eventBus.publishEvent(jobExecute);
+      if (jobExecute.isVeto()) {
+         eventBus.publishEvent(new JobSkipped(this, queue, payload, runner));
+         return;
+      }
 
-        Runnable runner = jobRunnerFactory.runnerFor(payload);
-        if (runner == null) {
-            log.error("Worker {}: Job {}: No runner found.", name, job.getId());
-            throw new IllegalArgumentException("No runner found.");
-        }
-        JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
-        eventBus.publishEvent(jobExecute);
-        if (jobExecute.isVeto()) {
-            eventBus.publishEvent(new JobSkipped(this, queue, payload, runner));
-            return;
-        }
+      log.info("Worker {}: Job {}: Start.", name, job.getId());
+      try {
+         runner.run();
+         log.info("Worker {}: Job {}: Success.", name, job.getId());
+         workerDao.success(name);
+         eventBus.publishEvent(new JobSuccess(this, queue, payload, runner));
+      } catch (Throwable t) {
+         log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
+         workerDao.failure(name);
+         eventBus.publishEvent(new JobFailed(this, queue, payload, runner));
+         throw new IllegalArgumentException("Failed to execute.", t);
+      } finally {
+         log.info("Worker {}: Job {}: End.", name, job.getId());
+      }
+   }
 
-        log.info("Worker {}: Job {}: Start.", name, job.getId());
-        try {
-           runner.run();
-            log.info("Worker {}: Job {}: Success.", name, job.getId());
-            workerDao.success(name);
-            eventBus.publishEvent(new JobSuccess(this, queue, payload, runner));
-        } catch (Throwable t) {
-            log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
-            workerDao.failure(name);
-            eventBus.publishEvent(new JobFailed(this, queue, payload, runner));
-            throw new IllegalArgumentException("Failed to execute.", t);
-        } finally {
-            log.info("Worker {}: Job {}: End.", name, job.getId());
-        }
-    }
+   @Override
+   public boolean equals(Object o) {
+      return o instanceof Worker && id == ((Worker) o).getId();
+   }
 
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof Worker && id == ((Worker) o).getId();
-    }
+   @Override
+   public int hashCode() {
+      return id;
+   }
 
-    @Override
-    public int hashCode() {
-        return id;
-    }
+   //
+   // Injections.
+   //
 
-    //
-    // Injections.
-    //
+   /**
+    * Queues to listen to.
+    */
+   public List<String> getQueues() {
+      return queues;
+   }
 
-    /**
-     * Queues to listen to.
-     */
-    public List<String> getQueues() {
-        return queues;
-    }
+   /**
+    * Queues to listen to.
+    */
+   public void setQueues(String... queues) {
+      setQueues(Arrays.asList(queues));
+   }
 
-    /**
-     * Queues to listen to.
-     */
-    public void setQueues(String... queues) {
-        setQueues(Arrays.asList(queues));
-    }
+   /**
+    * Queues to listen to.
+    */
+   public void setQueues(List<String> queues) {
+      this.queues = queues;
+   }
 
-    /**
-     * Queues to listen to.
-     */
-    public void setQueues(List<String> queues) {
-        this.queues = queues;
-    }
+   /**
+    * Queue dao.
+    */
+   public QueueDao getQueueDao() {
+      return queueDao;
+   }
 
-    /**
-     * Queue dao.
-     */
-    public QueueDao getQueueDao() {
-        return queueDao;
-    }
+   /**
+    * Queue dao.
+    */
+   public void setQueueDao(QueueDao queueDao) {
+      this.queueDao = queueDao;
+   }
 
-    /**
-     * Queue dao.
-     */
-    public void setQueueDao(QueueDao queueDao) {
-        this.queueDao = queueDao;
-    }
+   /**
+    * Worker dao.
+    */
+   public WorkerDao getWorkerDao() {
+      return workerDao;
+   }
 
-    /**
-     * Worker dao.
-     */
-    public WorkerDao getWorkerDao() {
-        return workerDao;
-    }
+   /**
+    * Worker dao.
+    */
+   public void setWorkerDao(WorkerDao workerDao) {
+      this.workerDao = workerDao;
+   }
 
-    /**
-     * Worker dao.
-     */
-    public void setWorkerDao(WorkerDao workerDao) {
-        this.workerDao = workerDao;
-    }
+   /**
+    * Factory for creating job runners.
+    */
+   public JobRunnerFactory getJobRunnerFactory() {
+      return jobRunnerFactory;
+   }
 
-    /**
-     * Factory for creating job runners.
-     */
-    public JobRunnerFactory getJobRunnerFactory() {
-        return jobRunnerFactory;
-    }
+   /**
+    * Factory for creating job runners.
+    */
+   public void setJobRunnerFactory(JobRunnerFactory jobRunnerFactory) {
+      this.jobRunnerFactory = jobRunnerFactory;
+   }
 
-    /**
-     * Factory for creating job runners.
-     */
-    public void setJobRunnerFactory(JobRunnerFactory jobRunnerFactory) {
-        this.jobRunnerFactory = jobRunnerFactory;
-    }
+   /**
+    * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
+    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    */
+   public long getEmptyQueuesSleepMillis() {
+      return emptyQueuesSleepMillis;
+   }
 
-    /**
-     * Number of milliseconds the worker pauses, if none of the queues contained a job.
-     * Defaults to {@value DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
-     */
-    public long getEmptyQueuesSleepMillis() {
-        return emptyQueuesSleepMillis;
-    }
+   /**
+    * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
+    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    */
+   public void setEmptyQueuesSleepMillis(long emptyQueuesSleepMillis) {
+      this.emptyQueuesSleepMillis = emptyQueuesSleepMillis;
+   }
 
-    /**
-     * Number of milliseconds the worker pauses, if none of the queues contained a job.
-     * Defaults to {@value DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
-     */
-    public void setEmptyQueuesSleepMillis(long emptyQueuesSleepMillis) {
-        this.emptyQueuesSleepMillis = emptyQueuesSleepMillis;
-    }
-
-    @Override
-    public void setApplicationEventPublisher(ApplicationEventPublisher eventBus) {
-        this.eventBus = eventBus;
-    }
+   @Override
+   public void setApplicationEventPublisher(ApplicationEventPublisher eventBus) {
+      this.eventBus = eventBus;
+   }
 }

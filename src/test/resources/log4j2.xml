@@ -2,20 +2,20 @@
 <Configuration status="INFO">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%date{ISO8601}|%thread|%level|%class{1}#%method|%message%n" />
+            <PatternLayout pattern="%date{ISO8601}|%thread|%level|%class{1}#%method|%message%n"/>
         </Console>
     </Appenders>
 
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="Console" />
+            <AppenderRef ref="Console"/>
         </Root>
 
         <Logger name="org.hibernate" level="WARN" additivity="false">
-            <AppenderRef ref="Console" />
+            <AppenderRef ref="Console"/>
         </Logger>
         <Logger name="org.springframework" level="WARN" additivity="false">
-            <AppenderRef ref="Console" />
+            <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>
 </Configuration>

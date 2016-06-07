@@ -4,18 +4,18 @@ package com.s24.redjob.queue.worker;
  * Worker.
  */
 public interface Worker {
-    /**
-     * Local unique id of worker.
-     */
-    int getId();
+   /**
+    * Local unique id of worker.
+    */
+   int getId();
 
-    /**
-     * Name of worker.
-     */
-    String getName();
+   /**
+    * Name of worker.
+    */
+   String getName();
 
-    /**
-     * Stop worker.
-     */
-    void stop();
+   /**
+    * Stop worker.
+    */
+   void stop();
 }

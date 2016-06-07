@@ -6,23 +6,23 @@ import com.s24.redjob.queue.worker.Worker;
  * Worker finished execution of a job.
  */
 public interface JobFinished {
-    /**
-     * Worker.
-     */
-    Worker getWorker();
+   /**
+    * Worker.
+    */
+   Worker getWorker();
 
-    /**
-     * Queue.
-     */
-    String getQueue();
+   /**
+    * Queue.
+    */
+   String getQueue();
 
-    /**
-     * Job.
-     */
-    Object getJob();
+   /**
+    * Job.
+    */
+   Object getJob();
 
-    /**
-     * Job runner.
-     */
-    Runnable getRunner();
+   /**
+    * Job runner.
+    */
+   Runnable getRunner();
 }
