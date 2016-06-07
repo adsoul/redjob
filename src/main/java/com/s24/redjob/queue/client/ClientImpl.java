@@ -24,8 +24,8 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public long enqueue(String queue, Object payload, boolean front) {
-      return queueDao.enqueue(queue, payload, front);
+   public long enqueue(String queue, Object job, boolean front) {
+      return queueDao.enqueue(queue, job, front);
    }
 
    @Override

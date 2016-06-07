@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
 /**
- * Job stored as JSON into queue.
+ * Job execution. Stored as JSON in Redis.
  */
-public class Job {
+public class Execution {
    /**
     * Id of job.
     */
@@ -18,27 +18,27 @@ public class Job {
    private final long id;
 
    /**
-    * Payload.
+    * Job.
     */
-   @JsonProperty(value = "payload", required = true)
-   @JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "payloadType")
-   private final Object payload;
+   @JsonProperty(value = "job", required = true)
+   @JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "jobType")
+   private final Object job;
 
    /**
     * Constructor.
     *
     * @param id
     *           Id of job.
-    * @param payload
-    *           Payload.
+    * @param job
+    *           Job.
     */
-   public Job(
+   public Execution(
          @JsonProperty(value = "id", required = true) long id,
-         @JsonProperty(value = "payload", required = true) Object payload) {
-      Assert.notNull(payload, "Precondition violated: payload != null.");
+         @JsonProperty(value = "job", required = true) Object job) {
+      Assert.notNull(job, "Precondition violated: job != null.");
 
       this.id = id;
-      this.payload = payload;
+      this.job = job;
    }
 
    /**
@@ -49,9 +49,9 @@ public class Job {
    }
 
    /**
-    * Payload.
+    * Job.
     */
-   public Object getPayload() {
-      return payload;
+   public Object getJob() {
+      return job;
    }
 }

@@ -46,7 +46,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    /**
     * Redis serializer for jobs.
     */
-   private final Jackson2JsonRedisSerializer<Job> jobs = new Jackson2JsonRedisSerializer<>(Job.class);
+   private final Jackson2JsonRedisSerializer<Execution> jobs = new Jackson2JsonRedisSerializer<>(Execution.class);
 
    /**
     * Redis access.
@@ -74,14 +74,14 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    //
 
    @Override
-   public long enqueue(String queue, Object payload, boolean front) {
+   public long enqueue(String queue, Object job, boolean front) {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
-         Job job = new Job(id, payload);
+         Execution execution = new Execution(id, job);
 
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
-         connection.hSet(key(JOB, queue), idBytes, jobs.serialize(job));
+         connection.hSet(key(JOB, queue), idBytes, jobs.serialize(execution));
          if (front) {
             connection.lPush(key(QUEUE, queue), idBytes);
          } else {
@@ -107,7 +107,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    //
 
    @Override
-   public Job pop(String queue, String worker) {
+   public Execution pop(String queue, String worker) {
       return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = connection.lPop(key(QUEUE, queue));
          if (idBytes == null) {

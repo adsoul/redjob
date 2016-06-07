@@ -92,32 +92,32 @@ public class AdminWorkerImpl {
    /**
     * Execute job.
     *
-    * @param payload
+    * @param job
     *           Job.
     * @throws Throwable
     *            In case of errors.
     */
-   protected void execute(Object payload) throws Throwable {
-      if (payload == null) {
-         log.error("AdminWorker {}: Missing payload.", name);
-         throw new IllegalArgumentException("Missing payload.");
+   protected void execute(Object job) throws Throwable {
+      if (job == null) {
+         log.error("AdminWorker {}: Missing job.", name);
+         throw new IllegalArgumentException("Missing job.");
       }
 
-      Runnable runner = jobRunnerFactory.runnerFor(payload);
+      Runnable runner = jobRunnerFactory.runnerFor(job);
       if (runner == null) {
-         log.error("AdminWorker {}: Job {}: No runner found.", name, payload.getClass());
+         log.error("AdminWorker {}: Job {}: No runner found.", name, job.getClass());
          throw new IllegalArgumentException("No runner found.");
       }
 
-      log.info("AdminWorker {}: Job {}: Start.", name, payload.getClass());
+      log.info("AdminWorker {}: Job {}: Start.", name, job.getClass());
       try {
          runner.run();
-         log.info("AdminWorker {}: Job {}: Success.", name, payload.getClass());
+         log.info("AdminWorker {}: Job {}: Success.", name, job.getClass());
       } catch (Throwable t) {
-         log.error("AdminWorker {}: Job {}: Failed to execute.", name, payload.getClass(), t);
+         log.error("AdminWorker {}: Job {}: Failed to execute.", name, job.getClass(), t);
          throw new IllegalArgumentException("Failed to execute.", t);
       } finally {
-         log.info("AdminWorker {}: Job {}: End.", name, payload.getClass());
+         log.info("AdminWorker {}: Job {}: End.", name, job.getClass());
       }
    }
 

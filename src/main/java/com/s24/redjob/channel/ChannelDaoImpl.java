@@ -8,7 +8,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s24.redjob.AbstractDao;
-import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.Execution;
 import com.s24.redjob.queue.QueueDao;
 
 /**
@@ -28,7 +28,7 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    /**
     * Redis serializer for jobs.
     */
-   private final Jackson2JsonRedisSerializer<Job> jobs = new Jackson2JsonRedisSerializer<>(Job.class);
+   private final Jackson2JsonRedisSerializer<Execution> jobs = new Jackson2JsonRedisSerializer<>(Execution.class);
 
    /**
     * Redis access.
@@ -50,12 +50,12 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    }
 
    @Override
-   public void publish(String channel, Object payload) {
+   public void publish(String channel, Object job) {
       redis.execute((RedisConnection connection) -> {
          // Admin jobs do not use ids.
-         Job job = new Job(0, payload);
+         Execution execution = new Execution(0, job);
 
-         connection.publish(key(CHANNEL, channel), jobs.serialize(job));
+         connection.publish(key(CHANNEL, channel), jobs.serialize(execution));
 
          return null;
       });

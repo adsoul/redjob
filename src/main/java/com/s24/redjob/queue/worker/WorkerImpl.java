@@ -10,14 +10,23 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.queue.Job;
+import com.s24.redjob.queue.Execution;
 import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.queue.worker.events.*;
+import com.s24.redjob.queue.worker.events.JobExecute;
+import com.s24.redjob.queue.worker.events.JobFailed;
+import com.s24.redjob.queue.worker.events.JobProcess;
+import com.s24.redjob.queue.worker.events.JobSkipped;
+import com.s24.redjob.queue.worker.events.JobSuccess;
+import com.s24.redjob.queue.worker.events.WorkerError;
+import com.s24.redjob.queue.worker.events.WorkerPoll;
+import com.s24.redjob.queue.worker.events.WorkerStart;
+import com.s24.redjob.queue.worker.events.WorkerStopped;
 
 /**
  * Default implementation of {@link Worker}.
@@ -125,11 +134,12 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
    @Override
    public void run() {
       try {
+         MDC.put("worker", getName());
          workerDao.start(name);
          eventBus.publishEvent(new WorkerStart(this));
          poll();
       } catch (Throwable t) {
-         log.error("Worker {}: Uncaught exception in worker. Worker stopped.", name, t);
+         log.error("Uncaught exception in worker. Worker stopped.", name, t);
          eventBus.publishEvent(new WorkerError(this, t));
       } finally {
          eventBus.publishEvent(new WorkerStopped(this));
@@ -145,9 +155,9 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
          try {
             pollQueues();
          } catch (InterruptedException e) {
-            log.debug("Worker {}: Thread has been interrupted.", name);
+            log.debug("Thread has been interrupted.", name);
          } catch (Throwable e) {
-            log.error("Worker {}: Polling for jobs failed.", name, e);
+            log.error("Polling queues for jobs failed.", name, e);
          }
       }
    }
@@ -160,68 +170,125 @@ public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAw
     */
    protected void pollQueues() throws Throwable {
       for (String queue : queues) {
-         WorkerPoll workerPoll = new WorkerPoll(this, queue);
-         eventBus.publishEvent(workerPoll);
-         if (!workerPoll.isVeto()) {
-            Job job = queueDao.pop(queue, name);
-            if (job != null) {
-               execute(queue, job);
+         try {
+            MDC.put("queue", queue);
+            boolean executed = pollQueue(queue);
+            if (executed) {
+               // Start over with polling.
                return;
             }
+         } finally {
+            MDC.remove("queue");
          }
       }
       Thread.sleep(emptyQueuesSleepMillis);
    }
 
    /**
-    * Execute job.
+    * Poll the given queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @return Has a job been polled and executed?.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected boolean pollQueue(String queue) throws Throwable {
+      WorkerPoll workerPoll = new WorkerPoll(this, queue);
+      eventBus.publishEvent(workerPoll);
+      if (workerPoll.isVeto()) {
+         log.debug("Queue poll vetoed.");
+         return false;
+      }
+
+      Execution execution = queueDao.pop(queue, name);
+      if (execution == null) {
+         log.debug("Queue is empty.");
+         return false;
+      }
+
+      try {
+         MDC.put("execution", Long.toString(execution.getId()));
+         MDC.put("job", execution.getJob().getClass().getSimpleName());
+         process(queue, execution);
+         return true;
+
+      } finally {
+         MDC.remove("job");
+         MDC.remove("execution");
+      }
+   }
+
+   /**
+    * Process job.
     *
     * @param queue
     *           Name of queue.
-    * @param job
+    * @param execution
     *           Job.
     * @throws Throwable
     *            In case of errors.
     */
-   protected void execute(String queue, Job job) throws Throwable {
-      Object payload = job.getPayload();
-      if (payload == null) {
-         log.error("Worker {}: Job {}: Missing payload.", name, job.getId());
-         throw new IllegalArgumentException("Missing payload.");
+   protected void process(String queue, Execution execution) throws Throwable {
+      Object job = execution.getJob();
+      if (job == null) {
+         log.error("Missing job.");
+         throw new IllegalArgumentException("Missing job.");
       }
 
-      JobProcess jobProcess = new JobProcess(this, queue, payload);
+      JobProcess jobProcess = new JobProcess(this, queue, job);
       eventBus.publishEvent(jobProcess);
       if (jobProcess.isVeto()) {
-         eventBus.publishEvent(new JobSkipped(this, queue, payload, null));
+         log.debug("Job processing vetoed.");
+         eventBus.publishEvent(new JobSkipped(this, queue, job, null));
          return;
       }
 
-      Runnable runner = jobRunnerFactory.runnerFor(payload);
+      Runnable runner = jobRunnerFactory.runnerFor(job);
       if (runner == null) {
-         log.error("Worker {}: Job {}: No runner found.", name, job.getId());
-         throw new IllegalArgumentException("No runner found.");
+         log.error("No job runner found.", name);
+         throw new IllegalArgumentException("No job runner found.");
       }
-      JobExecute jobExecute = new JobExecute(this, queue, payload, runner);
+
+      execute(queue, execution, runner);
+   }
+
+   /**
+    * Process job.
+    *
+    * @param queue
+    *           Name of queue.
+    * @param execution
+    *           Job.
+    * @param runner
+    *           Job runner.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
+      Object job = execution.getJob();
+
+      JobExecute jobExecute = new JobExecute(this, queue, job, runner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
-         eventBus.publishEvent(new JobSkipped(this, queue, payload, runner));
+         log.debug("Job execution vetoed.");
+         eventBus.publishEvent(new JobSkipped(this, queue, job, runner));
          return;
       }
 
-      log.info("Worker {}: Job {}: Start.", name, job.getId());
+      log.info("Starting job.");
       try {
          runner.run();
-         log.info("Worker {}: Job {}: Success.", name, job.getId());
+         log.info("Job succeeded.");
          workerDao.success(name);
-         eventBus.publishEvent(new JobSuccess(this, queue, payload, runner));
+         eventBus.publishEvent(new JobSuccess(this, queue, job, runner));
       } catch (Throwable t) {
-         log.error("Worker {}: Job {}: Failed to execute.", name, job.getId(), t);
+         log.info("Job failed.", t);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, payload, runner));
-         throw new IllegalArgumentException("Failed to execute.", t);
+         eventBus.publishEvent(new JobFailed(this, queue, job, runner));
+         throw new IllegalArgumentException("Job failed.", t);
       } finally {
-         log.info("Worker {}: Job {}: End.", name, job.getId());
+         log.info("Job finished.", name, execution.getId());
       }
    }
 

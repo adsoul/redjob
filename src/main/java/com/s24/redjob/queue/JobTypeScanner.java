@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Scans the classpath and registers JSON subtypes (@link {@link JsonTypeName}) at a {@link ObjectMapper}.
  */
-public class PayloadTypeScanner extends AnnotatedTypeScanner {
+public class JobTypeScanner extends AnnotatedTypeScanner {
    /**
     * JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
     */
@@ -33,7 +33,7 @@ public class PayloadTypeScanner extends AnnotatedTypeScanner {
    /**
     * Constructor.
     */
-   public PayloadTypeScanner() {
+   public JobTypeScanner() {
       super(JsonTypeName.class);
    }
 

@@ -24,7 +24,7 @@ public class AdminClientImpl implements AdminClient {
    }
 
    @Override
-   public void publish(String channel, Object payload) {
+   public void publish(String channel, Object job) {
 
    }
 

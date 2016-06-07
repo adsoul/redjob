@@ -9,13 +9,13 @@ public interface Client {
     *
     * @param queue
     *           Queue name.
-    * @param payload
-    *           Payload.
+    * @param job
+    *           Job.
     * @param front
     *           Enqueue job at front of the queue, so that the job is the first to be executed?.
     * @return Id assigned to the job.
     */
-   long enqueue(String queue, Object payload, boolean front);
+   long enqueue(String queue, Object job, boolean front);
 
    /**
     * Dequeue the job with the given id from the given queue.

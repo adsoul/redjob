@@ -15,7 +15,7 @@ public class TestJobRunner implements Runnable {
    public static final String EXCEPTION = "exception";
 
    /**
-    * Payload
+    * Job.
     */
    private static volatile TestJob job;
 
@@ -61,7 +61,7 @@ public class TestJobRunner implements Runnable {
    }
 
    /**
-    * Payload.
+    * Job.
     */
    public static TestJob getJob() {
       return job;

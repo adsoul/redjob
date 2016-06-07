@@ -1,7 +1,9 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.*;
+import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,11 +35,11 @@ public class QueueDaoImplIT {
       long id = dao.enqueue(queue, new TestJob("value"), false);
       assertTrue(id > 0);
 
-      Job job = dao.pop(queue, "worker");
+      Execution execution = dao.pop(queue, "worker");
+      assertNotNull(execution);
+      assertEquals(id, execution.getId());
+      TestJob job = (TestJob) execution.getJob();
       assertNotNull(job);
-      assertEquals(id, job.getId());
-      TestJob payload = (TestJob) job.getPayload();
-      assertNotNull(payload);
-      assertEquals("value", payload.getValue());
+      assertEquals("value", job.getValue());
    }
 }

@@ -11,10 +11,10 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Test of {@link PayloadTypeScanner}.
+ * Test of {@link JobTypeScanner}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class PayloadTypeScannerTest {
+public class JobTypeScannerTest {
    /**
     * JSON mapper.
     */
@@ -61,7 +61,7 @@ public class PayloadTypeScannerTest {
     *           Base packages to scan.
     */
    public static void scanForJsonSubtypes(ObjectMapper json, String... basePackages) {
-      PayloadTypeScanner scanner = new PayloadTypeScanner();
+      JobTypeScanner scanner = new JobTypeScanner();
       scanner.setJson(json);
       scanner.setBasePackages(basePackages);
       scanner.afterPropertiesSet();

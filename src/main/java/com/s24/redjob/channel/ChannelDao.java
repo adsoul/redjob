@@ -9,8 +9,8 @@ public interface ChannelDao {
     *
     * @param channel
     *           Channel name.
-    * @param payload
-    *           Payload.
+    * @param job
+    *           Job.
     */
-   void publish(String channel, Object payload);
+   void publish(String channel, Object job);
 }

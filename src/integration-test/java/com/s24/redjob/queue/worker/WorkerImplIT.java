@@ -1,6 +1,6 @@
 package com.s24.redjob.queue.worker;
 
-import static com.s24.redjob.queue.PayloadTypeScannerTest.scanForJsonSubtypes;
+import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -15,7 +15,13 @@ import com.s24.redjob.queue.QueueDaoImpl;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
-import com.s24.redjob.queue.worker.events.*;
+import com.s24.redjob.queue.worker.events.JobExecute;
+import com.s24.redjob.queue.worker.events.JobFailed;
+import com.s24.redjob.queue.worker.events.JobProcess;
+import com.s24.redjob.queue.worker.events.JobSuccess;
+import com.s24.redjob.queue.worker.events.WorkerPoll;
+import com.s24.redjob.queue.worker.events.WorkerStart;
+import com.s24.redjob.queue.worker.events.WorkerStopped;
 
 /**
  * Integration test for {@link WorkerImpl}.
