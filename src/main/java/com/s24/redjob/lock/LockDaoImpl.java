@@ -1,9 +1,10 @@
 package com.s24.redjob.lock;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.AbstractDao;
@@ -20,15 +21,14 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
    /**
     * Redis access.
     */
-   private RedisTemplate<String, ?> redis;
+   private StringRedisTemplate redis;
 
    @Override
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
 
-      redis = new RedisTemplate<>();
+      redis = new StringRedisTemplate();
       redis.setConnectionFactory(connectionFactory);
-      redis.setKeySerializer(strings);
       redis.afterPropertiesSet();
    }
 
@@ -73,8 +73,8 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
       // Try to extend existing lock.
-      if (value.equals(connection.get(key))) {
-         if (connection.expire(key, timeout) && value.equals(connection.get(key))) {
+      if (Arrays.equals(value, connection.get(key))) {
+         if (connection.expire(key, timeout) && Arrays.equals(value, connection.get(key))) {
             // Expiration has successfully been set and we are the new holder -> We got the lock.
             return true;
          }
@@ -91,7 +91,7 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       }
 
       // Lock has successfully been acquired if we are finally the new holder.
-      return value.equals(connection.get(key));
+      return Arrays.equals(value, connection.get(key));
    }
 
    @Override
