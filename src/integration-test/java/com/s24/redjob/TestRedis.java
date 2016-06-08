@@ -5,7 +5,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import redis.clients.jedis.JedisShardInfo;
+import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * Creates connection factories for the integration test Redis.
@@ -15,10 +15,22 @@ public class TestRedis {
     * Connection factory for the integration test Redis.
     */
    public static RedisConnectionFactory connectionFactory() {
-      JedisShardInfo shard = new JedisShardInfo("localhost", 16379);
-      return new JedisConnectionFactory(shard);
+      JedisPoolConfig pool = new JedisPoolConfig();
+      pool.setMaxTotal(100);
+
+      JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
+      connectionFactory.setHostName("localhost");
+      connectionFactory.setPort(16379);
+      connectionFactory.setDatabase(0);
+      connectionFactory.setPoolConfig(pool);
+      connectionFactory.afterPropertiesSet();
+
+      return connectionFactory;
    }
 
+   /**
+    * Remove all keys from the given Redis database.
+    */
    public static void flushDb(RedisConnectionFactory connectionFactory) {
       RedisTemplate<?, ?> redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
