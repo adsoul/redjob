@@ -11,7 +11,7 @@ import com.s24.redjob.AbstractDao;
 /**
  * Default implementation of {@link LockDao}.
  */
-public class LockDaoImpl extends AbstractDao {
+public class LockDaoImpl extends AbstractDao implements LockDao {
    /**
     * Redis key part for locks.
     */
@@ -32,19 +32,7 @@ public class LockDaoImpl extends AbstractDao {
       redis.afterPropertiesSet();
    }
 
-   /**
-    * Try to acquire a lock.
-    *
-    * @param lock
-    *           Name of the lock.
-    * @param holder
-    *           Holder for the lock.
-    * @param timeout
-    *           Timeout for the lock. Should be >= 100 ms.
-    * @param unit
-    *           Unit of the timeout.
-    * @return Lock has been acquired.
-    */
+   @Override
    public boolean tryLock(final String lock, final String holder, final int timeout, final TimeUnit unit) {
       Assert.notNull(lock, "Pre-condition violated: lock != null.");
       Assert.notNull(holder, "Pre-condition violated: holder != null.");
@@ -106,14 +94,7 @@ public class LockDaoImpl extends AbstractDao {
       return value.equals(connection.get(key));
    }
 
-   /**
-    * Release a lock.
-    *
-    * @param lock
-    *           Name of the lock.
-    * @param holder
-    *           Holder for the lock.
-    */
+   @Override
    public void releaseLock(final String lock, final String holder) {
       Assert.notNull(lock, "Pre-condition violated: lock != null.");
       Assert.notNull(holder, "Pre-condition violated: holder != null.");
