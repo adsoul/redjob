@@ -26,7 +26,7 @@ import com.s24.redjob.worker.events.WorkerStopped;
 /**
  * {@link Worker} for channels (admin jobs).
  */
-public class AdminWorker extends AbstractWorker {
+public class ChannelWorker extends AbstractWorker {
    /**
     * Channels to listen to.
     */
@@ -90,7 +90,7 @@ public class AdminWorker extends AbstractWorker {
          process(channel, execution);
 
       } catch (Throwable t) {
-         log.error("Uncaught exception in worker. Worker stopped.", name, t);
+         log.error("Uncaught exception in worker.", name, t);
          eventBus.publishEvent(new WorkerError(this, t));
 
       } finally {
@@ -145,5 +145,19 @@ public class AdminWorker extends AbstractWorker {
     */
    public void setChannelDao(ChannelDao channelDao) {
       this.channelDao = channelDao;
+   }
+
+   /**
+    * Message listener container.
+    */
+   public RedisMessageListenerContainer getListenerContainer() {
+      return listenerContainer;
+   }
+
+   /**
+    * Message listener container.
+    */
+   public void setListenerContainer(RedisMessageListenerContainer listenerContainer) {
+      this.listenerContainer = listenerContainer;
    }
 }
