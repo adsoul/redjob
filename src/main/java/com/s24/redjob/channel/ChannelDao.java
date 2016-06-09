@@ -1,6 +1,7 @@
 package com.s24.redjob.channel;
 
 import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.listener.Topic;
 
 import com.s24.redjob.worker.Execution;
 
@@ -17,6 +18,14 @@ public interface ChannelDao {
     *           Job.
     */
    Execution publish(String channel, Object job);
+
+   /**
+    * Create channel topic.
+    *
+    * @param channel
+    *           Channel name.
+    */
+   Topic getTopic(String channel);
 
    /**
     * Extract channel from channel message.

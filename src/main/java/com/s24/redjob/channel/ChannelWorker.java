@@ -10,7 +10,6 @@ import javax.annotation.PreDestroy;
 import org.slf4j.MDC;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.Topic;
 import org.springframework.util.Assert;
@@ -30,7 +29,7 @@ public class ChannelWorker extends AbstractWorker {
    /**
     * Channels to listen to.
     */
-   private List<Topic> channels;
+   private List<String> channels;
 
    /**
     * Channel dao.
@@ -54,12 +53,19 @@ public class ChannelWorker extends AbstractWorker {
 
       super.afterPropertiesSet();
 
+      List<Topic> topics = channels.stream().map(channelDao::getTopic).collect(Collectors.toList());
+      synchronized (listenerContainer) {
+         listenerContainer.addMessageListener(listener, topics);
+      }
+
       workerDao.start(name);
       eventBus.publishEvent(new WorkerStart(this));
+   }
 
-      synchronized (listenerContainer) {
-         listenerContainer.addMessageListener(listener, channels);
-      }
+   @Override
+   public void stop() {
+      super.stop();
+      destroy();
    }
 
    @PreDestroy
@@ -70,7 +76,6 @@ public class ChannelWorker extends AbstractWorker {
 
       eventBus.publishEvent(new WorkerStopped(this));
       workerDao.stop(name);
-
    }
 
    /**
@@ -118,7 +123,7 @@ public class ChannelWorker extends AbstractWorker {
    /**
     * Channels to listen to.
     */
-   public List<Topic> getChannels() {
+   public List<String> getChannels() {
       return channels;
    }
 
@@ -133,7 +138,7 @@ public class ChannelWorker extends AbstractWorker {
     * Channels to listen to.
     */
    public void setChannels(List<String> channels) {
-      this.channels = channels.stream().map(ChannelTopic::new).collect(Collectors.toList());
+      this.channels = channels;
    }
 
    /**

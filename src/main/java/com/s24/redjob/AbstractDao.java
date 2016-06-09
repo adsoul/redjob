@@ -54,7 +54,18 @@ public class AbstractDao {
     */
    protected byte[] key(String... parts) {
       Assert.notEmpty(parts, "Precondition violated: parts are not empty.");
-      return strings.serialize(Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", "")));
+      return strings.serialize(keyString(parts));
+   }
+
+   /**
+    * Construct Redis key name. Created by joining the namespace and the parts together with ':'.
+    *
+    * @param parts
+    *           Parts of the key name.
+    */
+   protected String keyString(String... parts) {
+      Assert.notEmpty(parts, "Precondition violated: parts are not empty.");
+      return Arrays.stream(parts).collect(Collectors.joining(":", namespace + ":", ""));
    }
 
    /**

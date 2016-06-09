@@ -5,12 +5,12 @@ import javax.annotation.PostConstruct;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.listener.ChannelTopic;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.queue.QueueDao;
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
  * Default implementation of {@link QueueDao}.
@@ -22,14 +22,9 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    public static final String CHANNEL = "channel";
 
    /**
-    * JSON mapper.
-    */
-   private ObjectMapper json = new ObjectMapper();
-
-   /**
     * Redis serializer for job executions.
     */
-   private final Jackson2JsonRedisSerializer<Execution> executions = new Jackson2JsonRedisSerializer<>(Execution.class);
+   private ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
 
    /**
     * Redis access.
@@ -40,8 +35,6 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    @PostConstruct
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
-
-      executions.setObjectMapper(json);
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
@@ -63,8 +56,14 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    }
 
    @Override
+   public ChannelTopic getTopic(String channel) {
+      return new ChannelTopic(keyString(CHANNEL, channel));
+   }
+
+   @Override
    public String getChannel(Message message) {
-      return strings.deserialize(message.getChannel());
+      String channel = strings.deserialize(message.getChannel());
+      return channel.substring(channel.lastIndexOf(":") + 1);
    }
 
    @Override
@@ -77,16 +76,16 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    //
 
    /**
-    * JSON mapper.
+    * Redis serializer for job executions.
     */
-   public ObjectMapper getJson() {
-      return json;
+   public ExecutionRedisSerializer getExecutions() {
+      return executions;
    }
 
    /**
-    * JSON mapper.
+    * Redis serializer for job executions.
     */
-   public void setJson(ObjectMapper json) {
-      this.json = json;
+   public void setExecutions(ExecutionRedisSerializer executions) {
+      this.executions = executions;
    }
 }
