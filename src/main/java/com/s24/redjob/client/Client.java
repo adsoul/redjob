@@ -13,6 +13,19 @@ public interface Client {
     *           Queue name.
     * @param job
     *           Job.
+    * @return Id assigned to the job.
+    */
+   default long enqueue(String queue, Object job) {
+      return enqueue(queue, job, false);
+   }
+
+   /**
+    * Enqueue the given job to the given queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @param job
+    *           Job.
     * @param front
     *           Enqueue job at front of the queue, so that the job is the first to be executed?.
     * @return Id assigned to the job.
