@@ -17,7 +17,7 @@ public interface QueueDao {
     *           Enqueue job at front of the queue, so that the job is the first to be executed?.
     * @return Id assigned to the job.
     */
-   long enqueue(String queue, Object job, boolean front);
+   Execution enqueue(String queue, Object job, boolean front);
 
    /**
     * Dequeue the job with the given id from the given queue.

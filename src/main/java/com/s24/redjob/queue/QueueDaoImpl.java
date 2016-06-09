@@ -75,7 +75,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    //
 
    @Override
-   public long enqueue(String queue, Object job, boolean front) {
+   public Execution enqueue(String queue, Object job, boolean front) {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
          Execution execution = new Execution(id, job);
@@ -89,7 +89,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
             connection.rPush(key(QUEUE, queue), idBytes);
          }
 
-         return id;
+         return execution;
       });
    }
 

@@ -51,17 +51,17 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    }
 
    @Override
-   public void publish(String channel, Object job) {
-      redis.execute((RedisConnection connection) -> {
+   public Execution publish(String channel, Object job) {
+      return redis.execute((RedisConnection connection) -> {
          // Admin jobs do not use ids.
          Execution execution = new Execution(0, job);
 
          connection.publish(key(CHANNEL, channel), executions.serialize(execution));
 
-         return null;
+         return execution;
       });
    }
-   
+
    @Override
    public String getChannel(Message message) {
       return strings.deserialize(message.getChannel());

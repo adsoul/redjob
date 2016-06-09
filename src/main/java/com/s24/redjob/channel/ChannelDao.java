@@ -16,7 +16,7 @@ public interface ChannelDao {
     * @param job
     *           Job.
     */
-   void publish(String channel, Object job);
+   Execution publish(String channel, Object job);
 
    /**
     * Extract channel from channel message.

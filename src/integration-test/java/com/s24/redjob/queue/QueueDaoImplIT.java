@@ -33,7 +33,7 @@ public class QueueDaoImplIT {
    public void enqueue() {
       String queue = "test";
 
-      long id = dao.enqueue(queue, new TestJob("value"), false);
+      long id = dao.enqueue(queue, new TestJob("value"), false).getId();
       assertTrue(id > 0);
 
       Execution execution = dao.pop(queue, "worker");

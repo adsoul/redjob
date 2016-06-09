@@ -49,8 +49,9 @@ public interface Client {
     *           Channel name.
     * @param job
     *           Job.
+    * @return Id assigned to the job.
     */
-   void publish(String channel, Object job);
+   long publish(String channel, Object job);
 
    /**
     * Try to acquire a lock.

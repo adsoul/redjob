@@ -41,7 +41,7 @@ public class ClientImpl implements Client {
 
    @Override
    public long enqueue(String queue, Object job, boolean front) {
-      return queueDao.enqueue(queue, job, front);
+      return queueDao.enqueue(queue, job, front).getId();
    }
 
    @Override
@@ -50,8 +50,8 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public void publish(String channel, Object job) {
-      channelDao.publish(channel, job);
+   public long publish(String channel, Object job) {
+      return channelDao.publish(channel, job).getId();
    }
 
    @Override
