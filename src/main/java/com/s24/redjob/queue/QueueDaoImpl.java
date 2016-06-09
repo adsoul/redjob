@@ -45,9 +45,9 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    private ObjectMapper json = new ObjectMapper();
 
    /**
-    * Redis serializer for jobs.
+    * Redis serializer for job executions.
     */
-   private final Jackson2JsonRedisSerializer<Execution> jobs = new Jackson2JsonRedisSerializer<>(Execution.class);
+   private final Jackson2JsonRedisSerializer<Execution> executions = new Jackson2JsonRedisSerializer<>(Execution.class);
 
    /**
     * Redis access.
@@ -59,14 +59,14 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
 
-      jobs.setObjectMapper(json);
+      executions.setObjectMapper(json);
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
       redis.setKeySerializer(strings);
       redis.setValueSerializer(strings);
       redis.setHashKeySerializer(strings);
-      redis.setHashValueSerializer(jobs);
+      redis.setHashValueSerializer(executions);
       redis.afterPropertiesSet();
    }
 
@@ -82,7 +82,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
 
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
-         connection.hSet(key(JOB, queue), idBytes, jobs.serialize(execution));
+         connection.hSet(key(JOB, queue), idBytes, executions.serialize(execution));
          if (front) {
             connection.lPush(key(QUEUE, queue), idBytes);
          } else {
@@ -121,7 +121,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
             return null;
          }
 
-         return jobs.deserialize(jobBytes);
+         return executions.deserialize(jobBytes);
       });
    }
 

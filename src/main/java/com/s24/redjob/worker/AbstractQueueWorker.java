@@ -15,9 +15,9 @@ import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 
 /**
- * Default implementation of {@link Worker} for queues.
+ * Base implementation of {@link Worker} for queues.
  */
-public abstract class AbstractQueueWorker extends AbstractWorker {
+public abstract class AbstractQueueWorker extends AbstractWorker implements Runnable {
    /**
     * Queues to listen to.
     */

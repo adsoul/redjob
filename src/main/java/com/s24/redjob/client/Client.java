@@ -43,6 +43,16 @@ public interface Client {
    void dequeue(String queue, long id);
 
    /**
+    * Publish the given job to the given channel.
+    *
+    * @param channel
+    *           Channel name.
+    * @param job
+    *           Job.
+    */
+   void publish(String channel, Object job);
+
+   /**
     * Try to acquire a lock.
     *
     * @param lock

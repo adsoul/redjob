@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.util.Assert;
 
+import com.s24.redjob.channel.ChannelDao;
 import com.s24.redjob.lock.LockDao;
 import com.s24.redjob.queue.QueueDao;
 
@@ -19,6 +20,11 @@ public class ClientImpl implements Client {
    private QueueDao queueDao;
 
    /**
+    * Channel dao.
+    */
+   private ChannelDao channelDao;
+
+   /**
     * Lock dao.
     */
    private LockDao lockDao;
@@ -29,6 +35,7 @@ public class ClientImpl implements Client {
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
+      Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
       Assert.notNull(lockDao, "Precondition violated: lockDao != null.");
    }
 
@@ -40,6 +47,11 @@ public class ClientImpl implements Client {
    @Override
    public void dequeue(String queue, long id) {
       queueDao.dequeue(queue, id);
+   }
+
+   @Override
+   public void publish(String channel, Object job) {
+      channelDao.publish(channel, job);
    }
 
    @Override
@@ -68,6 +80,20 @@ public class ClientImpl implements Client {
     */
    public void setQueueDao(QueueDao queueDao) {
       this.queueDao = queueDao;
+   }
+
+   /**
+    * Channel dao.
+    */
+   public ChannelDao getChannelDao() {
+      return channelDao;
+   }
+
+   /**
+    * Channel dao.
+    */
+   public void setChannelDao(ChannelDao channelDao) {
+      this.channelDao = channelDao;
    }
 
    /**

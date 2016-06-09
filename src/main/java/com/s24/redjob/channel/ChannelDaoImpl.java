@@ -2,6 +2,7 @@ package com.s24.redjob.channel;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -26,9 +27,9 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    private ObjectMapper json = new ObjectMapper();
 
    /**
-    * Redis serializer for jobs.
+    * Redis serializer for job executions.
     */
-   private final Jackson2JsonRedisSerializer<Execution> jobs = new Jackson2JsonRedisSerializer<>(Execution.class);
+   private final Jackson2JsonRedisSerializer<Execution> executions = new Jackson2JsonRedisSerializer<>(Execution.class);
 
    /**
     * Redis access.
@@ -40,12 +41,12 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
 
-      jobs.setObjectMapper(json);
+      executions.setObjectMapper(json);
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
       redis.setKeySerializer(strings);
-      redis.setValueSerializer(jobs);
+      redis.setValueSerializer(executions);
       redis.afterPropertiesSet();
    }
 
@@ -55,10 +56,20 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
          // Admin jobs do not use ids.
          Execution execution = new Execution(0, job);
 
-         connection.publish(key(CHANNEL, channel), jobs.serialize(execution));
+         connection.publish(key(CHANNEL, channel), executions.serialize(execution));
 
          return null;
       });
+   }
+   
+   @Override
+   public String getChannel(Message message) {
+      return strings.deserialize(message.getChannel());
+   }
+
+   @Override
+   public Execution getExecution(Message message) {
+      return executions.deserialize(message.getBody());
    }
 
    //

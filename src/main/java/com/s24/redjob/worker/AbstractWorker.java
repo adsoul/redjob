@@ -19,9 +19,9 @@ import com.s24.redjob.worker.events.JobSkipped;
 import com.s24.redjob.worker.events.JobSuccess;
 
 /**
- * Default implementation of {@link Worker}.
+ * Base implementation of {@link Worker}.
  */
-public abstract class AbstractWorker implements Worker, Runnable, ApplicationEventPublisherAware {
+public abstract class AbstractWorker implements Worker, ApplicationEventPublisherAware {
    /**
     * Log.
     */
