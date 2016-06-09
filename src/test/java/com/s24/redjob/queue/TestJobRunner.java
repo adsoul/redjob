@@ -45,6 +45,13 @@ public class TestJobRunner implements Runnable {
 
    @Override
    public void run() {
+      try {
+         // Simulate execution of job...
+         Thread.sleep(100);
+      } catch (InterruptedException e) {
+         // ignore
+      }
+
       latch.countDown();
       if (EXCEPTION.equals(job.getValue())) {
          throw new Error("exception");

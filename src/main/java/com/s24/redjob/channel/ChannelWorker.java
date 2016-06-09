@@ -2,6 +2,8 @@ package com.s24.redjob.channel;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -46,6 +48,11 @@ public class ChannelWorker extends AbstractWorker {
     */
    private final MessageListener listener = this::receive;
 
+   /**
+    * Monitor active jobs.
+    */
+   private final ReadWriteLock active = new ReentrantReadWriteLock();
+
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(channels, "Precondition violated: channels != null.");
@@ -74,8 +81,14 @@ public class ChannelWorker extends AbstractWorker {
          listenerContainer.removeMessageListener(listener);
       }
 
-      eventBus.publishEvent(new WorkerStopped(this));
-      workerDao.stop(name);
+      // Wait for jobs to finish.
+      try {
+         active.writeLock().lock();
+         eventBus.publishEvent(new WorkerStopped(this));
+         workerDao.stop(name);
+      } finally {
+         active.writeLock().unlock();
+      }
    }
 
    /**
@@ -88,6 +101,8 @@ public class ChannelWorker extends AbstractWorker {
     */
    private void receive(Message message, byte[] pattern) {
       try {
+         active.readLock().lock();
+
          MDC.put("worker", getName());
          String channel = channelDao.getChannel(message);
          MDC.put("queue", channel);
@@ -102,6 +117,8 @@ public class ChannelWorker extends AbstractWorker {
          eventBus.publishEvent(new WorkerError(this, t));
 
       } finally {
+         active.readLock().unlock();
+
          MDC.remove("job");
          MDC.remove("execution");
          MDC.remove("queue");
