@@ -1,4 +1,4 @@
-package com.s24.redjob.queue.worker;
+package com.s24.redjob.worker;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;

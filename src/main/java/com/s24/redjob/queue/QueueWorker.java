@@ -1,4 +1,4 @@
-package com.s24.redjob.queue.worker;
+package com.s24.redjob.queue;
 
 import java.lang.management.ManagementFactory;
 import java.util.Arrays;
@@ -16,26 +16,28 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.queue.Execution;
-import com.s24.redjob.queue.QueueDao;
-import com.s24.redjob.queue.worker.events.JobExecute;
-import com.s24.redjob.queue.worker.events.JobFailed;
-import com.s24.redjob.queue.worker.events.JobProcess;
-import com.s24.redjob.queue.worker.events.JobSkipped;
-import com.s24.redjob.queue.worker.events.JobSuccess;
-import com.s24.redjob.queue.worker.events.WorkerError;
-import com.s24.redjob.queue.worker.events.WorkerPoll;
-import com.s24.redjob.queue.worker.events.WorkerStart;
-import com.s24.redjob.queue.worker.events.WorkerStopped;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.JobRunnerFactory;
+import com.s24.redjob.worker.Worker;
+import com.s24.redjob.worker.WorkerDao;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerError;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
 
 /**
  * Default implementation of {@link Worker}.
  */
-public class WorkerImpl implements Worker, Runnable, ApplicationEventPublisherAware {
+public class QueueWorker implements Worker, Runnable, ApplicationEventPublisherAware {
    /**
     * Log.
     */
-   private static final Logger log = LoggerFactory.getLogger(WorkerImpl.class);
+   private static final Logger log = LoggerFactory.getLogger(QueueWorker.class);
 
    /**
     * Queues to listen to.

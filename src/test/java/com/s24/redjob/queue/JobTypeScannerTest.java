@@ -9,6 +9,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.s24.redjob.worker.JobTypeScanner;
 
 /**
  * Test of {@link JobTypeScanner}.

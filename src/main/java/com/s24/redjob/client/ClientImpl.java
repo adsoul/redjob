@@ -1,9 +1,12 @@
-package com.s24.redjob.queue.client;
+package com.s24.redjob.client;
+
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.util.Assert;
 
+import com.s24.redjob.lock.LockDao;
 import com.s24.redjob.queue.QueueDao;
 
 /**
@@ -16,11 +19,17 @@ public class ClientImpl implements Client {
    private QueueDao queueDao;
 
    /**
+    * Lock dao.
+    */
+   private LockDao lockDao;
+
+   /**
     * Init.
     */
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
+      Assert.notNull(lockDao, "Precondition violated: lockDao != null.");
    }
 
    @Override
@@ -31,6 +40,16 @@ public class ClientImpl implements Client {
    @Override
    public void dequeue(String queue, long id) {
       queueDao.dequeue(queue, id);
+   }
+
+   @Override
+   public boolean tryLock(String lock, String holder, int timeout, TimeUnit unit) {
+      return lockDao.tryLock(lock, holder, timeout, unit);
+   }
+
+   @Override
+   public void releaseLock(String lock, String holder) {
+      lockDao.releaseLock(lock, holder);
    }
 
    //
@@ -49,5 +68,19 @@ public class ClientImpl implements Client {
     */
    public void setQueueDao(QueueDao queueDao) {
       this.queueDao = queueDao;
+   }
+
+   /**
+    * Lock dao.
+    */
+   public LockDao getLockDao() {
+      return lockDao;
+   }
+
+   /**
+    * Lock dao.
+    */
+   public void setLockDao(LockDao lockDao) {
+      this.lockDao = lockDao;
    }
 }

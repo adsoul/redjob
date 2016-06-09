@@ -1,4 +1,4 @@
-package com.s24.redjob.queue.worker;
+package com.s24.redjob.worker;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

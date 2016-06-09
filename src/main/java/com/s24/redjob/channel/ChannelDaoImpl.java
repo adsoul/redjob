@@ -8,8 +8,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s24.redjob.AbstractDao;
-import com.s24.redjob.queue.Execution;
 import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.worker.Execution;
 
 /**
  * Default implementation of {@link QueueDao}.

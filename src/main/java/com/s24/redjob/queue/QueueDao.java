@@ -1,5 +1,7 @@
 package com.s24.redjob.queue;
 
+import com.s24.redjob.worker.Execution;
+
 /**
  * DAO for accessing job queues.
  */

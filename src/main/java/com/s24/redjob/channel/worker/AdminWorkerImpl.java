@@ -17,8 +17,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.s24.redjob.channel.ChannelDao;
-import com.s24.redjob.queue.Execution;
-import com.s24.redjob.queue.worker.JobRunnerFactory;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.JobRunnerFactory;
 
 /**
  * Default implementation of {@link AdminWorker}.

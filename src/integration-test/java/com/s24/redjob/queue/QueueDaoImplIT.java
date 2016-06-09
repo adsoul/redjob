@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.s24.redjob.TestRedis;
+import com.s24.redjob.worker.Execution;
 
 /**
  * Integration test for {@link QueueDaoImpl}.

@@ -1,4 +1,4 @@
-package com.s24.redjob.queue.worker;
+package com.s24.redjob.worker;
 
 /**
  * Interface for factories creating job runners.

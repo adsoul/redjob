@@ -1,4 +1,4 @@
-package com.s24.redjob.queue;
+package com.s24.redjob.worker;
 
 import org.springframework.util.Assert;
 

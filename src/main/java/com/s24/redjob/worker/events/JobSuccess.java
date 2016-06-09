@@ -1,11 +1,11 @@
-package com.s24.redjob.queue.worker.events;
+package com.s24.redjob.worker.events;
 
 import java.util.Objects;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.queue.worker.Worker;
+import com.s24.redjob.worker.Worker;
 
 /**
  * Worker successfully executed a job.

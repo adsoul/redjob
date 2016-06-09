@@ -12,19 +12,21 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.QueueDaoImpl;
+import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
-import com.s24.redjob.queue.worker.events.JobExecute;
-import com.s24.redjob.queue.worker.events.JobFailed;
-import com.s24.redjob.queue.worker.events.JobProcess;
-import com.s24.redjob.queue.worker.events.JobSuccess;
-import com.s24.redjob.queue.worker.events.WorkerPoll;
-import com.s24.redjob.queue.worker.events.WorkerStart;
-import com.s24.redjob.queue.worker.events.WorkerStopped;
+import com.s24.redjob.worker.WorkerDaoImpl;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
 
 /**
- * Integration test for {@link WorkerImpl}.
+ * Integration test for {@link QueueWorker}.
  */
 public class WorkerImplIT {
    /**
@@ -45,7 +47,7 @@ public class WorkerImplIT {
    /**
     * Worker under test.
     */
-   private WorkerImpl worker = new WorkerImpl();
+   private QueueWorker worker = new QueueWorker();
 
    /**
     * Worker thread.
