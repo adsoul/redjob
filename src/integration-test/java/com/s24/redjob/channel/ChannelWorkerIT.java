@@ -86,7 +86,7 @@ public class ChannelWorkerIT {
 
    @Test
    public void test() throws Exception {
-      TestJob job = new TestJob("ping");
+      TestJob job = new TestJob();
       TestJobRunner runner = new TestJobRunner(job);
 
       assertEquals(new WorkerStart(channelWorker), eventBus.waitForEvent());

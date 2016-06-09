@@ -85,7 +85,7 @@ public class WorkerImplIT {
 
    @Test
    public void testLifecycle() throws Exception {
-      TestJob job = new TestJob("worker");
+      TestJob job = new TestJob();
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());

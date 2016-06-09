@@ -1,5 +1,7 @@
 package com.s24.redjob.queue;
 
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -13,6 +15,13 @@ public class TestJob {
     */
    @JsonProperty("value")
    private String value;
+
+   /**
+    * Constructor using a random value.
+    */
+   public TestJob() {
+      this(UUID.randomUUID().toString());
+   }
 
    /**
     * Constructor.
