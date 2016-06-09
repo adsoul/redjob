@@ -4,11 +4,10 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
  * Default implementation of {@link QueueDao}.
@@ -40,14 +39,9 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    public static final String INFLIGHT = "inflight";
 
    /**
-    * JSON mapper.
-    */
-   private ObjectMapper json = new ObjectMapper();
-
-   /**
     * Redis serializer for job executions.
     */
-   private final Jackson2JsonRedisSerializer<Execution> executions = new Jackson2JsonRedisSerializer<>(Execution.class);
+   private ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
 
    /**
     * Redis access.
@@ -58,8 +52,6 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    @PostConstruct
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
-
-      executions.setObjectMapper(json);
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
@@ -149,16 +141,16 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    //
 
    /**
-    * JSON mapper.
+    * Redis serializer for job executions.
     */
-   public ObjectMapper getJson() {
-      return json;
+   public ExecutionRedisSerializer getExecutions() {
+      return executions;
    }
 
    /**
-    * JSON mapper.
+    * Redis serializer for job executions.
     */
-   public void setJson(ObjectMapper json) {
-      this.json = json;
+   public void setExecutions(ExecutionRedisSerializer executions) {
+      this.executions = executions;
    }
 }

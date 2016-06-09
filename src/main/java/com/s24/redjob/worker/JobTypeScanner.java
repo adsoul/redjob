@@ -2,6 +2,8 @@ package com.s24.redjob.worker;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.util.Assert;
 
@@ -13,9 +15,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JobTypeScanner extends AnnotatedTypeScanner {
    /**
-    * JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
+    * Redis serializer for job executions.
     */
-   private ObjectMapper json;
+   @Autowired
+   private ExecutionRedisSerializer executions;
 
    /**
     * Base packages to scan.
@@ -24,10 +27,11 @@ public class JobTypeScanner extends AnnotatedTypeScanner {
 
    @PostConstruct
    public void afterPropertiesSet() {
-      Assert.notNull(json, "Precondition violated: json != null.");
+      Assert.notNull(executions, "Precondition violated: json != null.");
       Assert.notNull(basePackages, "Precondition violated: basePackages != null.");
 
-      findTypes(basePackages).forEach(json::registerSubtypes);
+      ObjectMapper objectMapper = executions.getObjectMapper();
+      findTypes(basePackages).forEach(objectMapper::registerSubtypes);
    }
 
    /**
@@ -38,17 +42,17 @@ public class JobTypeScanner extends AnnotatedTypeScanner {
    }
 
    /**
-    * JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
+    * Redis serializer for job executions.
     */
-   public ObjectMapper getJson() {
-      return json;
+   public ExecutionRedisSerializer getExecutions() {
+      return executions;
    }
 
    /**
-    * JSON mapper to register subtypes (@link {@link JsonTypeName}) at.
+    * Redis serializer for job executions.
     */
-   public void setJson(ObjectMapper json) {
-      this.json = json;
+   public void setExecutions(ExecutionRedisSerializer executions) {
+      this.executions = executions;
    }
 
    /**

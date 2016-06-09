@@ -60,7 +60,7 @@ public class WorkerImplIT {
       queueDao.setConnectionFactory(redis);
       queueDao.setNamespace("namespace");
       queueDao.afterPropertiesSet();
-      scanForJsonSubtypes(queueDao.getJson(), TestJob.class);
+      scanForJsonSubtypes(queueDao.getExecutions(), TestJob.class);
 
       workerDao.setConnectionFactory(redis);
       workerDao.setNamespace("namespace");

@@ -26,7 +26,7 @@ public class QueueDaoImplIT {
       dao.setNamespace("namespace");
       dao.afterPropertiesSet();
 
-      scanForJsonSubtypes(dao.getJson(), TestJob.class);
+      scanForJsonSubtypes(dao.getExecutions(), TestJob.class);
    }
 
    @Test
