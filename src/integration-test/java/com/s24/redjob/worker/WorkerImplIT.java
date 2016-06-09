@@ -1,4 +1,4 @@
-package com.s24.redjob.queue.worker;
+package com.s24.redjob.worker;
 
 import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
@@ -16,7 +16,6 @@ import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
-import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;

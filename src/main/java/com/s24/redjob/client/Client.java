@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 public interface Client {
    /**
     * Enqueue the given job to the given queue.
+    * Job are considered to be possibly long running.
     *
     * @param queue
     *           Queue name.
@@ -21,6 +22,7 @@ public interface Client {
 
    /**
     * Enqueue the given job to the given queue.
+    * Job are considered to be possibly long running.
     *
     * @param queue
     *           Queue name.
@@ -44,6 +46,7 @@ public interface Client {
 
    /**
     * Publish the given job to the given channel.
+    * Job are considered to be admin jobs, which execute fast.
     *
     * @param channel
     *           Channel name.
