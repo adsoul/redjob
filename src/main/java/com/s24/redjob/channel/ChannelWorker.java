@@ -51,19 +51,22 @@ public class ChannelWorker extends AbstractWorker {
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(channels, "Precondition violated: channels != null.");
       Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
-      Assert.notNull(listenerContainer, "Precondition violated: listenerContainer != null.");
 
       super.afterPropertiesSet();
 
       workerDao.start(name);
       eventBus.publishEvent(new WorkerStart(this));
 
-      listenerContainer.addMessageListener(listener, channels);
+      synchronized (listenerContainer) {
+         listenerContainer.addMessageListener(listener, channels);
+      }
    }
 
    @PreDestroy
    public void destroy() {
-      listenerContainer.removeMessageListener(listener);
+      synchronized (listenerContainer) {
+         listenerContainer.removeMessageListener(listener);
+      }
 
       eventBus.publishEvent(new WorkerStopped(this));
       workerDao.stop(name);
