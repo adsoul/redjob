@@ -14,8 +14,6 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
-import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSuccess;
@@ -29,7 +27,7 @@ public class ChannelWorkerIT {
    /**
     * Channel DAO.
     */
-   private ChannelDaoImpl channelDao;
+   private ChannelDao channelDao;
 
    /**
     * Channel DAO.
@@ -51,28 +49,19 @@ public class ChannelWorkerIT {
       listenerContainer.afterPropertiesSet();
       listenerContainer.start();
 
-      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
-      scanForJsonSubtypes(executions, TestJob.class);
+      ChannelWorkerFactoryBean factory = new ChannelWorkerFactoryBean();
+      factory.setConnectionFactory(connectionFactory);
+      factory.setNamespace("test");
+      factory.setListenerContainer(listenerContainer);
+      factory.setApplicationEventPublisher(eventBus);
+      factory.setJobRunnerFactory(new TestJobRunnerFactory());
+      factory.setChannels("test-channel");
+      factory.afterPropertiesSet();
 
-      channelDao = new ChannelDaoImpl();
-      channelDao.setConnectionFactory(connectionFactory);
-      channelDao.setExecutions(executions);
-      channelDao.setNamespace("test");
-      channelDao.afterPropertiesSet();
+      scanForJsonSubtypes(factory.getExecutions(), TestJob.class);
 
-      WorkerDaoImpl workerDao = new WorkerDaoImpl();
-      workerDao.setConnectionFactory(connectionFactory);
-      workerDao.setNamespace("test");
-      workerDao.afterPropertiesSet();
-
-      channelWorker = new ChannelWorker();
-      channelWorker.setWorkerDao(workerDao);
-      channelWorker.setChannelDao(channelDao);
-      channelWorker.setChannels("test-channel");
-      channelWorker.setListenerContainer(listenerContainer);
-      channelWorker.setApplicationEventPublisher(eventBus);
-      channelWorker.setJobRunnerFactory(new TestJobRunnerFactory());
-      channelWorker.afterPropertiesSet();
+      channelWorker = factory.getObject();
+      channelDao = channelWorker.getChannelDao();
 
       // Wait for subscription of worker to the channel.
       Thread.sleep(1000);

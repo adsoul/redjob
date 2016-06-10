@@ -147,8 +147,8 @@ public class ChannelWorker extends AbstractWorker {
    /**
     * Channels to listen to.
     */
-   public void setChannels(String... queues) {
-      setChannels(Arrays.asList(queues));
+   public void setChannels(String... channels) {
+      setChannels(Arrays.asList(channels));
    }
 
    /**

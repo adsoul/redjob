@@ -59,7 +59,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    /**
     * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
-    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    * #DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
     */
    protected long emptyQueuesSleepMillis = DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS;
 
@@ -225,7 +225,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    /**
     * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
-    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    * #DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
     */
    public long getEmptyQueuesSleepMillis() {
       return emptyQueuesSleepMillis;
@@ -233,7 +233,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    /**
     * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value
-    * DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
+    * #DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS}.
     */
    public void setEmptyQueuesSleepMillis(long emptyQueuesSleepMillis) {
       this.emptyQueuesSleepMillis = emptyQueuesSleepMillis;
