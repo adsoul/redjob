@@ -52,10 +52,10 @@ public class ChannelWorkerIT {
       ChannelWorkerFactoryBean factory = new ChannelWorkerFactoryBean();
       factory.setConnectionFactory(connectionFactory);
       factory.setNamespace("test");
+      factory.setChannels("test-channel");
       factory.setListenerContainer(listenerContainer);
       factory.setApplicationEventPublisher(eventBus);
       factory.setJobRunnerFactory(new TestJobRunnerFactory());
-      factory.setChannels("test-channel");
       factory.afterPropertiesSet();
 
       scanForJsonSubtypes(factory.getExecutions(), TestJob.class);
