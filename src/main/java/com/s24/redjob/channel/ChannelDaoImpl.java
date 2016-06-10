@@ -6,6 +6,7 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.util.Assert;
 
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.queue.QueueDao;
@@ -24,7 +25,7 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    /**
     * Redis serializer for job executions.
     */
-   private ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
+   private ExecutionRedisSerializer executions;
 
    /**
     * Redis access.
@@ -35,6 +36,8 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    @PostConstruct
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
+
+      Assert.notNull(executions, "Precondition violated: executions != null.");
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);

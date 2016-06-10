@@ -4,6 +4,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.Assert;
 
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.Execution;
@@ -41,7 +42,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    /**
     * Redis serializer for job executions.
     */
-   private ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
+   private ExecutionRedisSerializer executions;
 
    /**
     * Redis access.
@@ -52,6 +53,8 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    @PostConstruct
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
+
+      Assert.notNull(executions, "Precondition violated: executions != null.");
 
       redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);

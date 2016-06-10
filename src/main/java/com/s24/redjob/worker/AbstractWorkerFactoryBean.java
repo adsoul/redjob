@@ -8,7 +8,6 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.AbstractDao;
-import com.s24.redjob.channel.ChannelDaoImpl;
 import com.s24.redjob.channel.ChannelWorker;
 
 /**
@@ -19,11 +18,6 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
     * Worker dao.
     */
    private WorkerDaoImpl workerDao = new WorkerDaoImpl();
-
-   /**
-    * Channel dao.
-    */
-   private ChannelDaoImpl channelDao = new ChannelDaoImpl();
 
    /**
     * The instance.
@@ -43,7 +37,6 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
    @Override
    public void afterPropertiesSet() throws Exception {
       workerDao.afterPropertiesSet();
-      channelDao.afterPropertiesSet();
 
       worker.setWorkerDao(workerDao);
       worker.afterPropertiesSet();
@@ -87,7 +80,6 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
     */
    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
       workerDao.setConnectionFactory(connectionFactory);
-      channelDao.setConnectionFactory(connectionFactory);
    }
 
    /**
@@ -102,21 +94,6 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
     */
    public void setNamespace(String namespace) {
       workerDao.setNamespace(namespace);
-      channelDao.setNamespace(namespace);
-   }
-
-   /**
-    * Redis serializer for job executions.
-    */
-   public ExecutionRedisSerializer getExecutions() {
-      return channelDao.getExecutions();
-   }
-
-   /**
-    * Redis serializer for job executions.
-    */
-   public void setExecutions(ExecutionRedisSerializer executions) {
-      channelDao.setExecutions(executions);
    }
 
    /**

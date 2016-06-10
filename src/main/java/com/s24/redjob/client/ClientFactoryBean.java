@@ -36,6 +36,10 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
 
    @Override
    public void afterPropertiesSet() throws Exception {
+      if (getExecutions() == null) {
+         setExecutions(new ExecutionRedisSerializer());
+      }
+
       queueDao.afterPropertiesSet();
       channelDao.afterPropertiesSet();
       lockDao.afterPropertiesSet();

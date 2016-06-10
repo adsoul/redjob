@@ -29,14 +29,14 @@ import com.s24.redjob.worker.events.WorkerStopped;
  */
 public class ChannelWorker extends AbstractWorker {
    /**
-    * Channels to listen to.
-    */
-   private List<String> channels;
-
-   /**
     * Channel dao.
     */
    private ChannelDao channelDao;
+
+   /**
+    * Channels to listen to.
+    */
+   private List<String> channels;
 
    /**
     * Message listener container.

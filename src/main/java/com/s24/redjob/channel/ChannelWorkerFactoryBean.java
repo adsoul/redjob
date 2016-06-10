@@ -28,6 +28,10 @@ public class ChannelWorkerFactoryBean extends AbstractWorkerFactoryBean<ChannelW
 
    @Override
    public void afterPropertiesSet() throws Exception {
+      if (getExecutions() == null) {
+         setExecutions(new ExecutionRedisSerializer());
+      }
+
       channelDao.afterPropertiesSet();
 
       worker.setChannelDao(channelDao);
