@@ -10,6 +10,7 @@
    <packaging>jar</packaging>
 
    <description>Spring based implementation of a Redis-backed job queue.</description>
+   <url>https://github.com/shopping24/redjob</url>
 
    <licenses>
       <license>
@@ -29,13 +30,14 @@
       <system>Github Issues</system>
       <url>${project.url}/issues</url>
    </issueManagement>
+
    <organization>
       <name>Shopping24 GmbH</name>
       <url>http://developer.s24.com</url>
    </organization>
    <developers>
       <developer>
-         <id>mheiden</id>
+         <id>MarkusHeiden</id>
          <name>Markus Heiden</name>
          <email>markus.heiden@s24.com</email>
          <roles>
