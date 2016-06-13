@@ -69,7 +69,7 @@
       <dependency.log4j.version>2.6.1</dependency.log4j.version>
       <dependency.mockito.version>1.10.19</dependency.mockito.version>
       <dependency.slf4j.version>1.7.21</dependency.slf4j.version>
-      <dependency.spring.version>4.30.0.RELEASE</dependency.spring.version>
+      <dependency.spring.version>4.3.0.RELEASE</dependency.spring.version>
       <dependency.spring-data-redis.version>1.7.1.RELEASE</dependency.spring-data-redis.version>
    </properties>
 
