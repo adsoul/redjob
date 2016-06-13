@@ -99,7 +99,7 @@ public class QueueDaoImplIT {
    @Test
    public void peek() {
       // No job -> return null.
-      assertNull(dao.peek(QUEUE, Long.MAX_VALUE));
+      assertNull(dao.peek(Long.MAX_VALUE));
 
       TestJob job = new TestJob();
 
@@ -110,6 +110,6 @@ public class QueueDaoImplIT {
       // Add a job.
       dao.enqueue(QUEUE, new TestJob(), false);
 
-      assertEquals(job, dao.peek(QUEUE, id).getJob());
+      assertEquals(job, dao.peek(id).getJob());
    }
 }

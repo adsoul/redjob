@@ -32,7 +32,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    /**
     * Redis key part for the hash of id -> job.
     */
-   public static final String JOB = "job";
+   public static final String JOBS = "jobs";
 
    /**
     * Redis key part for the list of all job ids of a queue.
@@ -77,7 +77,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
 
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
-         connection.hSet(key(JOB, queue), idBytes, executions.serialize(execution));
+         connection.hSet(key(JOBS), idBytes, executions.serialize(execution));
          if (front) {
             connection.lPush(key(QUEUE, queue), idBytes);
          } else {
@@ -93,16 +93,16 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
       return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(id);
          Long deletes = connection.lRem(key(QUEUE, queue), 0, idBytes);
-         connection.hDel(key(JOB, queue), idBytes);
+         connection.hDel(key(JOBS), idBytes);
          return deletes != null && deletes > 0;
       });
    }
 
    @Override
-   public Execution peek(String queue, long id) {
+   public Execution peek(long id) {
       return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(id);
-         byte[] jobBytes = connection.hGet(key(JOB, queue), idBytes);
+         byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
          if (jobBytes == null) {
             return null;
          }
@@ -124,7 +124,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
          }
          connection.lPush(key(INFLIGHT, worker, queue), idBytes);
 
-         byte[] jobBytes = connection.hGet(key(JOB, queue), idBytes);
+         byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
          if (jobBytes == null) {
             return null;
          }

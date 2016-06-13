@@ -51,8 +51,8 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public Object peek(String queue, long id) {
-      Execution execution = queueDao.peek(queue, id);
+   public Object peek(long id) {
+      Execution execution = queueDao.peek(id);
       return execution != null? execution.getJob() : null;
    }
 

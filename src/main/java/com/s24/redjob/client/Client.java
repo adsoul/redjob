@@ -45,15 +45,13 @@ public interface Client {
    void dequeue(String queue, long id);
 
    /**
-    * Get a job from the given queue.
+    * Get the job with the given id.
     *
-    * @param queue
-    *           Queue name.
     * @param id
     *           Id of the job.
     * @return job, or null if not existing.
     */
-   Object peek(String queue, long id);
+   Object peek(long id);
 
    /**
     * Publish the given job to the given channel.
