@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue;
 
 import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
@@ -11,11 +11,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
-import com.s24.redjob.queue.QueueDaoImpl;
-import com.s24.redjob.queue.QueueWorker;
-import com.s24.redjob.queue.TestJob;
-import com.s24.redjob.queue.TestJobRunner;
-import com.s24.redjob.queue.TestJobRunnerFactory;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
@@ -27,26 +23,21 @@ import com.s24.redjob.worker.events.WorkerStopped;
 /**
  * Integration test for {@link QueueWorker}.
  */
-public class WorkerImplIT {
-   /**
-    * Queue DAO.
-    */
-   private QueueDaoImpl queueDao = new QueueDaoImpl();
-
-   /**
-    * Worker DAO.
-    */
-   private WorkerDaoImpl workerDao = new WorkerDaoImpl();
-
+public class QueueWorkerImplIT {
    /**
     * Recording event publisher.
     */
    private TestEventPublisher eventBus = new TestEventPublisher();
 
    /**
+    * Queue DAO.
+    */
+   private QueueDao queueDao;
+
+   /**
     * Worker under test.
     */
-   private QueueWorker worker = new QueueWorker();
+   private QueueWorker worker;
 
    /**
     * Worker thread.
@@ -60,21 +51,17 @@ public class WorkerImplIT {
       ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
       scanForJsonSubtypes(executions, TestJob.class);
 
-      queueDao.setConnectionFactory(redis);
-      queueDao.setNamespace("namespace");
-      queueDao.setExecutions(executions);
-      queueDao.afterPropertiesSet();
+      QueueWorkerFactoryBean factory = new QueueWorkerFactoryBean();
+      factory.setConnectionFactory(redis);
+      factory.setNamespace("namespace");
+      factory.setExecutions(executions);
+      factory.setQueues("test-queue");
+      factory.setJobRunnerFactory(new TestJobRunnerFactory());
+      factory.setApplicationEventPublisher(eventBus);
+      factory.afterPropertiesSet();
 
-      workerDao.setConnectionFactory(redis);
-      workerDao.setNamespace("namespace");
-      workerDao.afterPropertiesSet();
-
-      worker.setQueues("test-queue");
-      worker.setQueueDao(queueDao);
-      worker.setWorkerDao(workerDao);
-      worker.setJobRunnerFactory(new TestJobRunnerFactory());
-      worker.setApplicationEventPublisher(eventBus);
-      worker.afterPropertiesSet();
+      worker = factory.getObject();
+      queueDao = worker.getQueueDao();
 
       workerThread = new Thread(worker, "test-worker");
    }
