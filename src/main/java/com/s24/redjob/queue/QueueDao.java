@@ -1,5 +1,7 @@
 package com.s24.redjob.queue;
 
+import java.util.Map;
+
 import com.s24.redjob.worker.Execution;
 
 /**
@@ -37,7 +39,12 @@ public interface QueueDao {
     *           Id of the job.
     * @return execution, or null if not existing.
     */
-   Execution peek(long id);
+   Execution get(long id);
+
+   /**
+    * Get all jobs.
+    */
+   Map<Long, Execution> getAll();
 
    /**
     * Pop first job from queue.

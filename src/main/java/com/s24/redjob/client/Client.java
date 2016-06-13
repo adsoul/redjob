@@ -1,5 +1,6 @@
 package com.s24.redjob.client;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -51,7 +52,12 @@ public interface Client {
     *           Id of the job.
     * @return job, or null if not existing.
     */
-   Object peek(long id);
+   Object get(long id);
+
+   /**
+    * Get all jobs.
+    */
+   Map<Long, Object> getAll();
 
    /**
     * Publish the given job to the given channel.

@@ -1,5 +1,10 @@
 package com.s24.redjob.queue;
 
+import static java.util.function.Function.identity;
+
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
@@ -99,7 +104,7 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    }
 
    @Override
-   public Execution peek(long id) {
+   public Execution get(long id) {
       return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(id);
          byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
@@ -108,6 +113,20 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
          }
 
          return executions.deserialize(jobBytes);
+      });
+   }
+
+   @Override
+   public Map<Long, Execution> getAll() {
+      return redis.execute((RedisConnection connection) -> {
+         Map<byte[], byte[]> jobBytes = connection.hGetAll(key(JOBS));
+         if (jobBytes == null) {
+            return null;
+         }
+
+         return jobBytes.values().stream()
+               .map(executions::deserialize)
+               .collect(Collectors.toMap(Execution::getId, identity()));
       });
    }
 
