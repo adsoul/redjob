@@ -57,10 +57,13 @@ public class WorkerImplIT {
    public void setUp() throws Exception {
       RedisConnectionFactory redis = TestRedis.connectionFactory();
 
+      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
+      scanForJsonSubtypes(executions, TestJob.class);
+
       queueDao.setConnectionFactory(redis);
       queueDao.setNamespace("namespace");
+      queueDao.setExecutions(executions);
       queueDao.afterPropertiesSet();
-      scanForJsonSubtypes(queueDao.getExecutions(), TestJob.class);
 
       workerDao.setConnectionFactory(redis);
       workerDao.setNamespace("namespace");

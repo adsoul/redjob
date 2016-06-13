@@ -14,6 +14,7 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSuccess;
@@ -49,16 +50,18 @@ public class ChannelWorkerIT {
       listenerContainer.afterPropertiesSet();
       listenerContainer.start();
 
+      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
+      scanForJsonSubtypes(executions, TestJob.class);
+
       ChannelWorkerFactoryBean factory = new ChannelWorkerFactoryBean();
       factory.setConnectionFactory(connectionFactory);
       factory.setNamespace("test");
       factory.setChannels("test-channel");
+      factory.setExecutions(executions);
       factory.setListenerContainer(listenerContainer);
       factory.setApplicationEventPublisher(eventBus);
       factory.setJobRunnerFactory(new TestJobRunnerFactory());
       factory.afterPropertiesSet();
-
-      scanForJsonSubtypes(factory.getExecutions(), TestJob.class);
 
       channelWorker = factory.getObject();
       channelDao = channelWorker.getChannelDao();

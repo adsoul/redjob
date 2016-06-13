@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
  * Integration test for {@link QueueDaoImpl}.
@@ -22,11 +23,13 @@ public class QueueDaoImplIT {
 
    @Before
    public void setUp() throws Exception {
+      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
+      scanForJsonSubtypes(executions, TestJob.class);
+
       dao.setConnectionFactory(TestRedis.connectionFactory());
       dao.setNamespace("namespace");
+      dao.setExecutions(executions);
       dao.afterPropertiesSet();
-
-      scanForJsonSubtypes(dao.getExecutions(), TestJob.class);
    }
 
    @Test
