@@ -43,7 +43,6 @@ public class ChannelWorkerIT {
    @Before
    public void setUp() throws Exception {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
-      TestRedis.flushDb(connectionFactory);
 
       RedisMessageListenerContainer listenerContainer = new RedisMessageListenerContainer();
       listenerContainer.setConnectionFactory(connectionFactory);

@@ -13,6 +13,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class TestRedis {
    /**
     * Connection factory for the integration test Redis.
+    * Flushes the Redis database before returning the connection factory.
     */
    public static RedisConnectionFactory connectionFactory() {
       JedisPoolConfig pool = new JedisPoolConfig();
@@ -24,6 +25,8 @@ public class TestRedis {
       connectionFactory.setDatabase(0);
       connectionFactory.setPoolConfig(pool);
       connectionFactory.afterPropertiesSet();
+
+      flushDb(connectionFactory);
 
       return connectionFactory;
    }

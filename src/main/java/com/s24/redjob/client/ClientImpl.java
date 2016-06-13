@@ -9,6 +9,7 @@ import org.springframework.util.Assert;
 import com.s24.redjob.channel.ChannelDao;
 import com.s24.redjob.lock.LockDao;
 import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.worker.Execution;
 
 /**
  * Default implementation of {@link Client}.
@@ -47,6 +48,12 @@ public class ClientImpl implements Client {
    @Override
    public void dequeue(String queue, long id) {
       queueDao.dequeue(queue, id);
+   }
+
+   @Override
+   public Object peek(String queue, long id) {
+      Execution execution = queueDao.peek(queue, id);
+      return execution != null? execution.getJob() : null;
    }
 
    @Override

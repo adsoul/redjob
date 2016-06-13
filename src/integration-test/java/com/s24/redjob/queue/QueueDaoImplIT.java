@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
@@ -33,7 +34,8 @@ public class QueueDaoImplIT {
       ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
       scanForJsonSubtypes(executions, TestJob.class);
 
-      dao.setConnectionFactory(TestRedis.connectionFactory());
+      RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
+      dao.setConnectionFactory(connectionFactory);
       dao.setNamespace("namespace");
       dao.setExecutions(executions);
       dao.afterPropertiesSet();
@@ -92,5 +94,22 @@ public class QueueDaoImplIT {
       // Check that the job got dequeued.
       assertTrue(dequeued);
       assertNull(dao.pop(QUEUE, "worker"));
+   }
+
+   @Test
+   public void peek() {
+      // No job -> return null.
+      assertNull(dao.peek(QUEUE, Long.MAX_VALUE));
+
+      TestJob job = new TestJob();
+
+      // Add a job.
+      dao.enqueue(QUEUE, new TestJob(), false);
+      // Add the job, we want to peek.
+      long id = dao.enqueue(QUEUE, job, false).getId();
+      // Add a job.
+      dao.enqueue(QUEUE, new TestJob(), false);
+
+      assertEquals(job, dao.peek(QUEUE, id).getJob());
    }
 }

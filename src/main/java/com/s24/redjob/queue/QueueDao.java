@@ -31,6 +31,17 @@ public interface QueueDao {
    boolean dequeue(String queue, long id);
 
    /**
+    * Get a job from the given queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @param id
+    *           Id of the job.
+    * @return execution, or null if not existing.
+    */
+   Execution peek(String queue, long id);
+
+   /**
     * Pop first job from queue.
     *
     * @param queue

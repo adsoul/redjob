@@ -43,8 +43,6 @@ public class LockDaoImplIT {
       redis = new StringRedisTemplate();
       redis.setConnectionFactory(connectionFactory);
       redis.afterPropertiesSet();
-
-      TestRedis.flushDb(connectionFactory);
    }
 
    @Test

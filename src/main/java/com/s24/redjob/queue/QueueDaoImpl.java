@@ -98,6 +98,19 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
       });
    }
 
+   @Override
+   public Execution peek(String queue, long id) {
+      return redis.execute((RedisConnection connection) -> {
+         byte[] idBytes = value(id);
+         byte[] jobBytes = connection.hGet(key(JOB, queue), idBytes);
+         if (jobBytes == null) {
+            return null;
+         }
+
+         return executions.deserialize(jobBytes);
+      });
+   }
+
    //
    // Worker related.
    //
