@@ -11,10 +11,40 @@
 
    <description>Spring based implementation of a Redis-backed job queue.</description>
 
+   <licenses>
+      <license>
+         <name>The Apache Software License, Version 2.0</name>
+         <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+         <distribution>repo</distribution>
+      </license>
+   </licenses>
+
+   <scm>
+      <connection>scm:git:git@github.com:shopping24/redjob.git</connection>
+      <developerConnection>scm:git:git@github.com:shopping24/redjob.git</developerConnection>
+      <url>https://github.com/shopping24/redjob</url>
+      <tag>HEAD</tag>
+   </scm>
+   <issueManagement>
+      <system>Github Issues</system>
+      <url>${project.url}/issues</url>
+   </issueManagement>
    <organization>
       <name>Shopping24 GmbH</name>
-      <url>http://www.s24.com</url>
+      <url>http://developer.s24.com</url>
    </organization>
+   <developers>
+      <developer>
+         <id>mheiden</id>
+         <name>Markus Heiden</name>
+         <email>markus.heiden@s24.com</email>
+         <roles>
+            <role>owner</role>
+            <role>developer</role>
+         </roles>
+         <timezone>+1</timezone>
+      </developer>
+   </developers>
 
    <prerequisites>
       <maven>3.2</maven>
