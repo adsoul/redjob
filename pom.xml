@@ -5,7 +5,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.s24</groupId>
    <artifactId>redjob</artifactId>
-   <name>${project.groupId}.${project.artifactId}</name>
+   <name>${project.artifactId}</name>
    <version>0.0.1-SNAPSHOT</version>
    <packaging>jar</packaging>
 
@@ -79,7 +79,7 @@
       <snapshotRepository>
          <id>s24-internal</id>
          <name>S24 internal artifactory</name>
-         <url>https://artifactory.s24.com/artifactory/s24-release-local</url>
+         <url>https://artifactory.s24.com/artifactory/s24-snapshot-local</url>
       </snapshotRepository>
       <repository>
          <id>s24-internal</id>
