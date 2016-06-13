@@ -89,12 +89,12 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
    }
 
    @Override
-   public void dequeue(String queue, long id) {
-      redis.execute((RedisConnection connection) -> {
+   public boolean dequeue(String queue, long id) {
+      return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(id);
-         connection.lRem(key(QUEUE, queue), 0, idBytes);
+         Long deletes = connection.lRem(key(QUEUE, queue), 0, idBytes);
          connection.hDel(key(JOB, queue), idBytes);
-         return null;
+         return deletes != null && deletes > 0;
       });
    }
 

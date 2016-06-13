@@ -26,8 +26,9 @@ public interface QueueDao {
     *           Queue name.
     * @param id
     *           Id of the job.
+    * @return true, if at least one job is dequeued.
     */
-   void dequeue(String queue, long id);
+   boolean dequeue(String queue, long id);
 
    /**
     * Pop first job from queue.
