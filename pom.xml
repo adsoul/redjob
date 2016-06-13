@@ -73,6 +73,19 @@
       <dependency.spring-data-redis.version>1.7.1.RELEASE</dependency.spring-data-redis.version>
    </properties>
 
+   <distributionManagement>
+      <snapshotRepository>
+         <id>s24-internal</id>
+         <name>S24 internal artifactory</name>
+         <url>https://artifactory.s24.com/artifactory/s24-release-local</url>
+      </snapshotRepository>
+      <repository>
+         <id>s24-internal</id>
+         <name>S24 internal artifactory</name>
+         <url>https://artifactory.s24.com/artifactory/s24-release-local</url>
+      </repository>
+   </distributionManagement>
+
    <repositories>
       <repository>
          <!-- This project depends on internal libraries -->
