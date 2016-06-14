@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
@@ -28,11 +29,6 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    protected final Logger log = LoggerFactory.getLogger(getClass());
 
    /**
-    * Worker dao.
-    */
-   protected WorkerDao workerDao;
-
-   /**
     * Sequence for worker ids.
     */
    private static final AtomicInteger IDS = new AtomicInteger();
@@ -43,9 +39,14 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    private int id;
 
    /**
-    * Name of this worker.
+    * Name of this worker. Defaults to a generated unique name.
     */
    protected String name;
+
+   /**
+    * Worker dao.
+    */
+   protected WorkerDao workerDao;
 
    /**
     * Factory for creating job runners.
@@ -83,7 +84,9 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
       id = IDS.incrementAndGet();
-      name = createName();
+      if (!StringUtils.hasLength(name)) {
+         name = createName();
+      }
    }
 
    /**
@@ -194,6 +197,13 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    //
    // Injections.
    //
+
+   /**
+    * Name of this worker. Defaults to a generated unique name.
+    */
+   public void setName(String name) {
+      this.name = name;
+   }
 
    /**
     * Worker dao.
