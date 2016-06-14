@@ -25,6 +25,13 @@ public class Execution {
    private final Object job;
 
    /**
+    * Job result.
+    */
+   @JsonProperty(value = "result", required = true)
+   @JsonTypeInfo(use = Id.NAME, include = As.EXTERNAL_PROPERTY, property = "resultType")
+   private Object result;
+
+   /**
     * Constructor.
     *
     * @param id
@@ -32,13 +39,30 @@ public class Execution {
     * @param job
     *           Job.
     */
+   public Execution(long id, Object job) {
+      this(id, job, new Result());
+   }
+
+   /**
+    * Constructor.
+    *
+    * @param id
+    *           Id of job.
+    * @param job
+    *           Job.
+    * @param result
+    *           Job result.
+    */
    public Execution(
          @JsonProperty(value = "id", required = true) long id,
-         @JsonProperty(value = "job", required = true) Object job) {
+         @JsonProperty(value = "job", required = true) Object job,
+         @JsonProperty(value = "result", required = true) Object result) {
       Assert.notNull(job, "Precondition violated: job != null.");
+      Assert.notNull(job, "Precondition violated: result != null.");
 
       this.id = id;
       this.job = job;
+      this.result = result;
    }
 
    /**
@@ -51,7 +75,23 @@ public class Execution {
    /**
     * Job.
     */
-   public Object getJob() {
-      return job;
+   @SuppressWarnings("unchecked")
+   public <J> J getJob() {
+      return (J) job;
+   }
+
+   /**
+    * Job result.
+    */
+   @SuppressWarnings("unchecked")
+   public <R> R getResult() {
+      return (R) result;
+   }
+
+   /**
+    * Job result.
+    */
+   public void setResult(Object result) {
+      this.result = result;
    }
 }

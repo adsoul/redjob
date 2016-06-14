@@ -3,7 +3,6 @@ package com.s24.redjob.worker;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.util.AnnotatedTypeScanner;
 import org.springframework.util.Assert;
 
@@ -13,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Scans the classpath and registers JSON subtypes (@link {@link JsonTypeName}) at a {@link ObjectMapper}.
  */
-public class JobTypeScanner extends AnnotatedTypeScanner {
+public class TypeScanner extends AnnotatedTypeScanner {
    /**
     * Redis serializer for job executions.
     */
@@ -37,7 +36,7 @@ public class JobTypeScanner extends AnnotatedTypeScanner {
    /**
     * Constructor.
     */
-   public JobTypeScanner() {
+   public TypeScanner() {
       super(JsonTypeName.class);
    }
 

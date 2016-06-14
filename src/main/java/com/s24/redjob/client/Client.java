@@ -3,6 +3,8 @@ package com.s24.redjob.client;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.s24.redjob.worker.Execution;
+
 /**
  * Job client.
  */
@@ -46,18 +48,18 @@ public interface Client {
    void dequeue(String queue, long id);
 
    /**
-    * Get the job with the given id.
+    * Get the job execution with the given id.
     *
     * @param id
     *           Id of the job.
     * @return job, or null if not existing.
     */
-   Object get(long id);
+   Execution execution(long id);
 
    /**
-    * Get all jobs.
+    * Get all jobs executions.
     */
-   Map<Long, Object> getAll();
+   Map<Long, Execution> executions();
 
    /**
     * Publish the given job to the given channel.

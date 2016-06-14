@@ -1,6 +1,6 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
+import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

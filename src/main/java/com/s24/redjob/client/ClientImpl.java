@@ -2,7 +2,6 @@ package com.s24.redjob.client;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
@@ -53,14 +52,13 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public Object get(long id) {
-      Execution execution = queueDao.get(id);
-      return execution != null? execution.getJob() : null;
+   public Execution execution(long id) {
+      return queueDao.get(id);
    }
 
    @Override
-   public Map<Long, Object> getAll() {
-      return queueDao.getAll().values().stream().collect(Collectors.toMap(Execution::getId, Execution::getJob));
+   public Map<Long, Execution> executions() {
+      return queueDao.getAll();
    }
 
    @Override

@@ -1,8 +1,9 @@
 package com.s24.redjob.worker;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * {@link RedisSerializer} for {@link Execution}s.
@@ -30,6 +31,7 @@ public class ExecutionRedisSerializer extends Jackson2JsonRedisSerializer<Execut
 
    @Override
    public void setObjectMapper(ObjectMapper objectMapper) {
+      objectMapper.registerSubtypes(Result.class);
       super.setObjectMapper(objectMapper);
       this.objectMapper = objectMapper;
    }

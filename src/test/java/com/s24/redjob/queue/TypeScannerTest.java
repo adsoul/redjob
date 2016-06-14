@@ -2,7 +2,6 @@ package com.s24.redjob.queue;
 
 import static org.mockito.Mockito.verify;
 
-import com.s24.redjob.worker.ExecutionRedisSerializer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -11,13 +10,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.s24.redjob.worker.JobTypeScanner;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.TypeScanner;
 
 /**
- * Test of {@link JobTypeScanner}.
+ * Test of {@link TypeScanner}.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JobTypeScannerTest {
+public class TypeScannerTest {
    /**
     * JSON mapper.
     */
@@ -71,7 +71,7 @@ public class JobTypeScannerTest {
     *           Base packages to scan.
     */
    public static void scanForJsonSubtypes(ExecutionRedisSerializer executions, String... basePackages) {
-      JobTypeScanner scanner = new JobTypeScanner();
+      TypeScanner scanner = new TypeScanner();
       scanner.setExecutions(executions);
       scanner.setBasePackages(basePackages);
       scanner.afterPropertiesSet();

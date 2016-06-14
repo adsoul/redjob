@@ -1,6 +1,6 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.JobTypeScannerTest.scanForJsonSubtypes;
+import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
