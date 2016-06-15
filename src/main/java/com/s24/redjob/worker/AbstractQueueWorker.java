@@ -155,6 +155,14 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     */
    protected abstract void removeInflight(String queue) throws Throwable;
 
+   /**
+    * Update execution.
+    *
+    * @param execution
+    *           Execution.
+    */
+   public abstract void update(Execution execution);
+
    //
    // Injections.
    //

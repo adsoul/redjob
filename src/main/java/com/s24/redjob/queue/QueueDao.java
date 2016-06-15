@@ -33,13 +33,21 @@ public interface QueueDao {
    boolean dequeue(String queue, long id);
 
    /**
-    * Get a job.
+    * Get a job execution.
     *
     * @param id
     *           Id of the job.
     * @return execution, or null if not existing.
     */
    Execution get(long id);
+
+   /**
+    * Update a job execution.
+    *
+    * @param execution
+    *           Job execution.
+    */
+   void update(Execution execution);
 
    /**
     * Get all jobs.

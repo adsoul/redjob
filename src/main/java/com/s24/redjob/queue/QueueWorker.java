@@ -37,6 +37,11 @@ public class QueueWorker extends AbstractQueueWorker {
       queueDao.removeInflight(queue, name);
    }
 
+   @Override
+   public void update(Execution execution) {
+      queueDao.update(execution);
+   }
+
    //
    // Injections.
    //

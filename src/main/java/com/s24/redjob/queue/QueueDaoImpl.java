@@ -2,6 +2,7 @@ package com.s24.redjob.queue;
 
 import static java.util.function.Function.identity;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -79,7 +80,8 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
          Execution execution = new Execution(id, job);
-
+         // TODO markus 2016-06-15: Reduce level to debug, guard with if debug enabled.
+         log.info(new String(executions.serialize(execution), StandardCharsets.UTF_8));
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
          connection.hSet(key(JOBS), idBytes, executions.serialize(execution));
@@ -113,6 +115,21 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
          }
 
          return executions.deserialize(jobBytes);
+      });
+   }
+
+   @Override
+   public void update(Execution execution) {
+      redis.execute((RedisConnection connection) -> {
+         byte[] idBytes = value(execution.getId());
+         byte[] jobBytes = executions.serialize(execution);
+         boolean created = connection.hSet(key(JOBS), idBytes, jobBytes);
+         if (created) {
+            // Job had been deleted before, so updates are not useful, because they will create a stale job.
+            connection.hDel(key(JOBS), idBytes);
+         }
+
+         return null;
       });
    }
 
