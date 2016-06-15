@@ -94,4 +94,16 @@ public class Execution {
    public void setResult(Object result) {
       this.result = result;
    }
+
+   @Override
+   public boolean equals(Object o) {
+      return o instanceof Execution &&
+            id == ((Execution) o).id &&
+            job.equals(((Execution) o).job);
+   }
+
+   @Override
+   public int hashCode() {
+      return Long.hashCode(id);
+   }
 }
