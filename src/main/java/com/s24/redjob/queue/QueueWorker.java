@@ -38,6 +38,11 @@ public class QueueWorker extends AbstractQueueWorker {
    }
 
    @Override
+   protected void restoreInflight(String queue) throws Throwable {
+      queueDao.restoreInflight(queue, name);
+   }
+
+   @Override
    public void update(Execution execution) {
       queueDao.update(execution);
    }

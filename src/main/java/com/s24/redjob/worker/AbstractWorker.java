@@ -125,10 +125,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *           Name of queue.
     * @param execution
     *           Job.
+    * @return true, if job needs to be re-enqueued. false, otherwise.
     * @throws Throwable
     *            In case of errors.
     */
-   protected void process(String queue, Execution execution) throws Throwable {
+   protected boolean process(String queue, Execution execution) throws Throwable {
       Object job = execution.getJob();
       if (job == null) {
          log.error("Missing job.");
@@ -140,7 +141,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       if (jobProcess.isVeto()) {
          log.debug("Job processing vetoed.");
          eventBus.publishEvent(new JobSkipped(this, queue, execution, null));
-         return;
+         return true;
       }
 
       Runnable runner = jobRunnerFactory.runnerFor(job);
@@ -150,6 +151,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       }
 
       execute(queue, execution, runner);
+      return false;
    }
 
    /**

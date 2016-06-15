@@ -117,15 +117,20 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          return false;
       }
 
+      boolean restore = false;
       try {
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
-         process(queue, execution);
+         restore = process(queue, execution);
          return true;
 
       } finally {
          try {
-            removeInflight(queue);
+            if (restore) {
+               restoreInflight(queue);
+            } else {
+               removeInflight(queue);
+            }
          } finally {
             MDC.remove("job");
             MDC.remove("execution");
@@ -153,6 +158,16 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     *            In case of errors.
     */
    protected abstract void removeInflight(String queue) throws Throwable;
+
+   /**
+    * Restore skipped job from the inflight queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected abstract void restoreInflight(String queue) throws Throwable;
 
    /**
     * Update execution.
