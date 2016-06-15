@@ -21,7 +21,7 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
    /**
     * Worker thread.
     */
-   protected Thread thread = null;
+   private Thread thread = null;
 
    /**
     * Constructor.
@@ -38,15 +38,16 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
 
       super.afterPropertiesSet();
 
-      startThread();
+      thread = startThread();
    }
 
    /**
     * Create and start worker thread.
     */
-   protected void startThread() {
-      thread = new Thread(worker, worker.getName());
+   protected Thread startThread() {
+      Thread thread = new Thread(worker, worker.getName());
       thread.start();
+      return thread;
    }
 
    //

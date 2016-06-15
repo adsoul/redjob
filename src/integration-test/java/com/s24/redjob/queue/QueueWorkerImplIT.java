@@ -54,8 +54,10 @@ public class QueueWorkerImplIT {
 
       QueueWorkerFactoryBean factory = new QueueWorkerFactoryBean() {
          @Override
-         protected void startThread() {
+         protected Thread startThread() {
             // Do NOT start thread yet.
+            workerThread = new Thread(worker, "test-worker");
+            return workerThread;
          }
       };
       factory.setConnectionFactory(redis);
@@ -68,8 +70,6 @@ public class QueueWorkerImplIT {
 
       worker = factory.getObject();
       queueDao = worker.getQueueDao();
-
-      workerThread = factory.thread;
    }
 
    @After
