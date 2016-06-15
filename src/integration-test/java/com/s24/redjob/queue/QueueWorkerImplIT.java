@@ -17,6 +17,7 @@ import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
@@ -89,6 +90,7 @@ public class QueueWorkerImplIT {
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
 
       Execution execution = queueDao.enqueue("test-queue", job, false);
 
@@ -100,6 +102,7 @@ public class QueueWorkerImplIT {
 
       assertEquals(new JobSuccess(worker, "test-queue", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }
 
@@ -113,6 +116,7 @@ public class QueueWorkerImplIT {
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
 
       Execution execution = queueDao.enqueue("test-queue", job, false);
 
@@ -124,6 +128,7 @@ public class QueueWorkerImplIT {
 
       assertEquals(new JobFailed(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }
 }

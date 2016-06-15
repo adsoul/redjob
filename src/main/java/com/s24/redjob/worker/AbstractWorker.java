@@ -165,8 +165,6 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *            In case of errors.
     */
    protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
-      Object job = execution.getJob();
-
       JobExecute jobExecute = new JobExecute(this, queue, execution, runner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {

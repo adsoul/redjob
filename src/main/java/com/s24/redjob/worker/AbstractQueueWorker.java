@@ -10,6 +10,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.s24.redjob.worker.events.WorkerError;
+import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
@@ -83,12 +84,16 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       for (String queue : queues) {
          try {
             MDC.put("queue", queue);
-            boolean executed = pollQueue(queue);
-            if (executed) {
-               // Start over with polling.
+            WorkerPoll workerPoll = new WorkerPoll(this, queue);
+            eventBus.publishEvent(workerPoll);
+            if (workerPoll.isVeto()) {
+               log.debug("Queue poll vetoed.");
+            } else if (pollQueue(queue)) {
+               // Event popped and executed -> Start over with polling.
                return;
             }
          } finally {
+            eventBus.publishEvent(new WorkerNext(this, queue));
             MDC.remove("queue");
          }
       }
@@ -106,13 +111,6 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     *            In case of errors.
     */
    protected boolean pollQueue(String queue) throws Throwable {
-      WorkerPoll workerPoll = new WorkerPoll(this, queue);
-      eventBus.publishEvent(workerPoll);
-      if (workerPoll.isVeto()) {
-         log.debug("Queue poll vetoed.");
-         return false;
-      }
-
       Execution execution = doPollQueue(queue);
       if (execution == null) {
          log.debug("Queue is empty.");
