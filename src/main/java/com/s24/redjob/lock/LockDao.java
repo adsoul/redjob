@@ -24,6 +24,11 @@ public interface LockDao {
    /**
     * Release a lock.
     *
+    * This operations does nothing, if the lock is not held by the given holder.
+    *
+    * Nevertheless it should not be called unnecessarily,
+    * because it acquires the lock for one second to avoid race conditions.
+    *
     * @param lock
     *           Name of the lock.
     * @param holder
