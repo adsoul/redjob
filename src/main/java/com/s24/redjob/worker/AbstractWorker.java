@@ -8,6 +8,7 @@ import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
@@ -22,7 +23,7 @@ import com.s24.redjob.worker.events.JobSuccess;
 /**
  * Base implementation of {@link Worker}.
  */
-public abstract class AbstractWorker implements Worker, ApplicationEventPublisherAware {
+public abstract class AbstractWorker implements Worker, ApplicationEventPublisherAware, DisposableBean {
    /**
     * Log.
     */
@@ -87,6 +88,12 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       if (!StringUtils.hasLength(name)) {
          name = createName();
       }
+   }
+
+   @Override
+   public void destroy() {
+      // TODO markus 2016-06-15: Interrupt too?
+      stop();
    }
 
    /**
