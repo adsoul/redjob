@@ -128,11 +128,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          throw new IllegalArgumentException("Missing job.");
       }
 
-      JobProcess jobProcess = new JobProcess(this, queue, job);
+      JobProcess jobProcess = new JobProcess(this, queue, execution);
       eventBus.publishEvent(jobProcess);
       if (jobProcess.isVeto()) {
          log.debug("Job processing vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, job, null));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution, null));
          return;
       }
 
@@ -160,11 +160,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
       Object job = execution.getJob();
 
-      JobExecute jobExecute = new JobExecute(this, queue, job, runner);
+      JobExecute jobExecute = new JobExecute(this, queue, execution, runner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
          log.debug("Job execution vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, job, runner));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution, runner));
          return;
       }
 
@@ -173,11 +173,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          runner.run();
          log.info("Job succeeded.");
          workerDao.success(name);
-         eventBus.publishEvent(new JobSuccess(this, queue, job, runner));
+         eventBus.publishEvent(new JobSuccess(this, queue, execution, runner));
       } catch (Throwable cause) {
          log.info("Job failed.", cause);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, job, runner, cause));
+         eventBus.publishEvent(new JobFailed(this, queue, execution, runner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.info("Job finished.", name, execution.getId());

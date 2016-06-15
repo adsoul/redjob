@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -22,9 +23,9 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
    private final String queue;
 
    /**
-    * Job.
+    * Job execution.
     */
-   private final Object job;
+   private final Execution execution;
 
    /**
     * Job runner.
@@ -43,23 +44,23 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
     *           Worker.
     * @param queue
     *           Queue.
-    * @param job
-    *           Job.
+    * @param execution
+    *           Job execution.
     * @param runner
     *           Job runner.
     * @param cause
     *           Cause of failure.
     */
-   public JobFailed(Worker worker, String queue, Object job, Runnable runner, Throwable cause) {
+   public JobFailed(Worker worker, String queue, Execution execution, Runnable runner, Throwable cause) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
-      Assert.notNull(job, "Precondition violated: job != null.");
+      Assert.notNull(execution, "Precondition violated: execution != null.");
       Assert.notNull(runner, "Precondition violated: runner != null.");
       Assert.notNull(cause, "Precondition violated: cause != null.");
       this.worker = worker;
       this.queue = queue;
-      this.job = job;
+      this.execution = execution;
       this.runner = runner;
       this.cause = cause;
    }
@@ -75,8 +76,8 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public <J> J getJob() {
-      return (J) job;
+   public Execution getExecution() {
+      return execution;
    }
 
    @Override
@@ -96,13 +97,13 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
       return o instanceof JobFailed &&
             Objects.equals(worker, ((JobFailed) o).worker) &&
             Objects.equals(queue, ((JobFailed) o).queue) &&
-            Objects.equals(job, ((JobFailed) o).job) &&
+            Objects.equals(execution, ((JobFailed) o).execution) &&
             Objects.equals(runner, ((JobFailed) o).runner) &&
             Objects.equals(cause, ((JobFailed) o).cause);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(worker, queue, job);
+      return Objects.hash(worker, queue, execution);
    }
 }

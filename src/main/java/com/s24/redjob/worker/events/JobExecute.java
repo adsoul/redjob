@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -22,9 +23,9 @@ public class JobExecute extends ApplicationEvent {
    private final String queue;
 
    /**
-    * Job.
+    * Job execution.
     */
-   private final Object job;
+   private final Execution execution;
 
    /**
     * Job runner.
@@ -43,20 +44,20 @@ public class JobExecute extends ApplicationEvent {
     *           Worker.
     * @param queue
     *           Queue.
-    * @param job
-    *           Job.
+    * @param execution
+    *           Job execution.
     * @param runner
     *           Job runner.
     */
-   public JobExecute(Worker worker, String queue, Object job, Runnable runner) {
+   public JobExecute(Worker worker, String queue, Execution execution, Runnable runner) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
-      Assert.notNull(job, "Precondition violated: job != null.");
+      Assert.notNull(execution, "Precondition violated: execution != null.");
       Assert.notNull(runner, "Precondition violated: runner != null.");
       this.worker = worker;
       this.queue = queue;
-      this.job = job;
+      this.execution = execution;
       this.runner = runner;
    }
 
@@ -75,10 +76,10 @@ public class JobExecute extends ApplicationEvent {
    }
 
    /**
-    * Job.
+    * Job execution.
     */
-   public <J> J getJob() {
-      return (J) job;
+   public Execution getExecution() {
+      return execution;
    }
 
    /**
@@ -107,12 +108,12 @@ public class JobExecute extends ApplicationEvent {
       return o instanceof JobExecute &&
             Objects.equals(worker, ((JobExecute) o).worker) &&
             Objects.equals(queue, ((JobExecute) o).queue) &&
-            Objects.equals(job, ((JobExecute) o).job) &&
+            Objects.equals(execution, ((JobExecute) o).execution) &&
             Objects.equals(runner, ((JobExecute) o).runner);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(worker, queue, job, runner);
+      return Objects.hash(worker, queue, execution);
    }
 }

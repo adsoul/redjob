@@ -1,5 +1,6 @@
 package com.s24.redjob.worker.events;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -17,9 +18,9 @@ public interface JobFinished {
    String getQueue();
 
    /**
-    * Job.
+    * Job execution.
     */
-   <J> J getJob();
+   Execution getExecution();
 
    /**
     * Job runner.

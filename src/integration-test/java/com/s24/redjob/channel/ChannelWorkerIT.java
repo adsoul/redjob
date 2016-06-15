@@ -14,6 +14,7 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.TestJob;
 import com.s24.redjob.queue.TestJobRunner;
 import com.s24.redjob.queue.TestJobRunnerFactory;
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobProcess;
@@ -78,19 +79,20 @@ public class ChannelWorkerIT {
    @Test
    public void test() throws Exception {
       TestJob job = new TestJob();
+      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertEquals(new WorkerStart(channelWorker), eventBus.waitForEvent());
 
       channelDao.publish("test-channel", job);
 
-      assertEquals(new JobProcess(channelWorker, "test-channel", job), eventBus.waitForEvent());
-      assertEquals(new JobExecute(channelWorker, "test-channel", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobProcess(channelWorker, "test-channel", execution), eventBus.waitForEvent());
+      assertEquals(new JobExecute(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
 
       // Asynchronously stop worker, because stop blocks until the last job finished.
       new Thread(channelWorker::stop).start();
 
-      assertEquals(new JobSuccess(channelWorker, "test-channel", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobSuccess(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
 
       // Worker stop should always be published, if the last worker has finished.

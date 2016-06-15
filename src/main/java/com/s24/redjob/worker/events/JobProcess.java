@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -22,9 +23,9 @@ public class JobProcess extends ApplicationEvent {
    private final String queue;
 
    /**
-    * Job.
+    * Job execution.
     */
-   private final Object job;
+   private final Execution execution;
 
    /**
     * Veto against job execution?.
@@ -38,17 +39,17 @@ public class JobProcess extends ApplicationEvent {
     *           Worker.
     * @param queue
     *           Queue.
-    * @param job
-    *           Job.
+    * @param execution
+    *           Job execution.
     */
-   public JobProcess(Worker worker, String queue, Object job) {
+   public JobProcess(Worker worker, String queue, Execution execution) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
-      Assert.notNull(job, "Precondition violated: job != null.");
+      Assert.notNull(execution, "Precondition violated: execution != null.");
       this.worker = worker;
       this.queue = queue;
-      this.job = job;
+      this.execution = execution;
    }
 
    /**
@@ -66,10 +67,10 @@ public class JobProcess extends ApplicationEvent {
    }
 
    /**
-    * Job.
+    * Job execution.
     */
-   public <J> J getJob() {
-      return (J) job;
+   public Execution getExecution() {
+      return execution;
    }
 
    /**
@@ -91,11 +92,11 @@ public class JobProcess extends ApplicationEvent {
       return o instanceof JobProcess &&
             Objects.equals(worker, ((JobProcess) o).worker) &&
             Objects.equals(queue, ((JobProcess) o).queue) &&
-            Objects.equals(job, ((JobProcess) o).job);
+            Objects.equals(execution, ((JobProcess) o).execution);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(worker, queue, job);
+      return Objects.hash(worker, queue, execution);
    }
 }

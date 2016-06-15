@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
@@ -76,6 +77,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
+      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
@@ -87,12 +89,12 @@ public class QueueWorkerImplIT {
       queueDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
-      assertEquals(new JobProcess(worker, "test-queue", job), eventBus.waitForEvent());
-      assertEquals(new JobExecute(worker, "test-queue", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
 
       worker.stop();
 
-      assertEquals(new JobSuccess(worker, "test-queue", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobSuccess(worker, "test-queue", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }
@@ -100,6 +102,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testJobError() throws Exception {
       TestJob job = new TestJob(TestJobRunner.EXCEPTION);
+      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
@@ -111,12 +114,12 @@ public class QueueWorkerImplIT {
       queueDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
-      assertEquals(new JobProcess(worker, "test-queue", job), eventBus.waitForEvent());
-      assertEquals(new JobExecute(worker, "test-queue", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
 
       worker.stop();
 
-      assertEquals(new JobFailed(worker, "test-queue", job, runner, new Throwable("test")), eventBus.waitForEvent());
+      assertEquals(new JobFailed(worker, "test-queue", execution, runner, new Throwable("test")), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }

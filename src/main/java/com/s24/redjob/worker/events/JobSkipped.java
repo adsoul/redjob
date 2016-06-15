@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -22,9 +23,9 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    private final String queue;
 
    /**
-    * Job.
+    * Job execution.
     */
-   private final Object job;
+   private final Execution execution;
 
    /**
     * Job runner.
@@ -38,19 +39,19 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
     *           Worker.
     * @param queue
     *           Queue.
-    * @param job
-    *           Job.
+    * @param execution
+    *           Job execution.
     * @param runner
     *           Job runner, may be null, if execution has been vetoed in process phase.
     */
-   public JobSkipped(Worker worker, String queue, Object job, Runnable runner) {
+   public JobSkipped(Worker worker, String queue, Execution execution, Runnable runner) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
-      Assert.notNull(job, "Precondition violated: job != null.");
+      Assert.notNull(execution, "Precondition violated: execution != null.");
       this.worker = worker;
       this.queue = queue;
-      this.job = job;
+      this.execution = execution;
       this.runner = runner;
    }
 
@@ -65,8 +66,8 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public <J> J getJob() {
-      return (J) job;
+   public Execution getExecution() {
+      return execution;
    }
 
    @Override
@@ -79,12 +80,12 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
       return o instanceof JobSkipped &&
             Objects.equals(worker, ((JobSkipped) o).worker) &&
             Objects.equals(queue, ((JobSkipped) o).queue) &&
-            Objects.equals(job, ((JobSkipped) o).job) &&
+            Objects.equals(execution, ((JobSkipped) o).execution) &&
             Objects.equals(runner, ((JobSkipped) o).runner);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(worker, queue, job, runner);
+      return Objects.hash(worker, queue, execution);
    }
 }
