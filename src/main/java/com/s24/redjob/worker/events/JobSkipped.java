@@ -55,8 +55,8 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public Worker getWorker() {
-      return worker;
+   public <W extends Worker> W getWorker() {
+      return (W) worker;
    }
 
    @Override
@@ -65,13 +65,13 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public Object getJob() {
-      return job;
+   public <J> J getJob() {
+      return (J) job;
    }
 
    @Override
-   public Runnable getRunner() {
-      return runner;
+   public <R> R getRunner() {
+      return (R) runner;
    }
 
    @Override

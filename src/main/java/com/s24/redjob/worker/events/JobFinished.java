@@ -9,7 +9,7 @@ public interface JobFinished {
    /**
     * Worker.
     */
-   Worker getWorker();
+   <W extends Worker> W getWorker();
 
    /**
     * Queue.
@@ -19,10 +19,10 @@ public interface JobFinished {
    /**
     * Job.
     */
-   Object getJob();
+   <J> J getJob();
 
    /**
     * Job runner.
     */
-   Runnable getRunner();
+   <R> R getRunner();
 }

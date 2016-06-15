@@ -45,8 +45,8 @@ public class WorkerPoll extends ApplicationEvent {
    /**
     * Worker.
     */
-   public Worker getWorker() {
-      return worker;
+   public <W extends Worker> W getWorker() {
+      return (W) worker;
    }
 
    /**

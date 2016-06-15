@@ -63,8 +63,8 @@ public class JobExecute extends ApplicationEvent {
    /**
     * Worker.
     */
-   public Worker getWorker() {
-      return worker;
+   public <W extends Worker> W getWorker() {
+      return (W) worker;
    }
 
    /**
@@ -77,15 +77,15 @@ public class JobExecute extends ApplicationEvent {
    /**
     * Job.
     */
-   public Object getJob() {
-      return job;
+   public <J> J getJob() {
+      return (J) job;
    }
 
    /**
     * Job runner.
     */
-   public Runnable getRunner() {
-      return runner;
+   public <R> R getRunner() {
+      return (R) runner;
    }
 
    /**

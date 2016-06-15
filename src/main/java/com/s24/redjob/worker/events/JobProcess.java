@@ -54,8 +54,8 @@ public class JobProcess extends ApplicationEvent {
    /**
     * Worker.
     */
-   public Worker getWorker() {
-      return worker;
+   public <W extends Worker> W getWorker() {
+      return (W) worker;
    }
 
    /**
@@ -68,8 +68,8 @@ public class JobProcess extends ApplicationEvent {
    /**
     * Job.
     */
-   public Object getJob() {
-      return job;
+   public <J> J getJob() {
+      return (J) job;
    }
 
    /**
