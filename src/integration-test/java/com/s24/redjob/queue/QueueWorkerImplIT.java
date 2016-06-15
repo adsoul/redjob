@@ -105,7 +105,7 @@ public class QueueWorkerImplIT {
 
    @Test
    public void testJobError() throws Exception {
-      TestJob job = new TestJob(TestJobRunner.EXCEPTION);
+      TestJob job = new TestJob(TestJobRunner.EXCEPTION_VALUE);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
@@ -122,7 +122,7 @@ public class QueueWorkerImplIT {
 
       worker.stop();
 
-      assertEquals(new JobFailed(worker, "test-queue", execution, runner, new Throwable("test")), eventBus.waitForEvent());
+      assertEquals(new JobFailed(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }

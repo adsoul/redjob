@@ -10,9 +10,15 @@ import org.springframework.util.Assert;
  */
 public class TestJobRunner implements Runnable {
    /**
-    * If the job's value if {@value #EXCEPTION}, this runner throws an exception when processing it.
+    * If the job's value if {@value #EXCEPTION_VALUE}, this runner throws {@link #EXCEPTION} when processing it.
     */
-   public static final String EXCEPTION = "exception";
+   public static final String EXCEPTION_VALUE = "exception";
+
+
+   /**
+    * The exception that will be thrown.
+    */
+   public static final Error EXCEPTION = new Error(EXCEPTION_VALUE);
 
    /**
     * Job.
@@ -53,8 +59,8 @@ public class TestJobRunner implements Runnable {
       }
 
       latch.countDown();
-      if (EXCEPTION.equals(job.getValue())) {
-         throw new Error("exception");
+      if (EXCEPTION_VALUE.equals(job.getValue())) {
+         throw EXCEPTION;
       }
    }
 
