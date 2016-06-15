@@ -13,7 +13,7 @@ import com.s24.redjob.channel.ChannelWorker;
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
  */
-public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements FactoryBean<W>, InitializingBean, ApplicationEventPublisherAware, DisposableBean {
+public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements FactoryBean<W>, InitializingBean, DisposableBean, ApplicationEventPublisherAware {
    /**
     * Worker dao.
     */
@@ -44,9 +44,7 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
 
    @Override
    public void destroy() throws Exception {
-      if (worker instanceof DisposableBean) {
-         ((DisposableBean) worker).destroy();
-      }
+      worker.destroy();
    }
 
    @Override
@@ -67,6 +65,20 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
    //
    // Injections.
    //
+
+   /**
+    * Name of this worker. Defaults to a generated unique name.
+    */
+   public String getName() {
+      return worker.getName();
+   }
+
+   /**
+    * Name of this worker. Defaults to a generated unique name.
+    */
+   public void setName(String name) {
+      this.worker.setName(name);
+   }
 
    /**
     * {@link RedisConnectionFactory} to access Redis.
