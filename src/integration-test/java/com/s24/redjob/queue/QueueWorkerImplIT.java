@@ -116,7 +116,7 @@ public class QueueWorkerImplIT {
 
       worker.stop();
 
-      assertEquals(new JobFailed(worker, "test-queue", job, runner), eventBus.waitForEvent());
+      assertEquals(new JobFailed(worker, "test-queue", job, runner, new Throwable("test")), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getJob());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
    }

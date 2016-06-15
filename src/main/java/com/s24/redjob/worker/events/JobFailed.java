@@ -32,6 +32,11 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
    private final Runnable runner;
 
    /**
+    * Cause of failure.
+    */
+   private final Throwable cause;
+
+   /**
     * Constructor.
     *
     * @param worker
@@ -42,17 +47,21 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
     *           Job.
     * @param runner
     *           Job runner.
+    * @param cause
+    *           Cause of failure.
     */
-   public JobFailed(Worker worker, String queue, Object job, Runnable runner) {
+   public JobFailed(Worker worker, String queue, Object job, Runnable runner, Throwable cause) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
       Assert.notNull(job, "Precondition violated: job != null.");
       Assert.notNull(runner, "Precondition violated: runner != null.");
+      Assert.notNull(cause, "Precondition violated: cause != null.");
       this.worker = worker;
       this.queue = queue;
       this.job = job;
       this.runner = runner;
+      this.cause = cause;
    }
 
    @Override
@@ -75,17 +84,25 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
       return runner;
    }
 
+   /**
+    * Cause of failure.
+    */
+   public Throwable getCause() {
+      return cause;
+   }
+
    @Override
    public boolean equals(Object o) {
       return o instanceof JobFailed &&
             Objects.equals(worker, ((JobFailed) o).worker) &&
             Objects.equals(queue, ((JobFailed) o).queue) &&
             Objects.equals(job, ((JobFailed) o).job) &&
-            Objects.equals(runner, ((JobFailed) o).runner);
+            Objects.equals(runner, ((JobFailed) o).runner) &&
+            Objects.equals(cause, ((JobFailed) o).cause);
    }
 
    @Override
    public int hashCode() {
-      return Objects.hash(worker, queue, job, runner);
+      return Objects.hash(worker, queue, job);
    }
 }

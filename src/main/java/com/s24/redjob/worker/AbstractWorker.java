@@ -174,11 +174,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          log.info("Job succeeded.");
          workerDao.success(name);
          eventBus.publishEvent(new JobSuccess(this, queue, job, runner));
-      } catch (Throwable t) {
-         log.info("Job failed.", t);
+      } catch (Throwable cause) {
+         log.info("Job failed.", cause);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, job, runner));
-         throw new IllegalArgumentException("Job failed.", t);
+         eventBus.publishEvent(new JobFailed(this, queue, job, runner, cause));
+         throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.info("Job finished.", name, execution.getId());
       }
