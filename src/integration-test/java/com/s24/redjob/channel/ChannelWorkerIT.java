@@ -77,14 +77,13 @@ public class ChannelWorkerIT {
    }
 
    @Test
-   public void test() throws Exception {
+   public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
-      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertEquals(new WorkerStart(channelWorker), eventBus.waitForEvent());
 
-      channelDao.publish("test-channel", job);
+      Execution execution = channelDao.publish("test-channel", job);
 
       assertEquals(new JobProcess(channelWorker, "test-channel", execution), eventBus.waitForEvent());
       assertEquals(new JobExecute(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
