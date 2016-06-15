@@ -52,7 +52,12 @@ public class QueueWorkerImplIT {
       ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
       scanForJsonSubtypes(executions, TestJob.class);
 
-      QueueWorkerFactoryBean factory = new QueueWorkerFactoryBean();
+      QueueWorkerFactoryBean factory = new QueueWorkerFactoryBean() {
+         @Override
+         protected void startThread() {
+            // Do NOT start thread yet.
+         }
+      };
       factory.setConnectionFactory(redis);
       factory.setNamespace("namespace");
       factory.setExecutions(executions);
@@ -64,7 +69,7 @@ public class QueueWorkerImplIT {
       worker = factory.getObject();
       queueDao = worker.getQueueDao();
 
-      workerThread = new Thread(worker, "test-worker");
+      workerThread = factory.thread;
    }
 
    @After
@@ -77,7 +82,6 @@ public class QueueWorkerImplIT {
    @Test
    public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
-      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
@@ -86,7 +90,7 @@ public class QueueWorkerImplIT {
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
 
-      queueDao.enqueue("test-queue", job, false);
+      Execution execution = queueDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
@@ -102,7 +106,6 @@ public class QueueWorkerImplIT {
    @Test
    public void testJobError() throws Exception {
       TestJob job = new TestJob(TestJobRunner.EXCEPTION);
-      Execution execution = new Execution(1, job);
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
@@ -111,7 +114,7 @@ public class QueueWorkerImplIT {
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
 
-      queueDao.enqueue("test-queue", job, false);
+      Execution execution = queueDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
