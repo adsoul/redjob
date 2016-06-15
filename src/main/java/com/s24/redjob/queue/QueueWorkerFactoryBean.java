@@ -19,6 +19,11 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
    private QueueDaoImpl queueDao = new QueueDaoImpl();
 
    /**
+    * Worker thread.
+    */
+   private Thread thread = null;
+
+   /**
     * Constructor.
     */
    public QueueWorkerFactoryBean() {
@@ -32,6 +37,9 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
       worker.setQueueDao(queueDao);
 
       super.afterPropertiesSet();
+
+      thread = new Thread(worker, worker.getName());
+      thread.start();
    }
 
    //
