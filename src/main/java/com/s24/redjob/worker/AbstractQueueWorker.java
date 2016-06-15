@@ -92,6 +92,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
             MDC.remove("queue");
          }
       }
+      // TODO markus 2016-06-15: Make interruptable to immediately stop on worker stop requests.
       Thread.sleep(emptyQueuesSleepMillis);
    }
 
