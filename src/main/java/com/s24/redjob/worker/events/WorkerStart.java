@@ -10,7 +10,7 @@ import com.s24.redjob.worker.Worker;
 /**
  * New worker starts.
  */
-public class WorkerStart extends ApplicationEvent {
+public class WorkerStart extends ApplicationEvent implements WorkerEvent {
    /**
     * Worker.
     */
@@ -28,9 +28,7 @@ public class WorkerStart extends ApplicationEvent {
       this.worker = worker;
    }
 
-   /**
-    * Worker.
-    */
+   @Override
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }

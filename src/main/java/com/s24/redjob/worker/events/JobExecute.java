@@ -11,7 +11,7 @@ import com.s24.redjob.worker.Worker;
 /**
  * Worker executes a job.
  */
-public class JobExecute extends ApplicationEvent {
+public class JobExecute extends ApplicationEvent implements JobEvent {
    /**
     * Worker.
     */
@@ -61,23 +61,17 @@ public class JobExecute extends ApplicationEvent {
       this.runner = runner;
    }
 
-   /**
-    * Worker.
-    */
+   @Override
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
 
-   /**
-    * Queue.
-    */
+   @Override
    public String getQueue() {
       return queue;
    }
 
-   /**
-    * Job execution.
-    */
+   @Override
    public Execution getExecution() {
       return execution;
    }

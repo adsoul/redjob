@@ -10,7 +10,7 @@ import com.s24.redjob.worker.Worker;
 /**
  * Worker got an exception.
  */
-public class WorkerError extends ApplicationEvent {
+public class WorkerError extends ApplicationEvent implements WorkerEvent {
    /**
     * Worker.
     */
@@ -35,9 +35,7 @@ public class WorkerError extends ApplicationEvent {
       this.throwable = throwable;
    }
 
-   /**
-    * Worker.
-    */
+   @Override
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
