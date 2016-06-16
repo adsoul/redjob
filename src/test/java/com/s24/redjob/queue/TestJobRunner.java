@@ -23,9 +23,14 @@ public class TestJobRunner implements JobRunner<TestJob> {
    public static final Error EXCEPTION = new Error(EXCEPTION_VALUE);
 
    /**
+    * Last executed job.
+    */
+   private static volatile TestJob lastJob;
+
+   /**
     * Job.
     */
-   private static volatile TestJob job;
+   private TestJob job;
 
    /**
     * Latch.
@@ -39,11 +44,27 @@ public class TestJobRunner implements JobRunner<TestJob> {
       latch = new CountDownLatch(count);
    }
 
+   public TestJobRunner() {
+   }
+
+   /**
+    * Constructor for creating a runner that executed a job.
+    *
+    * @param job
+    *           Job.
+    */
+   public TestJobRunner(TestJob job) {
+      this.job = job;
+   }
+
+
+
    @Override
    public void execute(TestJob job) {
       Assert.notNull(job, "Precondition violated: job != null.");
 
-      TestJobRunner.job = job;
+      this.job = job;
+      TestJobRunner.lastJob = job;
 
       try {
          // Simulate execution of job...
@@ -70,13 +91,13 @@ public class TestJobRunner implements JobRunner<TestJob> {
    /**
     * Job.
     */
-   public static TestJob getJob() {
-      return job;
+   public static TestJob getLastJob() {
+      return lastJob;
    }
 
    @Override
    public boolean equals(Object o) {
-      return o instanceof TestJobRunner && job.equals(job);
+      return o instanceof TestJobRunner && job.equals(((TestJobRunner) o).job);
    }
 
    @Override

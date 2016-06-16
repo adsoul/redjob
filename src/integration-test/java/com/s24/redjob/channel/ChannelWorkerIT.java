@@ -92,7 +92,7 @@ public class ChannelWorkerIT {
       new Thread(channelWorker::stop).start();
 
       assertEquals(new JobSuccess(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
-      assertEquals(job, TestJobRunner.getJob());
+      assertEquals(job, TestJobRunner.getLastJob());
 
       // Worker stop should always be published, if the last worker has finished.
       assertEquals(new WorkerStopped(channelWorker), eventBus.waitForEvent());
