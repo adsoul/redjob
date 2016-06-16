@@ -1,8 +1,10 @@
 package com.s24.redjob.worker;
 
 import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 
@@ -28,6 +30,21 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * Log.
     */
    protected final Logger log = LoggerFactory.getLogger(getClass());
+
+   /**
+    * Placeholder for the worker id.
+    */
+   public static final String ID = "[id]";
+
+   /**
+    * Placeholder for hostname without domain.
+    */
+   public static final String HOSTNAME = "[hostname]";
+
+   /**
+    * Placeholder for hostname without domain.
+    */
+   public static final String FULL_HOSTNAME = "[full-hostname]";
 
    /**
     * Sequence for worker ids.
@@ -85,7 +102,9 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
       id = IDS.incrementAndGet();
-      if (!StringUtils.hasLength(name)) {
+      if (StringUtils.hasLength(name)) {
+         name = resolvePlaceholders(name);
+      } else {
          name = createName();
       }
    }
@@ -94,6 +113,29 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    public void destroy() {
       // TODO markus 2016-06-15: Interrupt too?
       stop();
+   }
+
+   /**
+    * Resolve placeholder in custom worker names.
+    *
+    * Supported placeholders:
+    * <ul>
+    *    <li>id: Worker id.</li>
+    *    <li>hostname: Hostname without domain.</li>
+    *    <li>full-hostname: Hostname with domain.</li>
+    * </ul>
+    */
+   protected String resolvePlaceholders(String name) throws Exception {
+      name = name.replaceAll(Pattern.quote(ID), Long.toString(id));
+
+      String fullHostname = InetAddress.getLocalHost().getHostName();
+      name = name.replaceAll(Pattern.quote(FULL_HOSTNAME), fullHostname);
+
+      int firstDot = fullHostname.indexOf(".");
+      String hostname = firstDot > 0? fullHostname.substring(0, firstDot) : fullHostname;
+      name = name.replaceAll(Pattern.quote(HOSTNAME), hostname);
+
+      return name;
    }
 
    /**
