@@ -40,7 +40,7 @@ public class Execution {
     *           Job.
     */
    public Execution(long id, Object job) {
-      this(id, job, new Result());
+      this(id, job, new NoResult());
    }
 
    /**

@@ -32,7 +32,7 @@ public class ExecutionRedisSerializer extends Jackson2JsonRedisSerializer<Execut
 
    @Override
    public void setObjectMapper(ObjectMapper objectMapper) {
-      objectMapper.registerSubtypes(Result.class);
+      objectMapper.registerSubtypes(NoResult.class);
       super.setObjectMapper(objectMapper);
       this.objectMapper = objectMapper;
    }

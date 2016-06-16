@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -25,21 +26,26 @@ public class SpringJobRunnerFactory implements JobRunnerFactory {
 
       JsonTypeName type = job.getClass().getAnnotation(JsonTypeName.class);
       Assert.notNull(type, "Pre-condition violated: Job has a @JsonTypeName.");
+      String jsonType = type.value();
+      if (!StringUtils.hasLength(jsonType)) {
+         // If the type is not specified in the annotation, use the simple class name as documented.
+         jsonType = job.getClass().getSimpleName();
+      }
 
       // Check for bean existence and that bean is a prototype.
       // Beans have to be prototypes, because they are configured with the job vars below.
-      BeanDefinition beanDefinition = beanFactory.getBeanDefinition(type.value());
+      BeanDefinition beanDefinition = beanFactory.getBeanDefinition(jsonType);
       if (!BeanDefinition.SCOPE_PROTOTYPE.equals(beanDefinition.getScope())) {
          throw new IllegalArgumentException(String.format(
                "Job runners have to be prototypes, but job runner %s has scope %s.",
-               type.value(), beanDefinition.getScope()));
+               jsonType, beanDefinition.getScope()));
       }
 
-      Object runner = beanFactory.getBean(type.value(), job);
+      Object runner = beanFactory.getBean(jsonType, job);
       if (!(runner instanceof Runnable)) {
          throw new IllegalArgumentException(String.format(
                "Job runners need to be Runnable, but job runner %s (%s) is not.",
-               type.value(), runner.getClass().getName()));
+               jsonType, runner.getClass().getName()));
       }
 
       return (Runnable) runner;
