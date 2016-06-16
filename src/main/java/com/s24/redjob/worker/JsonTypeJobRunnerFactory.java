@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * jobs. The job runners are expected to be implement {@link Runnable} and to be prototypes providing a one argument
  * constructor accepting the job. Because they are prototypes, job runners are allowed to have state.
  */
-public class SpringJobRunnerFactory implements JobRunnerFactory {
+public class JsonTypeJobRunnerFactory implements JobRunnerFactory {
    /**
     * Bean factory.
     */
