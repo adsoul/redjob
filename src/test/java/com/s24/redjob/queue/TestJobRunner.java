@@ -1,16 +1,14 @@
 package com.s24.redjob.queue;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.JobRunner;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Job runner for {@link TestJob}s.
  */
-public class TestJobRunner implements JobRunner<TestJob> {
+public class TestJobRunner implements Runnable {
    /**
     * If the job's value if {@value #EXCEPTION_VALUE}, this runner throws {@link #EXCEPTION} when processing it.
     */
@@ -44,9 +42,6 @@ public class TestJobRunner implements JobRunner<TestJob> {
       latch = new CountDownLatch(count);
    }
 
-   public TestJobRunner() {
-   }
-
    /**
     * Constructor for creating a runner that executed a job.
     *
@@ -54,16 +49,13 @@ public class TestJobRunner implements JobRunner<TestJob> {
     *           Job.
     */
    public TestJobRunner(TestJob job) {
-      this.job = job;
-   }
-
-
-
-   @Override
-   public void execute(TestJob job) {
       Assert.notNull(job, "Precondition violated: job != null.");
 
       this.job = job;
+   }
+
+   @Override
+   public void run() {
       TestJobRunner.lastJob = job;
 
       try {

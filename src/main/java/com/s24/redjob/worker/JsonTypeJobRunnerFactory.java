@@ -1,12 +1,11 @@
 package com.s24.redjob.worker;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
  * {@link JobRunnerFactory} using a Spring application context to retrieve job runners by the {@link JsonTypeName} of
@@ -21,7 +20,7 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory {
    private ConfigurableListableBeanFactory beanFactory;
 
    @Override
-   public <J> JobRunner<J> runnerFor(J job) {
+   public <J> Runnable runnerFor(J job) {
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
       JsonTypeName type = job.getClass().getAnnotation(JsonTypeName.class);
@@ -48,6 +47,6 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory {
                jsonType, runner.getClass().getName()));
       }
 
-      return j -> ((Runnable) runner).run();
+      return (Runnable) runner;
    }
 }

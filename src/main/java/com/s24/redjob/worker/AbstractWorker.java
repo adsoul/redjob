@@ -1,13 +1,6 @@
 package com.s24.redjob.worker;
 
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
+import com.s24.redjob.worker.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -16,11 +9,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.worker.events.JobExecute;
-import com.s24.redjob.worker.events.JobFailed;
-import com.s24.redjob.worker.events.JobProcess;
-import com.s24.redjob.worker.events.JobSkipped;
-import com.s24.redjob.worker.events.JobSuccess;
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Base implementation of {@link Worker}.
@@ -186,7 +180,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          return true;
       }
 
-      JobRunner<J> runner = jobRunnerFactory.runnerFor(job);
+      Runnable runner = jobRunnerFactory.runnerFor(job);
       if (runner == null) {
          log.error("No job runner found.", name);
          throw new IllegalArgumentException("No job runner found.");
@@ -208,25 +202,30 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * @throws Throwable
     *            In case of errors.
     */
-   protected <J> void execute(String queue, Execution execution, JobRunner<J> runner) throws Throwable {
-      JobExecute jobExecute = new JobExecute(this, queue, execution, runner);
+   protected <J> void execute(String queue, Execution execution, Runnable runner) throws Throwable {
+      Object wrappedRunner = runner;
+      if (runner instanceof WrappingRunnable) {
+         wrappedRunner =  ((WrappingRunnable) runner).getWrappedRunner();
+      }
+
+      JobExecute jobExecute = new JobExecute(this, queue, execution, wrappedRunner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
          log.debug("Job execution vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, execution, runner));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution, wrappedRunner));
          return;
       }
 
       log.info("Starting job.");
       try {
-         runner.execute(execution.getJob());
+         runner.run();
          log.info("Job succeeded.");
          workerDao.success(name);
-         eventBus.publishEvent(new JobSuccess(this, queue, execution, runner));
+         eventBus.publishEvent(new JobSuccess(this, queue, execution, wrappedRunner));
       } catch (Throwable cause) {
          log.info("Job failed.", cause);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, execution, runner, cause));
+         eventBus.publishEvent(new JobFailed(this, queue, execution, wrappedRunner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.info("Job finished.", name, execution.getId());

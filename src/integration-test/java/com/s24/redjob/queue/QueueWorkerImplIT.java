@@ -1,26 +1,18 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
+import com.s24.redjob.TestEventPublisher;
+import com.s24.redjob.TestRedis;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.events.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import com.s24.redjob.TestEventPublisher;
-import com.s24.redjob.TestRedis;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
-import com.s24.redjob.worker.events.JobExecute;
-import com.s24.redjob.worker.events.JobFailed;
-import com.s24.redjob.worker.events.JobProcess;
-import com.s24.redjob.worker.events.JobSuccess;
-import com.s24.redjob.worker.events.WorkerNext;
-import com.s24.redjob.worker.events.WorkerPoll;
-import com.s24.redjob.worker.events.WorkerStart;
-import com.s24.redjob.worker.events.WorkerStopped;
+import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration test for {@link QueueWorker}.
@@ -83,7 +75,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
-      TestJobRunner runner = new TestJobRunner();
+      TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
       workerThread.start();
@@ -109,7 +101,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testJobError() throws Exception {
       TestJob job = new TestJob(TestJobRunner.EXCEPTION_VALUE);
-      TestJobRunner runner = new TestJobRunner();
+      TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
       workerThread.start();

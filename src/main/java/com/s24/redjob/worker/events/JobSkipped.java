@@ -1,13 +1,11 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.JobRunner;
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker has skipped a job due to a veto.
@@ -31,7 +29,7 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    /**
     * Job runner.
     */
-   private final JobRunner<?> runner;
+   private final Object runner;
 
    /**
     * Constructor.
@@ -45,7 +43,7 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
     * @param runner
     *           Job runner, may be null, if execution has been vetoed in process phase.
     */
-   public JobSkipped(Worker worker, String queue, Execution execution, JobRunner<?> runner) {
+   public JobSkipped(Worker worker, String queue, Execution execution, Object runner) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -72,7 +70,7 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public <J, R extends JobRunner<J>> R getRunner() {
+   public <R> R getRunner() {
       return (R) runner;
    }
 

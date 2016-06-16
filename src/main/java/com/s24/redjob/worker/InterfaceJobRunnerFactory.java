@@ -19,7 +19,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory {
    private ConfigurableListableBeanFactory beanFactory;
 
    @Override
-   public <J> JobRunner<J> runnerFor(J job) {
+   public <J> Runnable runnerFor(J job) {
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
       ResolvableType type = ResolvableType.forClassWithGenerics(JobRunner.class, job.getClass());
@@ -45,6 +45,13 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory {
                beanName, beanDefinition.getScope()));
       }
 
-      return (JobRunner<J>) beanFactory.getBean(beanName);
+      JobRunner<J> runner = (JobRunner<J>) beanFactory.getBean(beanName);
+
+      return new WrappingRunnable(runner) {
+         @Override
+         public void run() {
+            runner.execute(job);
+         }
+      };
    }
 }

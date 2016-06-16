@@ -1,13 +1,11 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.JobRunner;
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker failed to execute a job.
@@ -31,7 +29,7 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
    /**
     * Job runner.
     */
-   private final JobRunner<?> runner;
+   private final Object runner;
 
    /**
     * Cause of failure.
@@ -52,7 +50,7 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
     * @param cause
     *           Cause of failure.
     */
-   public JobFailed(Worker worker, String queue, Execution execution, JobRunner<?> runner, Throwable cause) {
+   public JobFailed(Worker worker, String queue, Execution execution, Object runner, Throwable cause) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -82,7 +80,7 @@ public class JobFailed extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public <J, R extends JobRunner<J>> R getRunner() {
+   public <R> R getRunner() {
       return (R) runner;
    }
 
