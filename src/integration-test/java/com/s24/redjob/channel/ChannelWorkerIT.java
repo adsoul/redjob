@@ -79,7 +79,7 @@ public class ChannelWorkerIT {
    @Test
    public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
-      TestJobRunner runner = new TestJobRunner(job);
+      TestJobRunner runner = new TestJobRunner();
 
       assertEquals(new WorkerStart(channelWorker), eventBus.waitForEvent());
 

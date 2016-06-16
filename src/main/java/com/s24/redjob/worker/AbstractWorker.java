@@ -171,8 +171,8 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * @throws Throwable
     *            In case of errors.
     */
-   protected boolean process(String queue, Execution execution) throws Throwable {
-      Object job = execution.getJob();
+   protected <J> boolean process(String queue, Execution execution) throws Throwable {
+      J job = execution.getJob();
       if (job == null) {
          log.error("Missing job.");
          throw new IllegalArgumentException("Missing job.");
@@ -186,7 +186,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          return true;
       }
 
-      Runnable runner = jobRunnerFactory.runnerFor(job);
+      JobRunner<J> runner = jobRunnerFactory.runnerFor(job);
       if (runner == null) {
          log.error("No job runner found.", name);
          throw new IllegalArgumentException("No job runner found.");
@@ -208,7 +208,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * @throws Throwable
     *            In case of errors.
     */
-   protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
+   protected <J> void execute(String queue, Execution execution, JobRunner<J> runner) throws Throwable {
       JobExecute jobExecute = new JobExecute(this, queue, execution, runner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
@@ -219,7 +219,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
       log.info("Starting job.");
       try {
-         runner.run();
+         runner.execute(execution.getJob());
          log.info("Job succeeded.");
          workerDao.success(name);
          eventBus.publishEvent(new JobSuccess(this, queue, execution, runner));

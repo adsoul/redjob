@@ -83,7 +83,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testLifecycle() throws Exception {
       TestJob job = new TestJob();
-      TestJobRunner runner = new TestJobRunner(job);
+      TestJobRunner runner = new TestJobRunner();
 
       assertTrue(eventBus.getEvents().isEmpty());
       workerThread.start();
@@ -109,7 +109,7 @@ public class QueueWorkerImplIT {
    @Test
    public void testJobError() throws Exception {
       TestJob job = new TestJob(TestJobRunner.EXCEPTION_VALUE);
-      TestJobRunner runner = new TestJobRunner(job);
+      TestJobRunner runner = new TestJobRunner();
 
       assertTrue(eventBus.getEvents().isEmpty());
       workerThread.start();

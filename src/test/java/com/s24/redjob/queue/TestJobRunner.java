@@ -5,10 +5,12 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.JobRunner;
+
 /**
  * Job runner for {@link TestJob}s.
  */
-public class TestJobRunner implements Runnable {
+public class TestJobRunner implements JobRunner<TestJob> {
    /**
     * If the job's value if {@value #EXCEPTION_VALUE}, this runner throws {@link #EXCEPTION} when processing it.
     */
@@ -31,18 +33,6 @@ public class TestJobRunner implements Runnable {
    private static volatile CountDownLatch latch = new CountDownLatch(0);
 
    /**
-    * Constructor.
-    *
-    * @param job
-    *           Job.
-    */
-   public TestJobRunner(TestJob job) {
-      Assert.notNull(job, "Precondition violated: job != null.");
-
-      this.job = job;
-   }
-
-   /**
     * Reset latch to the given value.
     */
    public static void resetLatch(int count) {
@@ -50,7 +40,11 @@ public class TestJobRunner implements Runnable {
    }
 
    @Override
-   public void run() {
+   public void execute(TestJob job) {
+      Assert.notNull(job, "Precondition violated: job != null.");
+
+      TestJobRunner.job = job;
+
       try {
          // Simulate execution of job...
          Thread.sleep(100);
@@ -82,7 +76,7 @@ public class TestJobRunner implements Runnable {
 
    @Override
    public boolean equals(Object o) {
-      return o instanceof TestJobRunner && job.equals(((TestJobRunner) o).job);
+      return o instanceof TestJobRunner && job.equals(job);
    }
 
    @Override

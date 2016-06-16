@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.JobRunner;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -30,7 +31,7 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
    /**
     * Job runner.
     */
-   private final Runnable runner;
+   private final JobRunner<?> runner;
 
    /**
     * Constructor.
@@ -44,7 +45,7 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
     * @param runner
     *           Job runner.
     */
-   public JobSuccess(Worker worker, String queue, Execution execution, Runnable runner) {
+   public JobSuccess(Worker worker, String queue, Execution execution, JobRunner<?> runner) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -72,7 +73,7 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   public <R> R getRunner() {
+   public <J, R extends JobRunner<J>> R getRunner() {
       return (R) runner;
    }
 

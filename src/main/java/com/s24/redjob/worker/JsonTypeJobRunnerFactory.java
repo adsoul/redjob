@@ -21,7 +21,7 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory {
    private ConfigurableListableBeanFactory beanFactory;
 
    @Override
-   public <J> Runnable runnerFor(J job) {
+   public <J> JobRunner<J> runnerFor(J job) {
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
       JsonTypeName type = job.getClass().getAnnotation(JsonTypeName.class);
@@ -48,6 +48,6 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory {
                jsonType, runner.getClass().getName()));
       }
 
-      return (Runnable) runner;
+      return j -> ((Runnable) runner).run();
    }
 }

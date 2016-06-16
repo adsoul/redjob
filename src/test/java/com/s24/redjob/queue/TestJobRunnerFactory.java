@@ -2,6 +2,7 @@ package com.s24.redjob.queue;
 
 import org.springframework.util.Assert;
 
+import com.s24.redjob.worker.JobRunner;
 import com.s24.redjob.worker.JobRunnerFactory;
 
 /**
@@ -9,8 +10,8 @@ import com.s24.redjob.worker.JobRunnerFactory;
  */
 public class TestJobRunnerFactory implements JobRunnerFactory {
    @Override
-   public Runnable runnerFor(Object job) {
+   public <J> JobRunner<J> runnerFor(J job) {
       Assert.isInstanceOf(TestJob.class, job, "Precondition violated: ");
-      return new TestJobRunner((TestJob) job);
+      return (JobRunner<J>) new TestJobRunner();
    }
 }

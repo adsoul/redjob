@@ -6,6 +6,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.JobRunner;
 import com.s24.redjob.worker.Worker;
 
 /**
@@ -30,7 +31,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    /**
     * Job runner.
     */
-   private final Runnable runner;
+   private final JobRunner<?> runner;
 
    /**
     * Veto against job execution?.
@@ -49,7 +50,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
     * @param runner
     *           Job runner.
     */
-   public JobExecute(Worker worker, String queue, Execution execution, Runnable runner) {
+   public JobExecute(Worker worker, String queue, Execution execution, JobRunner<?> runner) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -79,7 +80,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    /**
     * Job runner.
     */
-   public <R> R getRunner() {
+   public <J, R extends JobRunner<J>> R getRunner() {
       return (R) runner;
    }
 

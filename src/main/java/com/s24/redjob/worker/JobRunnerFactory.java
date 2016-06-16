@@ -11,5 +11,5 @@ public interface JobRunnerFactory {
     *           Job.
     * @return Job runner.
     */
-   <J> Runnable runnerFor(J job);
+   <J> JobRunner<J> runnerFor(J job);
 }
