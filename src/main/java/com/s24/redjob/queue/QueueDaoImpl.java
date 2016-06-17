@@ -80,11 +80,13 @@ public class QueueDaoImpl extends AbstractDao implements QueueDao {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
          Execution execution = new Execution(id, job);
-         // TODO markus 2016-06-15: Reduce level to debug, guard with if debug enabled.
-         log.info(new String(executions.serialize(execution), StandardCharsets.UTF_8));
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
-         connection.hSet(key(JOBS), idBytes, executions.serialize(execution));
+         byte[] executionBytes = executions.serialize(execution);
+         if (log.isDebugEnabled()) {
+            log.debug("Enqueuing: {}", new String(executionBytes, StandardCharsets.UTF_8));
+         }
+         connection.hSet(key(JOBS), idBytes, executionBytes);
          if (front) {
             connection.lPush(key(QUEUE, queue), idBytes);
          } else {
