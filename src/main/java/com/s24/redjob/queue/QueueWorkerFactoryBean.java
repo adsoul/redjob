@@ -45,7 +45,7 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
     * Create and start worker thread.
     */
    protected Thread startThread() {
-      Thread thread = new Thread(worker, worker.getName());
+      thread = new Thread(worker, worker.getName());
       thread.start();
       return thread;
    }
