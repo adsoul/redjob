@@ -1,8 +1,8 @@
 package com.s24.redjob.queue;
 
-import java.util.Map;
-
 import com.s24.redjob.worker.Execution;
+
+import java.util.Map;
 
 /**
  * DAO for accessing job queues.
@@ -33,6 +33,14 @@ public interface QueueDao {
    boolean dequeue(String queue, long id);
 
    /**
+    * Update a job execution.
+    *
+    * @param execution
+    *           Job execution.
+    */
+   void update(Execution execution);
+
+   /**
     * Get a job execution.
     *
     * @param id
@@ -40,14 +48,6 @@ public interface QueueDao {
     * @return execution, or null if not existing.
     */
    Execution get(long id);
-
-   /**
-    * Update a job execution.
-    *
-    * @param execution
-    *           Job execution.
-    */
-   void update(Execution execution);
 
    /**
     * Get all jobs.
