@@ -60,6 +60,8 @@ public class ChannelWorker extends AbstractWorker {
 
       super.afterPropertiesSet();
 
+      log.info("Starting worker {}.", getName());
+      log.info("Listening to channels {}.", StringUtils.collectionToCommaDelimitedString(channels));
       List<Topic> topics = channels.stream().map(channelDao::getTopic).collect(Collectors.toList());
       synchronized (listenerContainer) {
          listenerContainer.addMessageListener(listener, topics);
@@ -71,6 +73,7 @@ public class ChannelWorker extends AbstractWorker {
 
    @Override
    public void stop() {
+      log.info("Stop worker {}.", getName());
       super.stop();
       destroy();
    }

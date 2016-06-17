@@ -45,6 +45,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    public void run() {
       try {
          MDC.put("worker", getName());
+         log.info("Starting worker {}.", getName());
          workerDao.start(name);
          eventBus.publishEvent(new WorkerStart(this));
          poll();
@@ -52,6 +53,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
          eventBus.publishEvent(new WorkerError(this, t));
       } finally {
+         log.info("Stop worker {}.", getName());
          eventBus.publishEvent(new WorkerStopped(this));
          workerDao.stop(name);
       }

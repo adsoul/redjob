@@ -3,6 +3,7 @@ package com.s24.redjob.worker;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -13,7 +14,8 @@ import com.s24.redjob.channel.ChannelWorker;
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
  */
-public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements FactoryBean<W>, InitializingBean, DisposableBean, ApplicationEventPublisherAware {
+public class AbstractWorkerFactoryBean<W extends AbstractWorker>
+      implements SmartFactoryBean<W>, InitializingBean, DisposableBean, ApplicationEventPublisherAware {
    /**
     * Worker dao.
     */
@@ -45,6 +47,16 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker> implements Fact
    @Override
    public void destroy() throws Exception {
       worker.destroy();
+   }
+
+   @Override
+   public boolean isEagerInit() {
+      return true;
+   }
+
+   @Override
+   public boolean isPrototype() {
+      return false;
    }
 
    @Override
