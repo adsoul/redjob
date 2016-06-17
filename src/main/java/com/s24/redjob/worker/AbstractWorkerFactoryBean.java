@@ -65,8 +65,8 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
    }
 
    @Override
-   public Class<ChannelWorker> getObjectType() {
-      return ChannelWorker.class;
+   public Class<W> getObjectType() {
+      return (Class<W>) worker.getClass();
    }
 
    @Override
