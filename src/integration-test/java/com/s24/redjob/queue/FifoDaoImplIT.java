@@ -21,9 +21,9 @@ import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
- * Integration test for {@link QueueDaoImpl}.
+ * Integration test for {@link FifoDaoImpl}.
  */
-public class QueueDaoImplIT {
+public class FifoDaoImplIT {
    /**
     * Test queue.
     */
@@ -32,7 +32,7 @@ public class QueueDaoImplIT {
    /**
     * DAO under test.
     */
-   private QueueDaoImpl dao = new QueueDaoImpl();
+   private FifoDaoImpl dao = new FifoDaoImpl();
 
    @Before
    public void setUp() throws Exception {

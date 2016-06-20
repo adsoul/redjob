@@ -1,23 +1,31 @@
 package com.s24.redjob.queue;
 
-import com.s24.redjob.TestEventPublisher;
-import com.s24.redjob.TestRedis;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
-import com.s24.redjob.worker.events.*;
+import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.s24.redjob.TestEventPublisher;
+import com.s24.redjob.TestRedis;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerNext;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
 
 /**
- * Integration test for {@link QueueWorker}.
+ * Integration test for {@link FifoWorker}.
  */
-public class QueueWorkerImplIT {
+public class FifoWorkerImplIT {
    /**
     * Recording event publisher.
     */
@@ -26,12 +34,12 @@ public class QueueWorkerImplIT {
    /**
     * Queue DAO.
     */
-   private QueueDao queueDao;
+   private FifoDao fifoDao;
 
    /**
     * Worker under test.
     */
-   private QueueWorker worker;
+   private FifoWorker worker;
 
    /**
     * Worker thread.
@@ -45,7 +53,7 @@ public class QueueWorkerImplIT {
       ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
       scanForJsonSubtypes(executions, TestJob.class);
 
-      QueueWorkerFactoryBean factory = new QueueWorkerFactoryBean() {
+      FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean() {
          @Override
          protected Thread startThread() {
             // Do NOT start thread yet.
@@ -62,7 +70,7 @@ public class QueueWorkerImplIT {
       factory.afterPropertiesSet();
 
       worker = factory.getObject();
-      queueDao = worker.getQueueDao();
+      fifoDao = worker.getFifoDao();
    }
 
    @After
@@ -84,7 +92,7 @@ public class QueueWorkerImplIT {
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
 
-      Execution execution = queueDao.enqueue("test-queue", job, false);
+      Execution execution = fifoDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
@@ -110,7 +118,7 @@ public class QueueWorkerImplIT {
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
 
-      Execution execution = queueDao.enqueue("test-queue", job, false);
+      Execution execution = fifoDao.enqueue("test-queue", job, false);
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());

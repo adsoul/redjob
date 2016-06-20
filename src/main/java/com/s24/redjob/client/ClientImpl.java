@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
 
 import com.s24.redjob.channel.ChannelDao;
 import com.s24.redjob.lock.LockDao;
-import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.queue.FifoDao;
 import com.s24.redjob.worker.Execution;
 
 /**
@@ -19,7 +19,7 @@ public class ClientImpl implements Client {
    /**
     * Queue dao.
     */
-   private QueueDao queueDao;
+   private FifoDao fifoDao;
 
    /**
     * Channel dao.
@@ -36,29 +36,29 @@ public class ClientImpl implements Client {
     */
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
-      Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
+      Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
       Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
       Assert.notNull(lockDao, "Precondition violated: lockDao != null.");
    }
 
    @Override
    public long enqueue(String queue, Object job, boolean front) {
-      return queueDao.enqueue(queue, job, front).getId();
+      return fifoDao.enqueue(queue, job, front).getId();
    }
 
    @Override
    public void dequeue(String queue, long id) {
-      queueDao.dequeue(queue, id);
+      fifoDao.dequeue(queue, id);
    }
 
    @Override
    public Execution execution(long id) {
-      return queueDao.get(id);
+      return fifoDao.get(id);
    }
 
    @Override
    public Map<Long, Execution> executions() {
-      return queueDao.getAll();
+      return fifoDao.getAll();
    }
 
    @Override
@@ -83,15 +83,15 @@ public class ClientImpl implements Client {
    /**
     * Queue dao.
     */
-   public QueueDao getQueueDao() {
-      return queueDao;
+   public FifoDao getFifoDao() {
+      return fifoDao;
    }
 
    /**
     * Queue dao.
     */
-   public void setQueueDao(QueueDao queueDao) {
-      this.queueDao = queueDao;
+   public void setFifoDao(FifoDao fifoDao) {
+      this.fifoDao = fifoDao;
    }
 
    /**

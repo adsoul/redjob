@@ -7,7 +7,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.channel.ChannelDaoImpl;
 import com.s24.redjob.lock.LockDaoImpl;
-import com.s24.redjob.queue.QueueDaoImpl;
+import com.s24.redjob.queue.FifoDaoImpl;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
@@ -17,7 +17,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
    /**
     * Queue dao.
     */
-   private QueueDaoImpl queueDao = new QueueDaoImpl();
+   private FifoDaoImpl fifoDao = new FifoDaoImpl();
 
    /**
     * Channel dao.
@@ -36,11 +36,11 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
 
    @Override
    public void afterPropertiesSet() throws Exception {
-      queueDao.afterPropertiesSet();
+      fifoDao.afterPropertiesSet();
       channelDao.afterPropertiesSet();
       lockDao.afterPropertiesSet();
 
-      client.setQueueDao(queueDao);
+      client.setFifoDao(fifoDao);
       client.setChannelDao(channelDao);
       client.setLockDao(lockDao);
       client.afterPropertiesSet();
@@ -69,14 +69,14 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
     * {@link RedisConnectionFactory} to access Redis.
     */
    public RedisConnectionFactory getConnectionFactory() {
-      return queueDao.getConnectionFactory();
+      return fifoDao.getConnectionFactory();
    }
 
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
-      queueDao.setConnectionFactory(connectionFactory);
+      fifoDao.setConnectionFactory(connectionFactory);
       channelDao.setConnectionFactory(connectionFactory);
       lockDao.setConnectionFactory(connectionFactory);
    }
@@ -85,14 +85,14 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
     */
    public String getNamespace() {
-      return queueDao.getNamespace();
+      return fifoDao.getNamespace();
    }
 
    /**
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
     */
    public void setNamespace(String namespace) {
-      queueDao.setNamespace(namespace);
+      fifoDao.setNamespace(namespace);
       channelDao.setNamespace(namespace);
       lockDao.setNamespace(namespace);
    }
@@ -101,14 +101,14 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
     * Redis serializer for job executions.
     */
    public ExecutionRedisSerializer getExecutions() {
-      return queueDao.getExecutions();
+      return fifoDao.getExecutions();
    }
 
    /**
     * Redis serializer for job executions.
     */
    public void setExecutions(ExecutionRedisSerializer executions) {
-      queueDao.setExecutions(executions);
+      fifoDao.setExecutions(executions);
       channelDao.setExecutions(executions);
    }
 }

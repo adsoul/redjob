@@ -9,12 +9,12 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.AbstractDao;
-import com.s24.redjob.queue.QueueDao;
+import com.s24.redjob.queue.FifoDao;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
- * Default implementation of {@link QueueDao}.
+ * Default implementation of {@link FifoDao}.
  */
 public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    /**

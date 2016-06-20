@@ -10,13 +10,13 @@ import com.s24.redjob.worker.AbstractWorkerFactoryBean;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
- * {@link FactoryBean} for easy creation of a {@link QueueWorker}.
+ * {@link FactoryBean} for easy creation of a {@link FifoWorker}.
  */
-public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorker> {
+public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker> {
    /**
     * Queue dao.
     */
-   private QueueDaoImpl queueDao = new QueueDaoImpl();
+   private FifoDaoImpl fifoDao = new FifoDaoImpl();
 
    /**
     * Worker thread.
@@ -26,15 +26,15 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
    /**
     * Constructor.
     */
-   public QueueWorkerFactoryBean() {
-      super(new QueueWorker());
+   public FifoWorkerFactoryBean() {
+      super(new FifoWorker());
    }
 
    @Override
    public void afterPropertiesSet() throws Exception {
-      queueDao.afterPropertiesSet();
+      fifoDao.afterPropertiesSet();
 
-      worker.setQueueDao(queueDao);
+      worker.setFifoDao(fifoDao);
 
       super.afterPropertiesSet();
 
@@ -59,7 +59,7 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
     */
    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
       super.setConnectionFactory(connectionFactory);
-      queueDao.setConnectionFactory(connectionFactory);
+      fifoDao.setConnectionFactory(connectionFactory);
    }
 
    /**
@@ -67,21 +67,21 @@ public class QueueWorkerFactoryBean extends AbstractWorkerFactoryBean<QueueWorke
     */
    public void setNamespace(String namespace) {
       super.setNamespace(namespace);
-      queueDao.setNamespace(namespace);
+      fifoDao.setNamespace(namespace);
    }
 
    /**
     * Redis serializer for job executions.
     */
    public ExecutionRedisSerializer getExecutions() {
-      return queueDao.getExecutions();
+      return fifoDao.getExecutions();
    }
 
    /**
     * Redis serializer for job executions.
     */
    public void setExecutions(ExecutionRedisSerializer executions) {
-      queueDao.setExecutions(executions);
+      fifoDao.setExecutions(executions);
    }
 
    /**

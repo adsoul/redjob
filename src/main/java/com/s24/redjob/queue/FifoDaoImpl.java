@@ -17,9 +17,9 @@ import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.ExecutionRedisSerializer;
 
 /**
- * Default implementation of {@link QueueDao}.
+ * Default implementation of {@link FifoDao}.
  */
-public class QueueDaoImpl extends AbstractDao implements QueueDao {
+public class FifoDaoImpl extends AbstractDao implements FifoDao {
    /**
     * Redis key part for id sequence.
     */

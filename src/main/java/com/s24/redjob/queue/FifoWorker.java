@@ -11,40 +11,40 @@ import com.s24.redjob.worker.Worker;
 /**
  * Default implementation of {@link Worker} for queues based on a Redis list.
  */
-public class QueueWorker extends AbstractQueueWorker {
+public class FifoWorker extends AbstractQueueWorker {
    /**
     * Queue dao.
     */
-   private QueueDao queueDao;
+   private FifoDao fifoDao;
 
    /**
     * Init.
     */
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
-      Assert.notNull(queueDao, "Precondition violated: queueDao != null.");
+      Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
 
       super.afterPropertiesSet();
    }
 
    @Override
    protected Execution doPollQueue(String queue) throws Throwable {
-      return queueDao.pop(queue, name);
+      return fifoDao.pop(queue, name);
    }
 
    @Override
    protected void removeInflight(String queue) throws Throwable {
-      queueDao.removeInflight(queue, name);
+      fifoDao.removeInflight(queue, name);
    }
 
    @Override
    protected void restoreInflight(String queue) throws Throwable {
-      queueDao.restoreInflight(queue, name);
+      fifoDao.restoreInflight(queue, name);
    }
 
    @Override
    public void update(Execution execution) {
-      queueDao.update(execution);
+      fifoDao.update(execution);
    }
 
    //
@@ -54,14 +54,14 @@ public class QueueWorker extends AbstractQueueWorker {
    /**
     * Queue dao.
     */
-   public QueueDao getQueueDao() {
-      return queueDao;
+   public FifoDao getFifoDao() {
+      return fifoDao;
    }
 
    /**
     * Queue dao.
     */
-   public void setQueueDao(QueueDao queueDao) {
-      this.queueDao = queueDao;
+   public void setFifoDao(FifoDao fifoDao) {
+      this.fifoDao = fifoDao;
    }
 }
