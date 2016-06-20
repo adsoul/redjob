@@ -55,10 +55,8 @@ public class FifoWorkerImplIT {
 
       FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean() {
          @Override
-         protected Thread startThread() {
-            // Do NOT start thread yet.
-            workerThread = new Thread(worker, "test-worker");
-            return workerThread;
+         protected void start() {
+            // Do not start worker.
          }
       };
       factory.setConnectionFactory(redis);
@@ -86,7 +84,7 @@ public class FifoWorkerImplIT {
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
-      workerThread.start();
+      workerThread = worker.start();
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
@@ -112,7 +110,7 @@ public class FifoWorkerImplIT {
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
-      workerThread.start();
+      workerThread = worker.start();
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());

@@ -25,6 +25,16 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    private List<String> queues;
 
    /**
+    * Currently processed execution, if any.
+    */
+   private volatile Execution execution = new Execution(-1, "dummy");
+
+   /**
+    * Worker thread.
+    */
+   private Thread thread;
+
+   /**
     * Init.
     */
    @PostConstruct
@@ -39,6 +49,15 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     */
    protected String createName() {
       return super.createName() + ":" + StringUtils.collectionToCommaDelimitedString(queues);
+   }
+
+   /**
+    * Start worker.
+    */
+   public Thread start() {
+      thread = new Thread(this, getName());
+      thread.start();
+      return thread;
    }
 
    @Override
@@ -121,12 +140,16 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
 
       boolean restore = false;
       try {
+         this.execution = execution;
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          restore = process(queue, execution);
          return true;
 
       } finally {
+         synchronized (this.execution) {
+            this.execution = null;
+         }
          try {
             if (restore) {
                restoreInflight(queue);
@@ -136,6 +159,20 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          } finally {
             MDC.remove("job");
             MDC.remove("execution");
+         }
+      }
+   }
+
+   /**
+    * Stop the given job.
+    *
+    * @param id
+    *           Job id.
+    */
+   public void stop(long id) {
+      synchronized (this.execution) {
+         if (execution.getId() == id) {
+            thread.interrupt();
          }
       }
    }

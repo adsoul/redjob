@@ -19,11 +19,6 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    private FifoDaoImpl fifoDao = new FifoDaoImpl();
 
    /**
-    * Worker thread.
-    */
-   private Thread thread = null;
-
-   /**
     * Constructor.
     */
    public FifoWorkerFactoryBean() {
@@ -38,16 +33,14 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
 
       super.afterPropertiesSet();
 
-      thread = startThread();
+      start();
    }
 
    /**
-    * Create and start worker thread.
+    * Start worker thread.
     */
-   protected Thread startThread() {
-      thread = new Thread(worker, worker.getName());
-      thread.start();
-      return thread;
+   protected void start() {
+      worker.start();
    }
 
    //
