@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * Scans the classpath and registers JSON subtypes (@link {@link JsonTypeName}) at a {@link ObjectMapper}.
+ * Scans the classpath and registers JSON subtypes ({@link JsonTypeName}) at a {@link ObjectMapper}.
  */
 public class TypeScanner extends AnnotatedTypeScanner {
    /**
