@@ -10,7 +10,14 @@ public class StopJob {
    /**
     * Id of job to stop.
     */
-   private final long id;
+   private long id;
+
+   /**
+    * Default constructor for Jackson.
+    */
+   private StopJob() {
+      super();
+   }
 
    /**
     * Constructor to stop the given job.
