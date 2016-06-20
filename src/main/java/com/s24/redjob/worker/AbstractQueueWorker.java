@@ -67,6 +67,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          log.info("Starting worker {}.", getName());
          workerDao.start(name);
          eventBus.publishEvent(new WorkerStart(this));
+         startup();
          poll();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
@@ -75,6 +76,15 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          log.info("Stop worker {}.", getName());
          eventBus.publishEvent(new WorkerStopped(this));
          workerDao.stop(name);
+      }
+   }
+
+   /**
+    * Startup initialization.
+    */
+   protected void startup() throws Throwable {
+      for (String queue : queues) {
+         restoreInflight(queue);
       }
    }
 
@@ -88,9 +98,9 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          } catch (InterruptedException e) {
             // Just to be sure clear interrupt flag before starting over (if worker has not been requested to stop).
             Thread.interrupted();
-            log.debug("Thread has been interrupted.", name);
+            log.debug("Thread has been interrupted.");
          } catch (Throwable e) {
-            log.error("Polling queues for jobs failed.", name, e);
+            log.error("Polling queues for jobs failed.", e);
          }
       }
    }
@@ -118,7 +128,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
             MDC.remove("queue");
          }
       }
-      // TODO markus 2016-06-15: Make interruptable to immediately stop on worker stop requests.
+
       Thread.sleep(emptyQueuesSleepMillis);
    }
 
@@ -144,6 +154,10 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          restore = process(queue, execution);
+         return true;
+
+      } catch (Throwable t) {
+         log.error("Job processing failed.", t);
          return true;
 
       } finally {
