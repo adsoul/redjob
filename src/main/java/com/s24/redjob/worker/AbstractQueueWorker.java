@@ -66,6 +66,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       log.info("Waiting for worker to shutdown.");
       if (thread != null) {
          try {
+            thread.interrupt();
             thread.join();
          } catch (InterruptedException e) {
             // Ignore
