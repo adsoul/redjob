@@ -61,6 +61,18 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    }
 
    @Override
+   public void destroy() {
+      super.destroy();
+      if (thread != null) {
+         try {
+            thread.join();
+         } catch (InterruptedException e) {
+            // Ignore
+         }
+      }
+   }
+
+   @Override
    public void run() {
       try {
          MDC.put("worker", getName());
