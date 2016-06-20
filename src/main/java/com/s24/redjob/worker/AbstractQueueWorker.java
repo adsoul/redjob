@@ -63,6 +63,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    @Override
    public void destroy() {
       super.destroy();
+      log.info("Waiting for worker to shutdown.");
       if (thread != null) {
          try {
             thread.join();
@@ -70,6 +71,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
             // Ignore
          }
       }
+      log.info("Worker has been shut down.");
    }
 
    @Override
