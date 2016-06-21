@@ -13,4 +13,7 @@ To build (clean/compile/test/install) the project, invoke
 ## Build a release
 To publish a release to maven central, invoke
 
-    $ mvn -P release
+    # Create release and tag it in git:
+    $ mvn release:prepare
+    # Deploy it to maven central:
+    $ mvn release:perform
