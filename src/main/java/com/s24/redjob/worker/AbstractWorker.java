@@ -266,6 +266,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       return id;
    }
 
+   @Override
+   public String toString() {
+      return getName();
+   }
+
    //
    // Injections.
    //
