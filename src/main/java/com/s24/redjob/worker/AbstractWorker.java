@@ -1,6 +1,13 @@
 package com.s24.redjob.worker;
 
-import com.s24.redjob.worker.events.*;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -9,12 +16,11 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobSuccess;
 
 /**
  * Base implementation of {@link Worker}.
@@ -44,6 +50,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * Sequence for worker ids.
     */
    private static final AtomicInteger IDS = new AtomicInteger();
+
+   /**
+    * Namespace of this worker.
+    */
+   private String namespace;
 
    /**
     * Worker id.
@@ -140,6 +151,11 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    }
 
    @Override
+   public String getNamespace() {
+      return namespace;
+   }
+
+   @Override
    public int getId() {
       return id;
    }
@@ -203,16 +219,17 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *            In case of errors.
     */
    protected <J> void execute(String queue, Execution execution, Runnable runner) throws Throwable {
-      Object wrappedRunner = runner;
+      Object unwrappedRunner = runner;
       if (runner instanceof WrappingRunnable) {
-         wrappedRunner =  ((WrappingRunnable) runner).getWrappedRunner();
+         unwrappedRunner =  ((WrappingRunnable) runner).unwrap();
       }
+      prepareRunner(unwrappedRunner);
 
-      JobExecute jobExecute = new JobExecute(this, queue, execution, wrappedRunner);
+      JobExecute jobExecute = new JobExecute(this, queue, execution, unwrappedRunner);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
          log.debug("Job execution vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, execution, wrappedRunner));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution, unwrappedRunner));
          return;
       }
 
@@ -221,15 +238,22 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          runner.run();
          log.info("Job succeeded.");
          workerDao.success(name);
-         eventBus.publishEvent(new JobSuccess(this, queue, execution, wrappedRunner));
+         eventBus.publishEvent(new JobSuccess(this, queue, execution, unwrappedRunner));
       } catch (Throwable cause) {
          log.info("Job failed.", cause);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, execution, wrappedRunner, cause));
+         eventBus.publishEvent(new JobFailed(this, queue, execution, unwrappedRunner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.info("Job finished.", name, execution.getId());
       }
+   }
+
+   /**
+    * Prepare runner.
+    */
+   protected void prepareRunner(Object runner) {
+      // Overwrite, if needed.
    }
 
    @Override
@@ -245,6 +269,13 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    //
    // Injections.
    //
+
+   /**
+    * Namespace of this worker.
+    */
+   public void setNamespace(String namespace) {
+      this.namespace = namespace;
+   }
 
    /**
     * Name of this worker. Defaults to a generated unique name.

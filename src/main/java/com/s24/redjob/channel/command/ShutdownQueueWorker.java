@@ -1,4 +1,4 @@
-package com.s24.redjob.channel.admin;
+package com.s24.redjob.channel.command;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 

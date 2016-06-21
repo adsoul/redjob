@@ -4,7 +4,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.AbstractQueueWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 

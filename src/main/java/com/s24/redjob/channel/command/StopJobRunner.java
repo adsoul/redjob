@@ -1,15 +1,15 @@
-package com.s24.redjob.channel.admin;
+package com.s24.redjob.channel.command;
 
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.s24.redjob.worker.AbstractQueueWorker;
+import com.s24.redjob.channel.WorkerAware;
+import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.JobRunner;
 
 /**
@@ -17,23 +17,22 @@ import com.s24.redjob.worker.JobRunner;
  */
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class StopJobRunner implements JobRunner<StopJob> {
+public class StopJobRunner implements JobRunner<StopJob>, WorkerAware {
    /**
     * Logger.
     */
    private static final Logger log = LoggerFactory.getLogger(StopJobRunner.class);
 
    /**
-    * All workers.
+    * Workers to check for running jobs.
     */
-   @Autowired
-   private List<AbstractQueueWorker> workers;
+   private List<QueueWorker> workers;
 
    @Override
    public void execute(StopJob job) {
       log.info("Stopping job {}.", job.getId());
 
-      for (AbstractQueueWorker worker : workers) {
+      for (QueueWorker worker : workers) {
          try {
             worker.stop(job.getId());
          } catch (Exception e) {
@@ -47,16 +46,14 @@ public class StopJobRunner implements JobRunner<StopJob> {
    //
 
    /**
-    * Workers to shutdown, if not set, defaults to all workers in the application context.
+    * Workers to check for running jobs.
     */
-   public List<AbstractQueueWorker> getWorkers() {
+   public List<QueueWorker> getWorkers() {
       return workers;
    }
 
-   /**
-    * Workers to shutdown, if not set, defaults to all workers in the application context.
-    */
-   public void setWorkers(List<AbstractQueueWorker> workers) {
+   @Override
+   public void setWorkers(List<QueueWorker> workers) {
       this.workers = workers;
    }
 }

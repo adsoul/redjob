@@ -110,7 +110,7 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
     */
    public String getNamespace() {
-      return workerDao.getNamespace();
+      return worker.getNamespace();
    }
 
    /**
@@ -118,6 +118,7 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
     */
    public void setNamespace(String namespace) {
       workerDao.setNamespace(namespace);
+      worker.setNamespace(namespace);
    }
 
    /**

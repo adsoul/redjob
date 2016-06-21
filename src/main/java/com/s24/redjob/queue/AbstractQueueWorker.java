@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.queue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +9,9 @@ import org.slf4j.MDC;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.s24.redjob.worker.AbstractWorker;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
@@ -18,7 +21,7 @@ import com.s24.redjob.worker.events.WorkerStopped;
 /**
  * Base implementation of {@link Worker} for queues.
  */
-public abstract class AbstractQueueWorker extends AbstractWorker implements Runnable {
+public abstract class AbstractQueueWorker extends AbstractWorker implements Runnable, QueueWorker {
    /**
     * Queues to listen to.
     */
@@ -51,9 +54,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       return super.createName() + ":" + StringUtils.collectionToCommaDelimitedString(queues);
    }
 
-   /**
-    * Start worker.
-    */
+   @Override
    public Thread start() {
       thread = new Thread(this, getName());
       thread.start();
@@ -192,12 +193,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       }
    }
 
-   /**
-    * Stop the given job.
-    *
-    * @param id
-    *           Job id.
-    */
+   @Override
    public void stop(long id) {
       synchronized (this.execution) {
          if (execution.getId() == id) {
@@ -236,14 +232,6 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     *            In case of errors.
     */
    protected abstract void restoreInflight(String queue) throws Throwable;
-
-   /**
-    * Update execution.
-    *
-    * @param execution
-    *           Execution.
-    */
-   public abstract void update(Execution execution);
 
    //
    // Injections.

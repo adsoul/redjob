@@ -17,6 +17,7 @@ import org.springframework.data.redis.listener.Topic;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
@@ -52,6 +53,11 @@ public class ChannelWorker extends AbstractWorker {
     * Monitor active jobs.
     */
    private final ReadWriteLock active = new ReentrantReadWriteLock();
+
+   /**
+    * {@link QueueWorker}s this worker should execute commands for.
+    */
+   private List<QueueWorker> workers;
 
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
@@ -136,6 +142,14 @@ public class ChannelWorker extends AbstractWorker {
       return super.createName() + ":" + StringUtils.collectionToCommaDelimitedString(channels);
    }
 
+   @Override
+   protected void prepareRunner(Object runner) {
+      super.prepareRunner(runner);
+      if (runner instanceof WorkerAware) {
+         ((WorkerAware) runner).setWorkers(workers);
+      }
+   }
+
    //
    // Injections.
    //
@@ -187,5 +201,19 @@ public class ChannelWorker extends AbstractWorker {
     */
    public void setListenerContainer(RedisMessageListenerContainer listenerContainer) {
       this.listenerContainer = listenerContainer;
+   }
+
+   /**
+    * {@link QueueWorker}s this worker should execute commands for.
+    */
+   public List<QueueWorker> getWorkers() {
+      return workers;
+   }
+
+   /**
+    * {@link QueueWorker}s this worker should execute commands for.
+    */
+   public void setWorkers(List<QueueWorker> workers) {
+      this.workers = workers;
    }
 }

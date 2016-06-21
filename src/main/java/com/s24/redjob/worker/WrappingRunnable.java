@@ -22,7 +22,7 @@ public abstract class WrappingRunnable implements Runnable {
    /**
     * Job runner.
     */
-   public Object getWrappedRunner() {
+   public Object unwrap() {
       return runner;
    }
 }
