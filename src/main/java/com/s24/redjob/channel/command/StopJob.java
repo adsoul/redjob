@@ -26,7 +26,6 @@ public class StopJob {
     *           Id of job to stop.
     */
    public StopJob(long id) {
-      super();
       this.id = id;
    }
 
