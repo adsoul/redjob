@@ -1,7 +1,7 @@
 package com.s24.redjob.worker;
 
 /**
- * Wrapper for job runner which do not implement {@link Runnable}.
+ * Wrapper for job runners which do not implement {@link Runnable}.
  */
 public abstract class WrappingRunnable implements Runnable {
    /**
