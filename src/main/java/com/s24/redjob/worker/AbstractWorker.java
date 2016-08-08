@@ -171,7 +171,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    }
 
    /**
-    * Process job.
+    * Process job. Sends {@link JobProcess} event.
     *
     * @param queue
     *           Name of queue.
@@ -207,7 +207,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    }
 
    /**
-    * Process job.
+    * Execute job. Sends {@link JobExecute} event.
     *
     * @param queue
     *           Name of queue.
@@ -218,7 +218,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     * @throws Throwable
     *            In case of errors.
     */
-   protected <J> void execute(String queue, Execution execution, Runnable runner) throws Throwable {
+   protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
       Object unwrappedRunner = runner;
       if (runner instanceof WrappingRunnable) {
          unwrappedRunner =  ((WrappingRunnable) runner).unwrap();
@@ -233,6 +233,22 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          return;
       }
 
+      run(queue, execution, runner, unwrappedRunner);
+   }
+
+   /**
+    * Run job.
+    *
+    * @param queue
+    *           Name of queue.
+    * @param execution
+    *           Job.
+    * @param runner
+    *           Job runner.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
       log.info("Starting job.");
       try {
          runner.run();
