@@ -98,7 +98,7 @@ public class Execution {
       this.id = id;
       this.job = job;
       this.result = result;
-      this.created = Instant.now();
+      this.created = created;
    }
 
    /**
