@@ -38,7 +38,7 @@ public class Execution {
    /**
     * Creation of execution.
     */
-   @JsonProperty(value = "create", required = true)
+   @JsonProperty(value = "creation", required = true)
    private Instant creation;
 
    /**
@@ -77,12 +77,23 @@ public class Execution {
     * @param result
     *           Job result.
     */
-   public Execution(
+   public Execution(long id, Object job, Object result) {
+      this(id, job, result, Instant.now(), null, null);
+   }
+
+   /**
+    * Jackson constructor.
+    */
+   Execution(
          @JsonProperty(value = "id", required = true) long id,
          @JsonProperty(value = "job", required = true) Object job,
-         @JsonProperty(value = "result", required = true) Object result) {
+         @JsonProperty(value = "result", required = true) Object result,
+         @JsonProperty(value = "creation", required = true) Instant creation,
+         @JsonProperty(value = "start", required = false) Instant start,
+         @JsonProperty(value = "stop", required = false) Instant stop) {
       Assert.notNull(job, "Precondition violated: job != null.");
-      Assert.notNull(job, "Precondition violated: result != null.");
+      Assert.notNull(result, "Precondition violated: result != null.");
+      // Assert.notNull(creation, "Precondition violated: creation != null.");
 
       this.id = id;
       this.job = job;
