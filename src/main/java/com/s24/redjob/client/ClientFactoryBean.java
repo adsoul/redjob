@@ -8,7 +8,7 @@ import com.s24.redjob.AbstractDao;
 import com.s24.redjob.channel.ChannelDaoImpl;
 import com.s24.redjob.lock.LockDaoImpl;
 import com.s24.redjob.queue.FifoDaoImpl;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link Client}.

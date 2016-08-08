@@ -233,6 +233,18 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     */
    protected abstract void restoreInflight(String queue) throws Throwable;
 
+   @Override
+   protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
+      try {
+         // Save start time.
+         update(execution);
+         super.run(queue, execution, runner, unwrappedRunner);
+      } finally {
+         // Save stop time.
+         update(execution);
+      }
+   }
+
    //
    // Injections.
    //

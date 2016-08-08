@@ -12,7 +12,7 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.AbstractWorkerFactoryBean;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.

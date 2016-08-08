@@ -7,7 +7,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.AbstractWorkerFactoryBean;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link FifoWorker}.

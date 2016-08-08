@@ -1,6 +1,5 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -12,7 +11,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
@@ -21,6 +19,8 @@ import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
 
 /**
  * Integration test for {@link FifoWorker}.
@@ -50,8 +50,7 @@ public class FifoWorkerImplIT {
    public void setUp() throws Exception {
       RedisConnectionFactory redis = TestRedis.connectionFactory();
 
-      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
-      scanForJsonSubtypes(executions, TestJob.class);
+      ExecutionRedisSerializer executions = new TestExecutionRedisSerializer(TestJob.class);
 
       FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean() {
          @Override

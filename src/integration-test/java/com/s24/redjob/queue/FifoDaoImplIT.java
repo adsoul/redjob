@@ -1,6 +1,5 @@
 package com.s24.redjob.queue;
 
-import static com.s24.redjob.queue.TypeScannerTest.scanForJsonSubtypes;
 import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
@@ -18,7 +17,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
 
 /**
  * Integration test for {@link FifoDaoImpl}.
@@ -36,8 +36,7 @@ public class FifoDaoImplIT {
 
    @Before
    public void setUp() throws Exception {
-      ExecutionRedisSerializer executions = new ExecutionRedisSerializer();
-      scanForJsonSubtypes(executions, TestJob.class);
+      ExecutionRedisSerializer executions = new TestExecutionRedisSerializer(TestJob.class);
 
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
       dao.setConnectionFactory(connectionFactory);

@@ -233,7 +233,12 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          return;
       }
 
-      run(queue, execution, runner, unwrappedRunner);
+      try {
+         execution.start();
+         run(queue, execution, runner, unwrappedRunner);
+      } finally {
+         execution.stop();
+      }
    }
 
    /**

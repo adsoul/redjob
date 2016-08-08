@@ -1,4 +1,4 @@
-package com.s24.redjob.queue;
+package com.s24.redjob.worker.json;
 
 import static org.mockito.Mockito.verify;
 
@@ -10,8 +10,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.s24.redjob.worker.ExecutionRedisSerializer;
-import com.s24.redjob.worker.TypeScanner;
+import com.s24.redjob.queue.TestJob;
 
 /**
  * Test of {@link TypeScanner}.

@@ -1,10 +1,12 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.json;
 
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.NoResult;
 
 /**
  * {@link RedisSerializer} for {@link Execution}s.
