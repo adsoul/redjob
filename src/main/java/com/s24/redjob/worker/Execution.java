@@ -38,8 +38,8 @@ public class Execution {
    /**
     * Creation of execution.
     */
-   @JsonProperty(value = "creation", required = true)
-   private Instant creation;
+   @JsonProperty(value = "created", required = true)
+   private Instant created;
 
    /**
     * Start of execution.
@@ -49,11 +49,11 @@ public class Execution {
    private Instant start;
 
    /**
-    * Stop of execution.
+    * End of execution.
     */
    @JsonInclude(value = Include.NON_NULL)
-   @JsonProperty(value = "stop", required = false)
-   private Instant stop;
+   @JsonProperty(value = "end", required = false)
+   private Instant end;
 
    /**
     * Constructor.
@@ -88,17 +88,17 @@ public class Execution {
          @JsonProperty(value = "id", required = true) long id,
          @JsonProperty(value = "job", required = true) Object job,
          @JsonProperty(value = "result", required = true) Object result,
-         @JsonProperty(value = "creation", required = true) Instant creation,
+         @JsonProperty(value = "created", required = true) Instant created,
          @JsonProperty(value = "start", required = false) Instant start,
-         @JsonProperty(value = "stop", required = false) Instant stop) {
+         @JsonProperty(value = "end", required = false) Instant end) {
       Assert.notNull(job, "Precondition violated: job != null.");
       Assert.notNull(result, "Precondition violated: result != null.");
-      // Assert.notNull(creation, "Precondition violated: creation != null.");
+      // Assert.notNull(created, "Precondition violated: created != null.");
 
       this.id = id;
       this.job = job;
       this.result = result;
-      this.creation = Instant.now();
+      this.created = Instant.now();
    }
 
    /**
@@ -134,8 +134,8 @@ public class Execution {
    /**
     * Creation of execution.
     */
-   public Instant getCreation() {
-      return creation;
+   public Instant getCreated() {
+      return created;
    }
 
    /**
@@ -153,17 +153,17 @@ public class Execution {
    }
 
    /**
-    * Stop execution.
+    * End execution.
     */
    public void stop() {
-      stop = Instant.now();
+      end = Instant.now();
    }
 
    /**
-    * Stop of execution.
+    * End of execution.
     */
-   public Instant getStop() {
-      return stop;
+   public Instant getEnd() {
+      return end;
    }
 
    @Override
