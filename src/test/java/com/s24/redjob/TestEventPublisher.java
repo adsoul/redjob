@@ -8,6 +8,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 
@@ -15,6 +17,11 @@ import org.springframework.context.ApplicationEventPublisher;
  * {@link ApplicationEventPublisher} that allows to wait for events. Useful for tests.
  */
 public class TestEventPublisher implements ApplicationEventPublisher {
+   /**
+    * Logger.
+    */
+   private static final Logger log = LoggerFactory.getLogger(TestEventPublisher.class);
+
    /**
     * All recorded events.
     */
@@ -42,6 +49,7 @@ public class TestEventPublisher implements ApplicationEventPublisher {
     *           Event.
     */
    protected void doPublishEvent(Object event) {
+      log.info("Publish {}.", event.getClass().getSimpleName());
       events.add(event);
       try {
          if (!recent.offer(event, 1, TimeUnit.SECONDS)) {
@@ -66,7 +74,9 @@ public class TestEventPublisher implements ApplicationEventPublisher {
     * @return Event, or null, if no event has been published until the timeout.
     */
    public Object waitForEvent() throws InterruptedException {
-      return waitForEvent(1, TimeUnit.SECONDS);
+      Object event = waitForEvent(1, TimeUnit.SECONDS);
+      log.info("Consumed {}.", event.getClass().getSimpleName());
+      return event;
    }
 
    /**
