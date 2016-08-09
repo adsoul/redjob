@@ -65,7 +65,10 @@ public class ChannelWorker extends AbstractWorker {
       Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
 
       super.afterPropertiesSet();
+   }
 
+   @Override
+   public void start() {
       log.info("Starting worker {}.", getName());
       log.info("Listening to channels {}.", StringUtils.collectionToCommaDelimitedString(channels));
       List<Topic> topics = channels.stream().map(channelDao::getTopic).collect(Collectors.toList());
@@ -79,13 +82,8 @@ public class ChannelWorker extends AbstractWorker {
 
    @Override
    public void stop() {
-      log.info("Stop worker {}.", getName());
       super.stop();
-      destroy();
-   }
 
-   @PreDestroy
-   public void destroy() {
       synchronized (listenerContainer) {
          listenerContainer.removeMessageListener(listener);
       }
@@ -98,6 +96,11 @@ public class ChannelWorker extends AbstractWorker {
       } finally {
          active.writeLock().unlock();
       }
+   }
+
+   @PreDestroy
+   public void destroy() {
+      stop();
    }
 
    /**

@@ -32,15 +32,6 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
       worker.setFifoDao(fifoDao);
 
       super.afterPropertiesSet();
-
-      start();
-   }
-
-   /**
-    * Start worker thread.
-    */
-   protected void start() {
-      worker.start();
    }
 
    //

@@ -8,11 +8,6 @@ import com.s24.redjob.worker.Worker;
  */
 public interface QueueWorker extends Worker {
    /**
-    * Start worker.
-    */
-   Thread start();
-
-   /**
     * Stop the given job.
     *
     * @param id

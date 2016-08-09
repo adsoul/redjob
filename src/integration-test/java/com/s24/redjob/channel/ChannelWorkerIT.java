@@ -64,6 +64,7 @@ public class ChannelWorkerIT {
 
       channelWorker = factory.getObject();
       channelDao = channelWorker.getChannelDao();
+      channelWorker.start();
 
       // Wait for subscription of worker to the channel.
       Thread.sleep(1000);

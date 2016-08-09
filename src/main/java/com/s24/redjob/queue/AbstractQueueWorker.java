@@ -55,10 +55,9 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    }
 
    @Override
-   public Thread start() {
+   public void start() {
       thread = new Thread(this, getName());
       thread.start();
-      return thread;
    }
 
    @Override

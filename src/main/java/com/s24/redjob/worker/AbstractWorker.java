@@ -167,6 +167,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    @Override
    public void stop() {
+      log.info("Stopping worker {}.", getName());
       run.set(false);
    }
 

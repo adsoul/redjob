@@ -6,6 +6,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.SmartLifecycle;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import com.s24.redjob.AbstractDao;
@@ -14,8 +15,8 @@ import com.s24.redjob.channel.ChannelWorker;
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
  */
-public class AbstractWorkerFactoryBean<W extends AbstractWorker>
-      implements SmartFactoryBean<W>, InitializingBean, DisposableBean, ApplicationEventPublisherAware {
+public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
+      implements SmartFactoryBean<W>, InitializingBean, DisposableBean, SmartLifecycle, ApplicationEventPublisherAware {
    /**
     * Worker dao.
     */
@@ -25,6 +26,11 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
     * The instance.
     */
    protected final W worker;
+
+   /**
+    * Is the worker running?.
+    */
+   private volatile boolean run = false;
 
    /**
     * Constructor.
@@ -49,6 +55,10 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
       worker.destroy();
    }
 
+   //
+   // Factory bean
+   //
+
    @Override
    public boolean isEagerInit() {
       return true;
@@ -72,6 +82,62 @@ public class AbstractWorkerFactoryBean<W extends AbstractWorker>
    @Override
    public W getObject() throws Exception {
       return worker;
+   }
+
+   //
+   // Lifecycle
+   //
+
+   @Override
+   public int getPhase() {
+      return 1000000;
+   }
+
+   @Override
+   public boolean isAutoStartup() {
+      return true;
+   }
+
+   @Override
+   public boolean isRunning() {
+      return run;
+   }
+
+   @Override
+   public void start() {
+      if (run) {
+         return;
+      }
+
+      try {
+         worker.start();
+      } finally {
+         run = true;
+      }
+   }
+
+   @Override
+   public void stop(Runnable callback) {
+      new Thread(() -> {
+         try {
+            stop();
+         } finally {
+            run = false;
+         }
+      }, "Stopping " + worker.getName()).start();
+   }
+
+   @Override
+   public void stop() {
+      if (!run) {
+         return;
+      }
+
+      try {
+         worker.stop();
+      } finally {
+         run = false;
+      }
    }
 
    //

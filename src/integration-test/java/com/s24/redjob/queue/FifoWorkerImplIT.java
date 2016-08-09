@@ -41,23 +41,13 @@ public class FifoWorkerImplIT {
     */
    private FifoWorker worker;
 
-   /**
-    * Worker thread.
-    */
-   private Thread workerThread;
-
    @Before
    public void setUp() throws Exception {
       RedisConnectionFactory redis = TestRedis.connectionFactory();
 
       ExecutionRedisSerializer executions = new TestExecutionRedisSerializer(TestJob.class);
 
-      FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean() {
-         @Override
-         protected void start() {
-            // Do not start worker.
-         }
-      };
+      FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean();
       factory.setConnectionFactory(redis);
       factory.setNamespace("namespace");
       factory.setExecutions(executions);
@@ -73,8 +63,6 @@ public class FifoWorkerImplIT {
    @After
    public void tearDown() throws Exception {
       worker.stop();
-      workerThread.join(1000);
-      workerThread.stop();
    }
 
    @Test
@@ -83,7 +71,7 @@ public class FifoWorkerImplIT {
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
-      workerThread = worker.start();
+      worker.start();
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
@@ -109,7 +97,7 @@ public class FifoWorkerImplIT {
       TestJobRunner runner = new TestJobRunner(job);
 
       assertTrue(eventBus.getEvents().isEmpty());
-      workerThread = worker.start();
+      worker.start();
 
       assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());

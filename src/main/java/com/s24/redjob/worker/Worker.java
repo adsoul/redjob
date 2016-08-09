@@ -20,6 +20,11 @@ public interface Worker {
    String getName();
 
    /**
+    * Start worker.
+    */
+   void start();
+
+   /**
     * Stop worker.
     */
    void stop();
