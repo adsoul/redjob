@@ -14,6 +14,7 @@ import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
@@ -82,6 +83,7 @@ public class FifoWorkerImplIT {
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
       assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution, runner), eventBus.waitForEvent());
 
       worker.stop();
 
@@ -108,6 +110,7 @@ public class FifoWorkerImplIT {
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
       assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution, runner), eventBus.waitForEvent());
 
       worker.stop();
 

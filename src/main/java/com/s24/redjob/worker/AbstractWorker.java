@@ -20,6 +20,7 @@ import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 
 /**
@@ -256,6 +257,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
       log.info("Starting job.");
+      eventBus.publishEvent(new JobStart(this, queue, execution, unwrappedRunner));
       try {
          runner.run();
          log.info("Job succeeded.");

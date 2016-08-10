@@ -16,6 +16,7 @@ import com.s24.redjob.queue.TestJobRunnerFactory;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
@@ -87,6 +88,7 @@ public class ChannelWorkerIT {
 
       assertEquals(new JobProcess(channelWorker, "test-channel", execution), eventBus.waitForEvent());
       assertEquals(new JobExecute(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobStart(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
 
       // Asynchronously stop worker, because stop blocks until the last job finished.
       new Thread(channelWorker::stop).start();
