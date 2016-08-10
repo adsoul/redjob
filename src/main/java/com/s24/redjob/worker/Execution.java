@@ -42,6 +42,14 @@ public class Execution {
    private Instant created;
 
    /**
+    * Worker processing this execution.
+    */
+   @JsonInclude(value = Include.NON_NULL)
+   @JsonProperty(value = "worker", required = false)
+   private String worker;
+
+
+   /**
     * Start of execution.
     */
    @JsonInclude(value = Include.NON_NULL)
@@ -78,7 +86,7 @@ public class Execution {
     *           Job result.
     */
    public Execution(long id, Object job, Object result) {
-      this(id, job, result, Instant.now(), null, null);
+      this(id, job, result, Instant.now(), null, null, null);
    }
 
    /**
@@ -89,16 +97,20 @@ public class Execution {
          @JsonProperty(value = "job", required = true) Object job,
          @JsonProperty(value = "result", required = true) Object result,
          @JsonProperty(value = "created", required = true) Instant created,
+         @JsonProperty(value = "worker", required = false) String worker,
          @JsonProperty(value = "start", required = false) Instant start,
          @JsonProperty(value = "end", required = false) Instant end) {
       Assert.notNull(job, "Precondition violated: job != null.");
       Assert.notNull(result, "Precondition violated: result != null.");
-      // Assert.notNull(created, "Precondition violated: created != null.");
+      Assert.notNull(created, "Precondition violated: created != null.");
 
       this.id = id;
       this.job = job;
       this.result = result;
       this.created = created;
+      this.worker = worker;
+      this.start = start;
+      this.end = end;
    }
 
    /**
@@ -139,10 +151,23 @@ public class Execution {
    }
 
    /**
-    * Start execution.
+    * Start execution by the given worker.
+    *
+    * @param worker
+    *           Name of worker.
     */
-   public void start() {
+   public void start(String worker) {
+      this.worker = worker;
       start = Instant.now();
+      // In case of restarts, reset end timestamp.
+      end = null;
+   }
+
+   /**
+    * Worker processing this execution.
+    */
+   public String getWorker() {
+      return worker;
    }
 
    /**
