@@ -3,7 +3,9 @@ package com.s24.redjob.queue;
 import static java.util.function.Function.identity;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -140,11 +142,12 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
       return redis.execute((RedisConnection connection) -> {
          Map<byte[], byte[]> jobBytes = connection.hGetAll(key(JOBS));
          if (jobBytes == null) {
-            return null;
+            return Collections.emptyMap();
          }
 
          return jobBytes.values().stream()
                .map(executions::deserialize)
+               .filter(Objects::nonNull)
                .collect(Collectors.toMap(Execution::getId, identity()));
       });
    }
