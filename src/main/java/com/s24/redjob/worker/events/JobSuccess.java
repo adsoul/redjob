@@ -56,6 +56,7 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
@@ -71,6 +72,7 @@ public class JobSuccess extends ApplicationEvent implements JobFinished {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <R> R getRunner() {
       return (R) runner;
    }
