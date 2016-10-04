@@ -1,4 +1,4 @@
-# RedJob
+# RedJob [![Build Status](https://travis-ci.org/shopping24/redjob.svg?branch=master)](https://travis-ci.org/shopping24/redjob)
 
 Spring based implementation of a Redis-backed job queue.
 
