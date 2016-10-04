@@ -56,27 +56,27 @@
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
-      <plugin.build-helper-maven-plugin.version>1.10</plugin.build-helper-maven-plugin.version>
+
+      <plugin.build-helper-maven-plugin.version>1.12</plugin.build-helper-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.5.1</plugin.maven-compiler-plugin.version>
-      <plugin.maven-failsafe-plugin.version>2.19.1</plugin.maven-failsafe-plugin.version>
+      <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
       <plugin.maven-gpg-plugin.version>1.6</plugin.maven-gpg-plugin.version>
       <plugin.maven-javadoc-plugin.version>2.10.4</plugin.maven-javadoc-plugin.version>
-      <plugin.maven-resources-plugin.version>2.7</plugin.maven-resources-plugin.version>
+      <plugin.maven-resources-plugin.version>3.0.1</plugin.maven-resources-plugin.version>
       <plugin.maven-release-plugin.version>2.5.3</plugin.maven-release-plugin.version>
-      <plugin.maven-source-plugin.version>3.0.0</plugin.maven-source-plugin.version>
-      <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
+      <plugin.maven-source-plugin.version>3.0.1</plugin.maven-source-plugin.version>
       <plugin.nexus-staging-maven-plugin.version>1.6.7</plugin.nexus-staging-maven-plugin.version>
 
       <dependency.assertj.version>3.5.2</dependency.assertj.version>
-      <dependency.jackson.version>2.8.1</dependency.jackson.version>
+      <dependency.jackson.version>2.8.3</dependency.jackson.version>
       <dependency.jedis.version>2.9.0</dependency.jedis.version>
       <dependency.junit.version>4.12</dependency.junit.version>
       <dependency.log4j.version>2.6.2</dependency.log4j.version>
       <dependency.mockito.version>1.10.19</dependency.mockito.version>
       <dependency.slf4j.version>1.7.21</dependency.slf4j.version>
-      <dependency.spring.version>4.3.1.RELEASE</dependency.spring.version>
-      <dependency.spring-data-redis.version>1.7.2.RELEASE</dependency.spring-data-redis.version>
+      <dependency.spring.version>4.3.3.RELEASE</dependency.spring.version>
+      <dependency.spring-data-redis.version>1.7.4.RELEASE</dependency.spring-data-redis.version>
 
       <integrationTest.redisPort>16379</integrationTest.redisPort>
       <integrationTest.sentinelPort>26379</integrationTest.sentinelPort>
@@ -84,25 +84,14 @@
 
    <distributionManagement>
       <snapshotRepository>
-         <id>s24-internal</id>
-         <name>S24 internal artifactory</name>
-         <url>https://artifactory.s24.com/artifactory/s24-snapshot-local</url>
+         <id>ossrh</id>
+         <url>https://oss.sonatype.org/content/repositories/snapshots</url>
       </snapshotRepository>
       <repository>
-         <id>s24-internal</id>
-         <name>S24 internal artifactory</name>
-         <url>https://artifactory.s24.com/artifactory/s24-release-local</url>
+         <id>ossrh</id>
+         <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
       </repository>
    </distributionManagement>
-
-   <repositories>
-      <repository>
-         <!-- This project depends on internal libraries -->
-         <id>s24-internal</id>
-         <name>S24 internal artifactory</name>
-         <url>https://artifactory.s24.com/artifactory/s24-internal</url>
-      </repository>
-   </repositories>
 
    <dependencies>
       <dependency>
@@ -199,29 +188,21 @@
       <pluginManagement>
          <plugins>
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-compiler-plugin</artifactId>
-               <configuration>
-                  <source>${maven.compiler.source}</source>
-                  <target>${maven.compiler.target}</target>
-               </configuration>
                <version>${plugin.maven-compiler-plugin.version}</version>
             </plugin>
 
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${plugin.maven-surefire-plugin.version}</version>
             </plugin>
 
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-failsafe-plugin</artifactId>
-               <version>${plugin.maven-failsafe-plugin.version}</version>
+               <version>${plugin.maven-surefire-plugin.version}</version>
             </plugin>
 
             <plugin>
-               <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-release-plugin</artifactId>
                <version>${plugin.maven-release-plugin.version}</version>
                <configuration>
@@ -367,7 +348,6 @@
 
          <!-- Execute integration tests -->
          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-failsafe-plugin</artifactId>
             <executions>
                <execution>
@@ -385,9 +365,9 @@
       <profile>
          <id>release</id>
          <build>
+            <defaultGoal>clean deploy</defaultGoal>
             <plugins>
                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-source-plugin</artifactId>
                   <version>${plugin.maven-source-plugin.version}</version>
                   <executions>
@@ -400,7 +380,6 @@
                   </executions>
                </plugin>
                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-javadoc-plugin</artifactId>
                   <version>${plugin.maven-javadoc-plugin.version}</version>
                   <configuration>
@@ -416,7 +395,6 @@
                   </executions>
                </plugin>
                <plugin>
-                  <groupId>org.apache.maven.plugins</groupId>
                   <artifactId>maven-gpg-plugin</artifactId>
                   <version>${plugin.maven-gpg-plugin.version}</version>
                   <executions>
