@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
 
@@ -140,11 +139,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
 
    @Override
    public Map<Long, Execution> getAll() {
-      return redis.execute(getCallback());
-   }
-
-   private RedisCallback<Map<Long, Execution>> getCallback() {
-      return (RedisConnection connection) -> {
+      return redis.execute((RedisConnection connection) -> {
          Map<byte[], byte[]> jobBytes = connection.hGetAll(key(JOBS));
          if (jobBytes == null) {
             return Collections.emptyMap();
@@ -154,7 +149,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
                .map(executions::deserialize)
                .filter(Objects::nonNull)
                .collect(Collectors.toMap(Execution::getId, identity()));
-      };
+      });
    }
 
    //
