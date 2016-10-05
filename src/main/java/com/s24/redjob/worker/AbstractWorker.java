@@ -35,17 +35,17 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    /**
     * Placeholder for the worker id.
     */
-   public static final String ID = "[id]";
+   public static final String PLACEHOLDER_ID = "[id]";
 
    /**
     * Placeholder for hostname without domain.
     */
-   public static final String HOSTNAME = "[hostname]";
+   public static final String PLACEHOLDER_HOSTNAME = "[hostname]";
 
    /**
     * Placeholder for hostname without domain.
     */
-   public static final String FULL_HOSTNAME = "[full-hostname]";
+   public static final String PLACEHOLDER_FULL_HOSTNAME = "[full-hostname]";
 
    /**
     * Sequence for worker ids.
@@ -91,7 +91,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    /**
     * Should worker run?. False stops this worker.
     */
-   protected final AtomicBoolean run = new AtomicBoolean(true);
+   protected final AtomicBoolean shouldRun = new AtomicBoolean(true);
 
    /**
     * Event bus.
@@ -131,17 +131,20 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *    <li>full-hostname: Hostname with domain.</li>
     * </ul>
     */
-   protected String resolvePlaceholders(String name) throws Exception {
-      name = name.replaceAll(Pattern.quote(ID), Long.toString(id));
+   private String resolvePlaceholders(final String name) throws Exception {
+
+      String resolved = name;
+
+      resolved = resolved.replaceAll(Pattern.quote(PLACEHOLDER_ID), Long.toString(id));
 
       String fullHostname = InetAddress.getLocalHost().getHostName();
-      name = name.replaceAll(Pattern.quote(FULL_HOSTNAME), fullHostname);
+      resolved = resolved.replaceAll(Pattern.quote(PLACEHOLDER_FULL_HOSTNAME), fullHostname);
 
-      int firstDot = fullHostname.indexOf(".");
+      int firstDot = fullHostname.indexOf('.');
       String hostname = firstDot > 0? fullHostname.substring(0, firstDot) : fullHostname;
-      name = name.replaceAll(Pattern.quote(HOSTNAME), hostname);
+      resolved = resolved.replaceAll(Pattern.quote(PLACEHOLDER_HOSTNAME), hostname);
 
-      return name;
+      return resolved;
    }
 
    /**
@@ -169,7 +172,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    @Override
    public void stop() {
       log.info("Stopping worker {}.", getName());
-      run.set(false);
+      shouldRun.set(false);
    }
 
    /**
@@ -252,7 +255,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *           Job.
     * @param runner
     *           Job runner.
-    * @throws Throwable
+    * @throws Exception
     *            In case of errors.
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
@@ -263,7 +266,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
          log.info("Job succeeded.");
          workerDao.success(name);
          eventBus.publishEvent(new JobSuccess(this, queue, execution, unwrappedRunner));
-      } catch (Throwable cause) {
+      } catch (Exception cause) {
          log.info("Job failed.", cause);
          workerDao.failure(name);
          eventBus.publishEvent(new JobFailed(this, queue, execution, unwrappedRunner, cause));
