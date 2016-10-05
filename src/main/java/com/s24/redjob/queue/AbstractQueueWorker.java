@@ -107,7 +107,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     * Main poll loop.
     */
    protected void poll() {
-      while (shouldRun.get()) {
+      while (run.get()) {
          try {
             pollQueues();
          } catch (InterruptedException e) {
