@@ -5,18 +5,21 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.fasterxml.jackson.core.JsonParser;
 
 /**
  * Test for {@link InstantDeserializer}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class InstantDeserializerTest {
+   @Rule
+   public MockitoRule mockitoRule = MockitoJUnit.rule();
+
    @Mock
    private JsonParser jp;
 

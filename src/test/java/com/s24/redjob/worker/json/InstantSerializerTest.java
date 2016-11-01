@@ -5,18 +5,20 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.Instant;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  * Test for {@link InstantSerializer}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class InstantSerializerTest {
+   @Rule
+   public MockitoRule mockitoRule = MockitoJUnit.rule();
    @Mock
    private JsonGenerator jgen;
 

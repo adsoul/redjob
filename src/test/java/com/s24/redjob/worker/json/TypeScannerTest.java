@@ -2,11 +2,12 @@ package com.s24.redjob.worker.json;
 
 import static org.mockito.Mockito.verify;
 
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,8 +16,10 @@ import com.s24.redjob.queue.TestJob;
 /**
  * Test of {@link TypeScanner}.
  */
-@RunWith(MockitoJUnitRunner.class)
 public class TypeScannerTest {
+   @Rule
+   public MockitoRule mockitoRule = MockitoJUnit.rule();
+
    /**
     * JSON mapper.
     */
