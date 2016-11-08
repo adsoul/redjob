@@ -285,6 +285,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    /**
     * Queues to listen to.
     */
+   @Override
    public List<String> getQueues() {
       return queues;
    }

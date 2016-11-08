@@ -1,5 +1,7 @@
 package com.s24.redjob.queue;
 
+import java.util.List;
+
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 
@@ -7,6 +9,11 @@ import com.s24.redjob.worker.Worker;
  * {@link Worker} handling queues.
  */
 public interface QueueWorker extends Worker {
+   /**
+    * Queues to listen to.
+    */
+   List<String> getQueues();
+
    /**
     * Pause / unpause worker.
     */

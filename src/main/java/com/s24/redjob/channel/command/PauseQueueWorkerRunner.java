@@ -1,5 +1,7 @@
 package com.s24.redjob.channel.command;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -7,36 +9,41 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import com.s24.redjob.channel.WorkerAware;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.JobRunner;
 
 /**
- * {@link JobRunner} for {@link ShutdownQueueWorker} command.
+ * {@link JobRunner} for {@link PauseQueueWorker} command.
  */
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker>, WorkerAware {
+public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker>, WorkerAware {
    /**
     * Logger.
     */
-   private static final Logger log = LoggerFactory.getLogger(ShutdownQueueWorkerRunner.class);
+   private static final Logger log = LoggerFactory.getLogger(PauseQueueWorkerRunner.class);
 
    /**
-    * Workers to shutdown.
+    * Workers to pause.
     */
    private List<QueueWorker> workers;
 
    @Override
-   public void execute(ShutdownQueueWorker job) {
-      log.info("Shutting down {} workers.", workers.size());
+   public void execute(PauseQueueWorker job) {
+      Assert.notNull(job, "Precondition violated: job != null.");
 
-      for (QueueWorker worker : workers) {
+      boolean pause = job.isPause();
+      List<QueueWorker> selectedWorkers = workers.stream().filter(job::matches).collect(toList());
+
+      log.info("{} {} workers.", pause? "Pausing" : "Unpausing", selectedWorkers.size());
+      for (QueueWorker worker : selectedWorkers) {
          try {
-            worker.stop();
+            worker.pause(pause);
          } catch (Exception e) {
-            log.error("Failed to stop worker {}: {}.", worker.getName(), e.getMessage());
+            log.error("Failed to {} worker {}: {}.", pause ? "pause" : "unpause", worker.getName(), e.getMessage());
          }
       }
    }
