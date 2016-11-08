@@ -7,6 +7,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.AbstractDao;
@@ -26,9 +27,9 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
    public static final String WORKER = "worker";
 
    /**
-    * Redis key part for worker start time.
+    * Redis key part for worker state.
     */
-   public static final String STARTED = "started";
+   public static final String STATE = "state";
 
    /**
     * Redis key part for worker stats.
@@ -50,6 +51,12 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
     */
    private RedisTemplate<String, String> redis;
 
+   /**
+    * JSNO serializer for {@link WorkerState}.
+    */
+   private Jackson2JsonRedisSerializer<WorkerState> workerStateSerializer =
+         new Jackson2JsonRedisSerializer<>(WorkerState.class);
+
    @Override
    @PostConstruct
    public void afterPropertiesSet() {
@@ -63,12 +70,13 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
    }
 
    @Override
-   public void start(String name) {
+   public void state(String name, WorkerState state) {
       Assert.notNull(name, "Precondition violated: name != null.");
+      Assert.notNull(state, "Precondition violated: state != null.");
 
       redis.execute((RedisConnection connection) -> {
          connection.sAdd(key(WORKERS), value(name));
-         connection.set(key(WORKER, name, STARTED), value(LocalDateTime.now()));
+         connection.set(key(WORKER, name, STATE), workerStateSerializer.serialize(state));
          return null;
       });
    }
@@ -79,8 +87,11 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
 
       redis.execute((RedisConnection connection) -> {
          connection.sRem(key(WORKERS), value(name));
-         connection.del(key(WORKER, name, STARTED), key(WORKER, name),
-               key(STAT, PROCESSED, name), key(STAT, FAILED, name));
+         connection.del(
+               key(WORKER, name, STATE),
+               key(WORKER, name),
+               key(STAT, PROCESSED, name),
+               key(STAT, FAILED, name));
          return null;
       });
    }

@@ -89,9 +89,14 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    protected long emptyQueuesSleepMillis = DEFAULT_EMPTY_QUEUE_SLEEP_MILLIS;
 
    /**
-    * Should worker run?. False stops this worker.
+    * Should worker run?.
     */
    protected final AtomicBoolean run = new AtomicBoolean(true);
+
+   /**
+    * Worker state.
+    */
+   protected WorkerState state;
 
    /**
     * Event bus.
@@ -166,10 +171,23 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       return name;
    }
 
+   /**
+    * Set worker state.
+    */
+   protected void setWorkerState(String state) {
+      try {
+         this.state.setState(state);
+         workerDao.state(name, this.state);
+      } catch (Exception e) {
+         log.error("Failed to set worker state to {}.", state);
+      }
+   }
+
    @Override
    public void stop() {
       log.info("Stopping worker {}.", getName());
       run.set(false);
+      setWorkerState(WorkerState.STOPPING);
    }
 
    /**

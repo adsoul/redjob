@@ -2,6 +2,7 @@ package com.s24.redjob.queue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.PostConstruct;
 
@@ -12,6 +13,7 @@ import org.springframework.util.StringUtils;
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
+import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
@@ -36,6 +38,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     * Worker thread.
     */
    private Thread thread;
+
+   /**
+    * Should worker pause?.
+    */
+   protected final AtomicBoolean pause = new AtomicBoolean(false);
 
    /**
     * Init.
@@ -80,7 +87,8 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       try {
          MDC.put("worker", getName());
          log.info("Starting worker {}.", getName());
-         workerDao.start(name);
+         state = new WorkerState();
+         setWorkerState(WorkerState.RUNNING);
          eventBus.publishEvent(new WorkerStart(this));
          startup();
          poll();
@@ -103,11 +111,37 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       }
    }
 
+   @Override
+   public void pause(boolean pause) {
+      synchronized (this.pause) {
+         this.pause(pause);
+         this.pause.notifyAll();
+      }
+   }
+
+   /**
+    * Block work thread while worker is paused.
+    */
+   private void blockWhilePaused() throws InterruptedException {
+      synchronized (this.pause) {
+         while (pause.get()) {
+            try {
+               setWorkerState(WorkerState.PAUSED);
+               this.pause.wait();
+            } finally {
+               setWorkerState(WorkerState.RUNNING);
+            }
+         }
+      }
+   }
+
    /**
     * Main poll loop.
     */
-   protected void poll() {
+   protected void poll() throws InterruptedException {
       while (run.get()) {
+         blockWhilePaused();
+
          try {
             pollQueues();
          } catch (InterruptedException e) {

@@ -21,6 +21,7 @@ import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
+import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
@@ -76,7 +77,8 @@ public class ChannelWorker extends AbstractWorker {
          listenerContainer.addMessageListener(listener, topics);
       }
 
-      workerDao.start(name);
+      state = new WorkerState();
+      setWorkerState(WorkerState.RUNNING);
       eventBus.publishEvent(new WorkerStart(this));
    }
 

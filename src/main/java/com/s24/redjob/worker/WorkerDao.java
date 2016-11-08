@@ -5,12 +5,14 @@ package com.s24.redjob.worker;
  */
 public interface WorkerDao {
    /**
-    * Start of worker.
+    * Update worker state.
     *
     * @param name
     *           Name of worker.
+    * @param state
+    *           State of worker.
     */
-   void start(String name);
+   void state(String name, WorkerState state);
 
    /**
     * Stop of worker.
