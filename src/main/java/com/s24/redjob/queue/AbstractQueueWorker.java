@@ -114,7 +114,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    @Override
    public void pause(boolean pause) {
       synchronized (this.pause) {
-         this.pause(pause);
+         this.pause.set(pause);
          this.pause.notifyAll();
       }
    }

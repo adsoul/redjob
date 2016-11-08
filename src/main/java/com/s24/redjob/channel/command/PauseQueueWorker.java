@@ -3,6 +3,7 @@ package com.s24.redjob.channel.command;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.s24.redjob.queue.QueueWorker;
 
@@ -21,6 +22,13 @@ public class PauseQueueWorker {
     * If empty, all workers will be paused.
     */
    private Set<String> queues = new HashSet<>();
+
+   /**
+    * Hidden default constructor for Jackson.
+    */
+   @JsonCreator
+   PauseQueueWorker() {
+   }
 
    /**
     * Constructor to pause/unpause all workers.
@@ -48,6 +56,6 @@ public class PauseQueueWorker {
     * Does the worker match the selectors of the job?.
     */
    protected boolean matches(QueueWorker worker) {
-      return worker.getQueues().stream().filter(queues::contains).findAny().isPresent();
+      return queues.isEmpty() || worker.getQueues().stream().filter(queues::contains).findAny().isPresent();
    }
 }
