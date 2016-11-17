@@ -1,5 +1,10 @@
 package com.s24.redjob.worker.json;
 
+import static java.util.Collections.synchronizedSet;
+
+import java.util.HashSet;
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -31,6 +36,11 @@ public class ExecutionRedisSerializer extends Jackson2JsonRedisSerializer<Execut
    private boolean ignoreDeserializationFailures = false;
 
    /**
+    * Cache for deserialization failures to reduce log noise.
+    */
+   private static final Set<String> deserializationFailuresCache = synchronizedSet(new HashSet<>());
+
+   /**
     * Constructor.
     */
    public ExecutionRedisSerializer() {
@@ -44,7 +54,12 @@ public class ExecutionRedisSerializer extends Jackson2JsonRedisSerializer<Execut
          return super.deserialize(bytes);
       } catch (SerializationException e) {
          if (ignoreDeserializationFailures) {
-            log.warn("Ignoring invalid JSON: {}.", e.getMessage());
+            if (deserializationFailuresCache.add(e.getMessage())) {
+               log.warn("Ignoring invalid JSON: {}.", e.getMessage());
+            }
+            if (deserializationFailuresCache.size() > 1000) {
+               deserializationFailuresCache.clear();
+            }
             return null;
          }
 
