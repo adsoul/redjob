@@ -30,9 +30,14 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    private List<String> queues;
 
    /**
+    * Dummy execution to avoid "not null" checks.
+    */
+   private static final Execution NO_EXECUTION = new Execution(-1, "dummy");
+
+   /**
     * Currently processed execution, if any.
     */
-   private volatile Execution execution = new Execution(-1, "dummy");
+   private volatile Execution execution = NO_EXECUTION;
 
    /**
     * Worker thread.
@@ -211,7 +216,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
 
       } finally {
          synchronized (this.execution) {
-            this.execution = null;
+            this.execution = NO_EXECUTION;
          }
          try {
             if (restore) {
