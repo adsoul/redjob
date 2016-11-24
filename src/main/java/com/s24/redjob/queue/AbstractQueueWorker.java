@@ -230,7 +230,9 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    public void stop(long id) {
       synchronized (this.execution) {
          if (execution.getId() == id) {
-            thread.interrupt();
+            if (thread != null) {
+               thread.interrupt();
+            }
          }
       }
    }
