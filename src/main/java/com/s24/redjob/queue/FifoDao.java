@@ -50,7 +50,18 @@ public interface FifoDao {
    Execution get(long id);
 
    /**
+    * Get all jobs of a queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @return Executions by id. Some execution may be null, e.g. if not deserializable.
+    */
+   Map<Long, Execution> getQueued(String queue);
+
+   /**
     * Get all jobs.
+    *
+    * @return Executions by id. Some execution may be null, e.g. if not deserializable.
     */
    Map<Long, Execution> getAll();
 

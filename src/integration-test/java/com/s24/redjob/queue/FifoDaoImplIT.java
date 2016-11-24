@@ -9,7 +9,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -118,6 +120,26 @@ public class FifoDaoImplIT {
    }
 
    @Test
+   public void getQueued() {
+      // No job -> return null.
+      assertNull(dao.get(Long.MAX_VALUE));
+
+
+      TestJob job1 = new TestJob();
+      long id1 = dao.enqueue(QUEUE, job1, false).getId();
+      TestJob job2 = new TestJob();
+      // No in the result, because it already has been "processed".
+      long id2 = dao.enqueue(QUEUE, job2, false).getId();
+      dao.dequeue(QUEUE, id2);
+      // No in the result, because it is in a different queue.
+      TestJob job3 = new TestJob();
+      dao.enqueue(QUEUE + "2", job3, false);
+
+      assertThat(dao.getQueued(QUEUE).entrySet().stream().collect(toJobMap()))
+            .containsOnly(entry(id1, job1));
+   }
+
+   @Test
    public void getAll() {
       // No job -> return null.
       assertNull(dao.get(Long.MAX_VALUE));
@@ -130,7 +152,14 @@ public class FifoDaoImplIT {
       TestJob job3 = new TestJob();
       long id3 = dao.enqueue(QUEUE, job3, false).getId();
 
-      assertThat(dao.getAll().entrySet().stream().collect(toMap(Entry::getKey, entry -> entry.getValue().getJob())))
+      assertThat(dao.getAll().entrySet().stream().collect(toJobMap()))
             .containsOnly(entry(id1, job1), entry(id2, job2), entry(id3, job3));
+   }
+
+   /**
+    * Converts id -> execution entries to id -> job entries.
+    */
+   private Collector<Entry<Long, Execution>, ?, Map<Long, Object>> toJobMap() {
+      return toMap(Entry::getKey, entry -> entry.getValue().getJob());
    }
 }

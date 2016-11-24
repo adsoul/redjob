@@ -57,7 +57,12 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public Map<Long, Execution> executions() {
+   public Map<Long, Execution> queuedExecutions(String queue) {
+      return fifoDao.getQueued(queue);
+   }
+
+   @Override
+   public Map<Long, Execution> allExecutions() {
       return fifoDao.getAll();
    }
 

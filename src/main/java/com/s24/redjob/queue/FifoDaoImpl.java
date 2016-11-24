@@ -1,18 +1,20 @@
 package com.s24.redjob.queue;
 
 import static java.util.Collections.emptyMap;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.Execution;
@@ -84,7 +86,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
          Execution execution = new Execution(id, job);
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
-         byte[] executionBytes = executions.serialize(execution);
+         byte[] executionBytes = value(execution);
          if (log.isDebugEnabled()) {
             log.debug("Enqueuing: {}", new String(executionBytes, StandardCharsets.UTF_8));
          }
@@ -113,12 +115,12 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public Execution get(long id) {
       return redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(id);
-         byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
-         if (jobBytes == null) {
+         byte[] executionBytes = connection.hGet(key(JOBS), idBytes);
+         if (executionBytes == null) {
             return null;
          }
 
-         return executions.deserialize(jobBytes);
+         return parseExecution(executionBytes);
       });
    }
 
@@ -126,8 +128,8 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public void update(Execution execution) {
       redis.execute((RedisConnection connection) -> {
          byte[] idBytes = value(execution.getId());
-         byte[] jobBytes = executions.serialize(execution);
-         boolean created = connection.hSet(key(JOBS), idBytes, jobBytes);
+         byte[] executionBytes = value(execution);
+         boolean created = connection.hSet(key(JOBS), idBytes, executionBytes);
          if (created) {
             // Job had been deleted before, so updates are not useful, because they will create a stale job.
             connection.hDel(key(JOBS), idBytes);
@@ -138,17 +140,55 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    }
 
    @Override
-   public Map<Long, Execution> getAll() {
+   public Map<Long, Execution> getQueued(String queue) {
       return redis.execute((RedisConnection connection) -> {
-         Map<byte[], byte[]> jobBytes = connection.hGetAll(key(JOBS));
-         if (jobBytes == null) {
+         // Get all ids from queue.
+         List<byte[]> idsBytes = connection.lRange(key(QUEUE, queue), 0, -1);
+         if (CollectionUtils.isEmpty(idsBytes)) {
             return emptyMap();
          }
 
-         return jobBytes.values().stream()
-               .map(executions::deserialize)
-               .filter(Objects::nonNull)
-               .collect(toMap(Execution::getId, identity()));
+         // Lookup all executions for all ids at once.
+         List<byte[]> jobsBytes = connection.hMGet(key(JOBS), idsBytes.toArray(new byte[idsBytes.size()][]));
+         if (jobsBytes == null) {
+            return emptyMap();
+         }
+         Assert.isTrue(jobsBytes.size() == idsBytes.size(),
+               "Precondition violated: Redis response has the expected length.");
+
+         Map<Long, Execution> result = new LinkedHashMap<>(idsBytes.size() * 2);
+         Iterator<Long> idIter = idsBytes.stream().map(this::parseLong).iterator();
+         Iterator<Execution> executionIter = jobsBytes.stream().map(this::parseExecution).iterator();
+         while (idIter.hasNext()) {
+            Long id = idIter.next();
+            Execution execution = executionIter.next();
+            if (id != null) {
+               result.put(id, execution);
+            }
+         }
+         Assert.isTrue(!executionIter.hasNext(),
+               "Precondition violated: Redis response has the expected length.");
+         return result;
+      });
+   }
+
+   @Override
+   public Map<Long, Execution> getAll() {
+      return redis.execute((RedisConnection connection) -> {
+         Map<byte[], byte[]> jobsBytes = connection.hGetAll(key(JOBS));
+         if (jobsBytes == null) {
+            return emptyMap();
+         }
+
+         Map<Long, Execution> result = new LinkedHashMap<>(jobsBytes.size() * 2);
+         for (Entry<byte[], byte[]> entry : jobsBytes.entrySet()) {
+            Long id = parseLong(entry.getKey());
+            Execution execution = parseExecution(entry.getValue());
+            if (id != null) {
+               result.put(id, execution);
+            }
+         }
+         return result;
       });
    }
 
@@ -165,12 +205,12 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
          }
          connection.lPush(key(INFLIGHT, worker, queue), idBytes);
 
-         byte[] jobBytes = connection.hGet(key(JOBS), idBytes);
-         if (jobBytes == null) {
+         byte[] executionBytes = connection.hGet(key(JOBS), idBytes);
+         if (executionBytes == null) {
             return null;
          }
 
-         return executions.deserialize(jobBytes);
+         return parseExecution(executionBytes);
       });
    }
 
@@ -191,6 +231,36 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
          }
          return null;
       });
+   }
+
+   //
+   // Serialization.
+   //
+
+   /**
+    * Serialize execution.
+    *
+    * @param execution
+    *           Execution.
+    * @return Serialized execution.
+    */
+   protected byte[] value(Execution execution) {
+      return executions.serialize(execution);
+   }
+
+   //
+   // Deserialization.
+   //
+
+   /**
+    * Deserialize long value.
+    *
+    * @param executionBytes
+    *           Execution.
+    * @return Deserialized execution.
+    */
+   protected Execution parseExecution(byte[] executionBytes) {
+      return executions.deserialize(executionBytes);
    }
 
    //

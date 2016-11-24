@@ -58,8 +58,16 @@ public interface Client {
 
    /**
     * Get all jobs executions.
+    *
+    * @param queue
+    *           Queue name.
     */
-   Map<Long, Execution> executions();
+   Map<Long, Execution> queuedExecutions(String queue);
+
+   /**
+    * Get all jobs executions.
+    */
+   Map<Long, Execution> allExecutions();
 
    /**
     * Publish the given job to the given channel.

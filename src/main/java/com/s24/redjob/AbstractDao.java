@@ -98,6 +98,32 @@ public class AbstractDao {
    }
 
    //
+   // Deserialization.
+   //
+
+   /**
+    * Deserialize long value.
+    *
+    * @param valueBytes
+    *           Long.
+    * @return Deserialized long.
+    */
+   protected Long parseLong(byte[] valueBytes) {
+      return Long.valueOf(parseString(valueBytes));
+   }
+
+   /**
+    * Deserialize string value.
+    *
+    * @param valueBytes
+    *           Long.
+    * @return Deserialized string.
+    */
+   protected String parseString(byte[] valueBytes) {
+      return strings.deserialize(valueBytes);
+   }
+
+   //
    // Injections.
    //
 
