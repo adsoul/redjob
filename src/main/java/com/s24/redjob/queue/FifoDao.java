@@ -1,6 +1,6 @@
 package com.s24.redjob.queue;
 
-import java.util.Map;
+import java.util.List;
 
 import com.s24.redjob.worker.Execution;
 
@@ -56,14 +56,14 @@ public interface FifoDao {
     *           Queue name.
     * @return Executions by id. Some execution may be null, e.g. if not deserializable.
     */
-   Map<Long, Execution> getQueued(String queue);
+   List<Execution> getQueued(String queue);
 
    /**
     * Get all jobs.
     *
     * @return Executions by id. Some execution may be null, e.g. if not deserializable.
     */
-   Map<Long, Execution> getAll();
+   List<Execution> getAll();
 
    /**
     * Pop first job from queue.

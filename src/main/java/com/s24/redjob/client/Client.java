@@ -1,6 +1,6 @@
 package com.s24.redjob.client;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.s24.redjob.worker.Execution;
@@ -62,12 +62,12 @@ public interface Client {
     * @param queue
     *           Queue name.
     */
-   Map<Long, Execution> queuedExecutions(String queue);
+   List<Execution> queuedExecutions(String queue);
 
    /**
     * Get all jobs executions.
     */
-   Map<Long, Execution> allExecutions();
+   List<Execution> allExecutions();
 
    /**
     * Publish the given job to the given channel.

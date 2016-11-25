@@ -1,6 +1,6 @@
 package com.s24.redjob.client;
 
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
@@ -57,12 +57,12 @@ public class ClientImpl implements Client {
    }
 
    @Override
-   public Map<Long, Execution> queuedExecutions(String queue) {
+   public List<Execution> queuedExecutions(String queue) {
       return fifoDao.getQueued(queue);
    }
 
    @Override
-   public Map<Long, Execution> allExecutions() {
+   public List<Execution> allExecutions() {
       return fifoDao.getAll();
    }
 

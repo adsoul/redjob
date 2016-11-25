@@ -1,13 +1,12 @@
 package com.s24.redjob.queue;
 
-import static java.util.Collections.emptyMap;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 
@@ -140,55 +139,41 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    }
 
    @Override
-   public Map<Long, Execution> getQueued(String queue) {
+   public List<Execution> getQueued(String queue) {
       return redis.execute((RedisConnection connection) -> {
          // Get all ids from queue.
          List<byte[]> idsBytes = connection.lRange(key(QUEUE, queue), 0, -1);
          if (CollectionUtils.isEmpty(idsBytes)) {
-            return emptyMap();
+            return emptyList();
          }
 
          // Lookup all executions for all ids at once.
-         List<byte[]> jobsBytes = connection.hMGet(key(JOBS), idsBytes.toArray(new byte[idsBytes.size()][]));
-         if (jobsBytes == null) {
-            return emptyMap();
+         List<byte[]> executionsBytes = connection.hMGet(key(JOBS), idsBytes.toArray(new byte[idsBytes.size()][]));
+         if (CollectionUtils.isEmpty(executionsBytes)) {
+            return emptyList();
          }
-         Assert.isTrue(jobsBytes.size() == idsBytes.size(),
+         Assert.isTrue(executionsBytes.size() == idsBytes.size(),
                "Precondition violated: Redis response has the expected length.");
 
-         Map<Long, Execution> result = new LinkedHashMap<>(idsBytes.size() * 2);
-         Iterator<Long> idIter = idsBytes.stream().map(this::parseLong).iterator();
-         Iterator<Execution> executionIter = jobsBytes.stream().map(this::parseExecution).iterator();
-         while (idIter.hasNext()) {
-            Long id = idIter.next();
-            Execution execution = executionIter.next();
-            if (id != null) {
-               result.put(id, execution);
-            }
-         }
-         Assert.isTrue(!executionIter.hasNext(),
-               "Precondition violated: Redis response has the expected length.");
-         return result;
+         return executionsBytes.stream()
+               .map(this::parseExecution)
+               .filter(Objects::nonNull)
+               .collect(toList());
       });
    }
 
    @Override
-   public Map<Long, Execution> getAll() {
+   public List<Execution> getAll() {
       return redis.execute((RedisConnection connection) -> {
-         Map<byte[], byte[]> jobsBytes = connection.hGetAll(key(JOBS));
-         if (jobsBytes == null) {
-            return emptyMap();
+         Map<byte[], byte[]> executionsBytes = connection.hGetAll(key(JOBS));
+         if (CollectionUtils.isEmpty(executionsBytes)) {
+            return emptyList();
          }
 
-         Map<Long, Execution> result = new LinkedHashMap<>(jobsBytes.size() * 2);
-         for (Entry<byte[], byte[]> entry : jobsBytes.entrySet()) {
-            Long id = parseLong(entry.getKey());
-            Execution execution = parseExecution(entry.getValue());
-            if (id != null) {
-               result.put(id, execution);
-            }
-         }
-         return result;
+         return executionsBytes.values().stream()
+               .map(this::parseExecution)
+               .filter(Objects::nonNull)
+               .collect(toList());
       });
    }
 

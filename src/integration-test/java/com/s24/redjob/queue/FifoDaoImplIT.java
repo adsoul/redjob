@@ -1,17 +1,11 @@
 package com.s24.redjob.queue;
 
-import static java.util.stream.Collectors.toMap;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -126,7 +120,7 @@ public class FifoDaoImplIT {
 
 
       TestJob job1 = new TestJob();
-      long id1 = dao.enqueue(QUEUE, job1, false).getId();
+      dao.enqueue(QUEUE, job1, false).getId();
       TestJob job2 = new TestJob();
       // No in the result, because it already has been "processed".
       long id2 = dao.enqueue(QUEUE, job2, false).getId();
@@ -135,8 +129,8 @@ public class FifoDaoImplIT {
       TestJob job3 = new TestJob();
       dao.enqueue(QUEUE + "2", job3, false);
 
-      assertThat(dao.getQueued(QUEUE).entrySet().stream().collect(toJobMap()))
-            .containsOnly(entry(id1, job1));
+      assertThat(dao.getQueued(QUEUE).stream().map(Execution::getJob))
+            .containsOnly(job1);
    }
 
    @Test
@@ -146,20 +140,13 @@ public class FifoDaoImplIT {
 
 
       TestJob job1 = new TestJob();
-      long id1 = dao.enqueue(QUEUE, job1, false).getId();
+      dao.enqueue(QUEUE, job1, false).getId();
       TestJob job2 = new TestJob();
-      long id2 = dao.enqueue(QUEUE, job2, false).getId();
+      dao.enqueue(QUEUE, job2, false).getId();
       TestJob job3 = new TestJob();
-      long id3 = dao.enqueue(QUEUE, job3, false).getId();
+      dao.enqueue(QUEUE, job3, false).getId();
 
-      assertThat(dao.getAll().entrySet().stream().collect(toJobMap()))
-            .containsOnly(entry(id1, job1), entry(id2, job2), entry(id3, job3));
-   }
-
-   /**
-    * Converts id -> execution entries to id -> job entries.
-    */
-   private Collector<Entry<Long, Execution>, ?, Map<Long, Object>> toJobMap() {
-      return toMap(Entry::getKey, entry -> entry.getValue().getJob());
+      assertThat(dao.getAll().stream().map(Execution::getJob))
+            .containsOnly(job1, job2, job3);
    }
 }
