@@ -197,7 +197,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    }
 
    /**
-    * Failsafe parsing of execution.
+    * Failsafe parsing of job execution.
     *
     * @return Parsed execution or null, if deserialization fails.
     */

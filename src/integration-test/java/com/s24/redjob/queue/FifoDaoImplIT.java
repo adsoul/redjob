@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
@@ -120,7 +121,7 @@ public class FifoDaoImplIT {
 
 
       TestJob job1 = new TestJob();
-      dao.enqueue(QUEUE, job1, false).getId();
+      dao.enqueue(QUEUE, job1, false);
       TestJob job2 = new TestJob();
       // No in the result, because it already has been "processed".
       long id2 = dao.enqueue(QUEUE, job2, false).getId();
@@ -140,13 +141,25 @@ public class FifoDaoImplIT {
 
 
       TestJob job1 = new TestJob();
-      dao.enqueue(QUEUE, job1, false).getId();
+      dao.enqueue(QUEUE, job1, false);
       TestJob job2 = new TestJob();
-      dao.enqueue(QUEUE, job2, false).getId();
+      dao.enqueue(QUEUE, job2, false);
       TestJob job3 = new TestJob();
-      dao.enqueue(QUEUE, job3, false).getId();
+      dao.enqueue(QUEUE, job3, false);
 
       assertThat(dao.getAll().stream().map(Execution::getJob))
             .containsOnly(job1, job2, job3);
+   }
+
+   @Ignore
+   @Test
+   public void cleanUp() {
+      TestJob job = new TestJob();
+      dao.enqueue(QUEUE, job, false);
+      Object notDeserializableJob = new Object();
+      long id = dao.enqueue(QUEUE, notDeserializableJob, false).getId();
+
+      assertEquals(1, dao.cleanUp());
+      assertNull(dao.get(id));
    }
 }
