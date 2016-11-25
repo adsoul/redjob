@@ -5,7 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.s24.redjob.channel.WorkerAware;
+import com.s24.redjob.channel.WorkersAware;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.JobRunner;
 import com.s24.redjob.worker.JobRunnerComponent;
@@ -14,7 +14,7 @@ import com.s24.redjob.worker.JobRunnerComponent;
  * {@link JobRunner} for {@link StopJob} command.
  */
 @JobRunnerComponent
-public class StopJobRunner implements JobRunner<StopJob>, WorkerAware {
+public class StopJobRunner implements JobRunner<StopJob>, WorkersAware {
    /**
     * Logger.
     */

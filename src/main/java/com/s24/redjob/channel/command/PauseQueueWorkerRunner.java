@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.channel.WorkerAware;
+import com.s24.redjob.channel.WorkersAware;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.JobRunner;
 import com.s24.redjob.worker.JobRunnerComponent;
@@ -17,7 +17,7 @@ import com.s24.redjob.worker.JobRunnerComponent;
  * {@link JobRunner} for {@link PauseQueueWorker} command.
  */
 @JobRunnerComponent
-public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker>, WorkerAware {
+public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker>, WorkersAware {
    /**
     * Logger.
     */

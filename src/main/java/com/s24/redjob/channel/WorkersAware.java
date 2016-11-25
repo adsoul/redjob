@@ -7,7 +7,7 @@ import com.s24.redjob.queue.QueueWorker;
 /**
  * Interface for command runners that work on {@link QueueWorker}s.
  */
-public interface WorkerAware {
+public interface WorkersAware {
    /**
     * Inject workers.
     */

@@ -150,8 +150,8 @@ public class ChannelWorker extends AbstractWorker {
    @Override
    protected void prepareRunner(Object runner) {
       super.prepareRunner(runner);
-      if (runner instanceof WorkerAware) {
-         ((WorkerAware) runner).setWorkers(workers);
+      if (runner instanceof WorkersAware) {
+         ((WorkersAware) runner).setWorkers(workers);
       }
    }
 
