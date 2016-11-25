@@ -2,6 +2,7 @@ package com.s24.redjob.queue;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -10,6 +11,14 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonTypeName("testJob")
 public class TestJob {
+   /**
+    * Failing job.
+    */
+   public static final TestJob FAILURE = new TestJob();
+   static {
+      FAILURE.value = "fail";
+   }
+
    /**
     * A value.
     */
@@ -29,8 +38,13 @@ public class TestJob {
     * @param value
     *           A value.
     */
+   @JsonCreator
    public TestJob(@JsonProperty("value") String value) {
       this.value = value;
+      // Throw exception on deserialization, if requested.
+      if ("fail".equals(value)) {
+         throw new IllegalArgumentException("Failure");
+      }
    }
 
    /**

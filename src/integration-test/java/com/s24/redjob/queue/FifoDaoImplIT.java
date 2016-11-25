@@ -8,7 +8,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
@@ -151,12 +150,11 @@ public class FifoDaoImplIT {
             .containsOnly(job1, job2, job3);
    }
 
-   @Ignore
    @Test
    public void cleanUp() {
       TestJob job = new TestJob();
       dao.enqueue(QUEUE, job, false);
-      Object notDeserializableJob = new Object();
+      TestJob notDeserializableJob = TestJob.FAILURE;
       long id = dao.enqueue(QUEUE, notDeserializableJob, false).getId();
 
       assertEquals(1, dao.cleanUp());
