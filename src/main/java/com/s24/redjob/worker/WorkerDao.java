@@ -5,6 +5,11 @@ package com.s24.redjob.worker;
  */
 public interface WorkerDao {
    /**
+    * Namespace of worker dao.
+    */
+   String getNamespace();
+
+   /**
     * Update worker state.
     *
     * @param name

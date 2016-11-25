@@ -53,11 +53,6 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    private static final AtomicInteger IDS = new AtomicInteger();
 
    /**
-    * Namespace of this worker.
-    */
-   private String namespace;
-
-   /**
     * Worker id.
     */
    private int id;
@@ -158,7 +153,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    @Override
    public String getNamespace() {
-      return namespace;
+      return ""; // workerDao.getNamespace();
    }
 
    @Override
@@ -318,20 +313,6 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    //
 
    /**
-    * Namespace of this worker.
-    */
-   public void setNamespace(String namespace) {
-      this.namespace = namespace;
-   }
-
-   /**
-    * Name of this worker. Defaults to a generated unique name.
-    */
-   public void setName(String name) {
-      this.name = name;
-   }
-
-   /**
     * Worker dao.
     */
    public WorkerDao getWorkerDao() {
@@ -343,6 +324,13 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     */
    public void setWorkerDao(WorkerDao workerDao) {
       this.workerDao = workerDao;
+   }
+
+   /**
+    * Name of this worker. Defaults to a generated unique name.
+    */
+   public void setName(String name) {
+      this.name = name;
    }
 
    /**

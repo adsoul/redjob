@@ -11,6 +11,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
 import com.s24.redjob.worker.events.JobFailed;
 import com.s24.redjob.worker.events.JobProcess;
@@ -20,7 +21,6 @@ import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
-import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
 
 /**
@@ -44,21 +44,29 @@ public class FifoWorkerImplIT {
 
    @Before
    public void setUp() throws Exception {
-      RedisConnectionFactory redis = TestRedis.connectionFactory();
+      RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
 
-      ExecutionRedisSerializer executions = new TestExecutionRedisSerializer(TestJob.class);
+      WorkerDaoImpl workerDao = new WorkerDaoImpl();
+      workerDao.setConnectionFactory(connectionFactory);
+      workerDao.setNamespace("test");
+      workerDao.afterPropertiesSet();
+
+      FifoDaoImpl fifoDao = new FifoDaoImpl();
+      fifoDao.setConnectionFactory(connectionFactory);
+      fifoDao.setNamespace("test");
+      fifoDao.setExecutions(new TestExecutionRedisSerializer(TestJob.class));
+      fifoDao.afterPropertiesSet();
 
       FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean();
-      factory.setConnectionFactory(redis);
-      factory.setNamespace("namespace");
-      factory.setExecutions(executions);
+      factory.setWorkerDao(workerDao);
+      factory.setFifoDao(fifoDao);
       factory.setQueues("test-queue");
       factory.setJobRunnerFactory(new TestJobRunnerFactory());
       factory.setApplicationEventPublisher(eventBus);
       factory.afterPropertiesSet();
 
       worker = factory.getObject();
-      fifoDao = worker.getFifoDao();
+      this.fifoDao = worker.getFifoDao();
    }
 
    @After

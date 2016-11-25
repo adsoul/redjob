@@ -7,9 +7,7 @@ import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import com.s24.redjob.AbstractDao;
 import com.s24.redjob.channel.ChannelWorker;
 
 /**
@@ -20,7 +18,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
    /**
     * Worker dao.
     */
-   private WorkerDaoImpl workerDao = new WorkerDaoImpl();
+   private WorkerDao workerDao;
 
    /**
     * The instance.
@@ -44,8 +42,6 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
 
    @Override
    public void afterPropertiesSet() throws Exception {
-      workerDao.afterPropertiesSet();
-
       worker.setWorkerDao(workerDao);
       worker.afterPropertiesSet();
    }
@@ -159,32 +155,17 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
    }
 
    /**
-    * {@link RedisConnectionFactory} to access Redis.
+    * Worker dao.
     */
-   public RedisConnectionFactory getConnectionFactory() {
-      return workerDao.getConnectionFactory();
+   public WorkerDao getWorkerDao() {
+      return workerDao;
    }
 
    /**
-    * {@link RedisConnectionFactory} to access Redis.
+    * Worker dao.
     */
-   public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
-      workerDao.setConnectionFactory(connectionFactory);
-   }
-
-   /**
-    * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
-    */
-   public String getNamespace() {
-      return worker.getNamespace();
-   }
-
-   /**
-    * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
-    */
-   public void setNamespace(String namespace) {
-      workerDao.setNamespace(namespace);
-      worker.setNamespace(namespace);
+   public void setWorkerDao(WorkerDao workerDao) {
+      this.workerDao = workerDao;
    }
 
    /**

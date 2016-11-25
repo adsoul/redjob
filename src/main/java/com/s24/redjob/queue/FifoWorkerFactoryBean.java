@@ -3,11 +3,8 @@ package com.s24.redjob.queue;
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.AbstractWorkerFactoryBean;
-import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link FifoWorker}.
@@ -16,7 +13,7 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    /**
     * Queue dao.
     */
-   private FifoDaoImpl fifoDao = new FifoDaoImpl();
+   private FifoDaoImpl fifoDao;
 
    /**
     * Constructor.
@@ -27,8 +24,6 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
 
    @Override
    public void afterPropertiesSet() throws Exception {
-      fifoDao.afterPropertiesSet();
-
       worker.setFifoDao(fifoDao);
 
       super.afterPropertiesSet();
@@ -39,33 +34,17 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    //
 
    /**
-    * {@link RedisConnectionFactory} to access Redis.
+    * Queue dao.
     */
-   public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
-      super.setConnectionFactory(connectionFactory);
-      fifoDao.setConnectionFactory(connectionFactory);
+   public FifoDaoImpl getFifoDao() {
+      return fifoDao;
    }
 
    /**
-    * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
+    * Queue dao.
     */
-   public void setNamespace(String namespace) {
-      super.setNamespace(namespace);
-      fifoDao.setNamespace(namespace);
-   }
-
-   /**
-    * Redis serializer for job executions.
-    */
-   public ExecutionRedisSerializer getExecutions() {
-      return fifoDao.getExecutions();
-   }
-
-   /**
-    * Redis serializer for job executions.
-    */
-   public void setExecutions(ExecutionRedisSerializer executions) {
-      fifoDao.setExecutions(executions);
+   public void setFifoDao(FifoDaoImpl fifoDao) {
+      this.fifoDao = fifoDao;
    }
 
    /**

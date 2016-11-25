@@ -10,6 +10,11 @@ import com.s24.redjob.worker.Execution;
  */
 public interface ChannelDao {
    /**
+    * Namespace of channel dao.
+    */
+   String getNamespace();
+
+   /**
     * Publish the given admin job to the given channel.
     *
     * @param channel
