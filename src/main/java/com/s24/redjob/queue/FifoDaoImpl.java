@@ -178,6 +178,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
       });
    }
 
+   @Override
    public int cleanUp() {
       return redis.execute((RedisConnection connection) -> {
          Map<byte[], byte[]> executionsBytes = connection.hGetAll(key(JOBS));
