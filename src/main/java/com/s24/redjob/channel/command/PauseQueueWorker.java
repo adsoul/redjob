@@ -22,7 +22,7 @@ public class PauseQueueWorker {
    private boolean pause;
 
    /**
-    * Workers of which queues should be paused?.
+    * Workers of which queues should be paused.
     * If empty, all workers will be paused.
     */
    private Set<String> queues = new HashSet<>();
@@ -74,7 +74,7 @@ public class PauseQueueWorker {
    }
 
    /**
-    * Workers of which queues should be paused?.
+    * Workers of which queues should be paused.
     * If empty, all workers will be paused.
     */
    public Set<String> getQueues() {

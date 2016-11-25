@@ -6,20 +6,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import com.s24.redjob.channel.WorkerAware;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.JobRunner;
+import com.s24.redjob.worker.JobRunnerComponent;
 
 /**
  * {@link JobRunner} for {@link PauseQueueWorker} command.
  */
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@JobRunnerComponent
 public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker>, WorkerAware {
    /**
     * Logger.
