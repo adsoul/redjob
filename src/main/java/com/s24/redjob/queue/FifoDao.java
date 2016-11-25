@@ -66,6 +66,13 @@ public interface FifoDao {
    List<Execution> getAll();
 
    /**
+    * Delete not deserializable job executions.
+    *
+    * @return Number of deleted job executions.
+    */
+   int cleanUp();
+
+   /**
     * Pop first job from queue.
     *
     * @param queue

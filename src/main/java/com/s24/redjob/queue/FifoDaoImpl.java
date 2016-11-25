@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import javax.annotation.PostConstruct;
@@ -175,6 +176,36 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
                .filter(Objects::nonNull)
                .collect(toList());
       });
+   }
+
+   public int cleanUp() {
+      return redis.execute((RedisConnection connection) -> {
+         Map<byte[], byte[]> executionsBytes = connection.hGetAll(key(JOBS));
+         if (CollectionUtils.isEmpty(executionsBytes)) {
+            return 0;
+         }
+
+         byte[][] toDelete = executionsBytes.entrySet().stream()
+               .filter(entry -> tryParseExecution(entry.getValue()) == null)
+               .map(Entry::getKey)
+               .toArray(byte[][]::new);
+
+         connection.hDel(key(JOBS), toDelete);
+         return toDelete.length;
+      });
+   }
+
+   /**
+    * Failsafe parsing of execution.
+    *
+    * @return Parsed execution or null, if deserialization fails.
+    */
+   private Execution tryParseExecution(byte[] executionBytes) {
+      try {
+         return parseExecution(executionBytes);
+      } catch (Exception e) {
+         return null;
+      }
    }
 
    //
