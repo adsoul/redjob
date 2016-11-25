@@ -1,5 +1,6 @@
 package com.s24.redjob.channel.command;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
@@ -13,9 +14,10 @@ public class StopJob {
    private long id;
 
    /**
-    * Default constructor for Jackson.
+    * Hidden default constructor for Jackson.
     */
-   private StopJob() {
+   @JsonCreator
+   StopJob() {
       super();
    }
 
