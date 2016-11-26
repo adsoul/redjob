@@ -14,7 +14,7 @@ import org.springframework.util.Assert;
 /**
  * Base dao.
  */
-public class AbstractDao {
+public abstract class AbstractDao implements Dao {
    /**
     * Logger.
     */
@@ -29,11 +29,6 @@ public class AbstractDao {
     * Redis serializer for strings.
     */
    protected final StringRedisSerializer strings = new StringRedisSerializer();
-
-   /**
-    * Default namespace.
-    */
-   public static final String DEFAULT_NAMESPACE = "redjob";
 
    /**
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value #DEFAULT_NAMESPACE}.
@@ -144,6 +139,7 @@ public class AbstractDao {
    /**
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value #DEFAULT_NAMESPACE}.
     */
+   @Override
    public String getNamespace() {
       return namespace;
    }

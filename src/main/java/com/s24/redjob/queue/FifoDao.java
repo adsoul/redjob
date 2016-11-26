@@ -2,12 +2,13 @@ package com.s24.redjob.queue;
 
 import java.util.List;
 
+import com.s24.redjob.Dao;
 import com.s24.redjob.worker.Execution;
 
 /**
  * DAO for accessing job queues.
  */
-public interface FifoDao {
+public interface FifoDao extends Dao {
    /**
     * Enqueue the given job to the given queue.
     *

@@ -1,14 +1,11 @@
 package com.s24.redjob.worker;
 
+import com.s24.redjob.Dao;
+
 /**
  * DAO for worker stats.
  */
-public interface WorkerDao {
-   /**
-    * Namespace of worker dao.
-    */
-   String getNamespace();
-
+public interface WorkerDao extends Dao {
    /**
     * Update worker state.
     *

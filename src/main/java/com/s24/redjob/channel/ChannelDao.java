@@ -3,17 +3,13 @@ package com.s24.redjob.channel;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.Topic;
 
+import com.s24.redjob.Dao;
 import com.s24.redjob.worker.Execution;
 
 /**
  * DAO for accessing admin job channels.
  */
-public interface ChannelDao {
-   /**
-    * Namespace of channel dao.
-    */
-   String getNamespace();
-
+public interface ChannelDao extends Dao {
    /**
     * Publish the given admin job to the given channel.
     *
