@@ -153,7 +153,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
 
    @Override
    public String getNamespace() {
-      return ""; // workerDao.getNamespace();
+      return workerDao.getNamespace();
    }
 
    @Override
