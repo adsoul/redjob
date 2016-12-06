@@ -7,6 +7,11 @@ import com.s24.redjob.Dao;
  */
 public interface WorkerDao extends Dao {
    /**
+    * Ping Redis.
+    */
+   void ping();
+
+   /**
     * Update worker state.
     *
     * @param name

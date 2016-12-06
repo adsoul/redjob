@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
@@ -67,6 +68,16 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
       redis.setKeySerializer(strings);
       redis.setValueSerializer(strings);
       redis.afterPropertiesSet();
+   }
+
+   @Override
+   public void ping() {
+      redis.execute((RedisConnection connection) -> {
+         if (!"PONG".equals(connection.ping())) {
+            throw new RedisConnectionFailureException("Ping failed.");
+         }
+         return null;
+      });
    }
 
    @Override

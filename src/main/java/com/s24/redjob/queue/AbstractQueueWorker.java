@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 
 import org.slf4j.MDC;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -15,6 +16,7 @@ import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
+import com.s24.redjob.worker.events.WorkerFailed;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
@@ -24,6 +26,11 @@ import com.s24.redjob.worker.events.WorkerStopped;
  * Base implementation of {@link Worker} for queues.
  */
 public abstract class AbstractQueueWorker extends AbstractWorker implements Runnable, QueueWorker {
+   /**
+    * Restart delay after connection failures.
+    */
+   public static final int RESTART_DELAY_MS = 5000;
+
    /**
     * Queues to listen to.
     */
@@ -93,10 +100,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          MDC.put("worker", getName());
          log.info("Starting worker {}.", getName());
          state = new WorkerState();
-         setWorkerState(WorkerState.RUNNING);
-         eventBus.publishEvent(new WorkerStart(this));
-         startup();
-         poll();
+         doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
          eventBus.publishEvent(new WorkerError(this, t));
@@ -104,6 +108,31 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          log.info("Stop worker {}.", getName());
          eventBus.publishEvent(new WorkerStopped(this));
          workerDao.stop(name);
+      }
+   }
+
+   /**
+    * Connection failure safe run loop.
+    */
+   protected void doRun() throws Throwable {
+      while (run.get()) {
+         try {
+            // Test connection to avoid marking this worker as running and fail immediately afterwards.
+            workerDao.ping();
+            setWorkerState(WorkerState.RUNNING);
+            eventBus.publishEvent(new WorkerStart(this));
+            startup();
+            poll();
+         } catch (RedisConnectionFailureException e) {
+            // Do not report the same connection error over and over again.
+            log.warn("Worker {} failed to connect to Redis. Restarting in {} ms.", getName(), RESTART_DELAY_MS);
+            if (!WorkerState.FAILED.equals(state.getState())) {
+               // No possibility to store the state in Redis...
+               this.state.setState(WorkerState.FAILED);
+               eventBus.publishEvent(new WorkerFailed(this));
+            }
+            Thread.sleep(RESTART_DELAY_MS);
+         }
       }
    }
 

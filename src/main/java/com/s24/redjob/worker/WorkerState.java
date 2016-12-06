@@ -27,6 +27,11 @@ public class WorkerState {
    public static final String STOPPING = "stopping";
 
    /**
+    * State: Worker failed.
+    */
+   public static final String FAILED = "failed";
+
+   /**
     * State of worker.
     */
    private String state = RUNNING;
