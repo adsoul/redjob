@@ -60,6 +60,7 @@ public class ChannelWorker extends AbstractWorker {
     */
    private List<QueueWorker> workers;
 
+   @Override
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(channels, "Precondition violated: channels != null.");
@@ -100,6 +101,7 @@ public class ChannelWorker extends AbstractWorker {
       }
    }
 
+   @Override
    @PreDestroy
    public void destroy() {
       stop();
@@ -143,6 +145,7 @@ public class ChannelWorker extends AbstractWorker {
    /**
     * Create name for this worker.
     */
+   @Override
    protected String createName() {
       return super.createName() + ":" + StringUtils.collectionToCommaDelimitedString(channels);
    }

@@ -59,6 +59,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    /**
     * Init.
     */
+   @Override
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notEmpty(queues, "Precondition violated: queues not empty.");
@@ -69,6 +70,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
    /**
     * Create name for this worker.
     */
+   @Override
    protected String createName() {
       return super.createName() + ":" + StringUtils.collectionToCommaDelimitedString(queues);
    }

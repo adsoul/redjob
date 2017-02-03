@@ -19,6 +19,7 @@ public class FifoWorker extends AbstractQueueWorker {
    /**
     * Init.
     */
+   @Override
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
       Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
