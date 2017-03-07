@@ -14,7 +14,6 @@ public class TestJobRunner implements Runnable {
     */
    public static final String EXCEPTION_VALUE = "exception";
 
-
    /**
     * The exception that will be thrown.
     */

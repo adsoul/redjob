@@ -1,13 +1,6 @@
 package com.s24.redjob.worker;
 
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
+import com.s24.redjob.worker.events.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -16,12 +9,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import com.s24.redjob.worker.events.JobExecute;
-import com.s24.redjob.worker.events.JobFailed;
-import com.s24.redjob.worker.events.JobProcess;
-import com.s24.redjob.worker.events.JobSkipped;
-import com.s24.redjob.worker.events.JobStart;
-import com.s24.redjob.worker.events.JobSuccess;
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 /**
  * Base implementation of {@link Worker}.
@@ -265,8 +258,6 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *           Job.
     * @param runner
     *           Job runner.
-    * @throws Throwable
-    *            In case of errors.
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
       log.info("Starting job.");
