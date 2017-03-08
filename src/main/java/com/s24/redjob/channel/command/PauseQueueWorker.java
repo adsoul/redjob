@@ -1,15 +1,15 @@
 package com.s24.redjob.channel.command;
 
-import static java.util.Collections.emptyList;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.s24.redjob.queue.QueueWorker;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.s24.redjob.queue.QueueWorker;
+import static java.util.Collections.emptyList;
 
 /**
  * Command to shutdown queue workers.
@@ -85,6 +85,6 @@ public class PauseQueueWorker {
     * Does the worker match the selectors of the job?.
     */
    protected boolean matches(QueueWorker worker) {
-      return queues.isEmpty() || worker.getQueues().stream().filter(queues::contains).findAny().isPresent();
+      return queues.isEmpty() || worker.getQueues().stream().anyMatch(queues::contains);
    }
 }
