@@ -38,8 +38,9 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
 
    /**
     * Dummy execution to avoid "not null" checks.
+    * Used for synchronizing access to {@link #execution}.
     */
-   private static final Execution NO_EXECUTION = new Execution(-1, "dummy");
+   private final Execution NO_EXECUTION = new Execution(-1, "dummy");
 
    /**
     * Currently processed execution, if any.
@@ -235,7 +236,9 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
 
       boolean restore = false;
       try {
-         this.execution = execution;
+         synchronized (NO_EXECUTION) {
+            this.execution = execution;
+         }
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          restore = process(queue, execution);
@@ -246,7 +249,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
          return true;
 
       } finally {
-         synchronized (this.execution) {
+         synchronized (NO_EXECUTION) {
             this.execution = NO_EXECUTION;
          }
          try {
@@ -264,8 +267,8 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
 
    @Override
    public void stop(long id) {
-      synchronized (this.execution) {
-         if (execution.getId() == id) {
+      synchronized (NO_EXECUTION) {
+         if (this.execution.getId() == id) {
             if (thread != null) {
                thread.interrupt();
             }
