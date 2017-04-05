@@ -57,26 +57,26 @@
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
 
-      <plugin.build-helper-maven-plugin.version>1.12</plugin.build-helper-maven-plugin.version>
+      <plugin.build-helper-maven-plugin.version>3.0.0</plugin.build-helper-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
-      <plugin.maven-compiler-plugin.version>3.5.1</plugin.maven-compiler-plugin.version>
+      <plugin.maven-compiler-plugin.version>3.6.1</plugin.maven-compiler-plugin.version>
       <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
       <plugin.maven-gpg-plugin.version>1.6</plugin.maven-gpg-plugin.version>
       <plugin.maven-javadoc-plugin.version>2.10.4</plugin.maven-javadoc-plugin.version>
-      <plugin.maven-resources-plugin.version>3.0.1</plugin.maven-resources-plugin.version>
+      <plugin.maven-resources-plugin.version>3.0.2</plugin.maven-resources-plugin.version>
       <plugin.maven-release-plugin.version>2.5.3</plugin.maven-release-plugin.version>
       <plugin.maven-source-plugin.version>3.0.1</plugin.maven-source-plugin.version>
-      <plugin.nexus-staging-maven-plugin.version>1.6.7</plugin.nexus-staging-maven-plugin.version>
+      <plugin.nexus-staging-maven-plugin.version>1.6.8</plugin.nexus-staging-maven-plugin.version>
 
-      <dependency.assertj.version>3.5.2</dependency.assertj.version>
-      <dependency.jackson.version>2.8.3</dependency.jackson.version>
+      <dependency.assertj.version>3.6.2</dependency.assertj.version>
+      <dependency.jackson.version>2.8.8</dependency.jackson.version>
       <dependency.jedis.version>2.9.0</dependency.jedis.version>
       <dependency.junit.version>4.12</dependency.junit.version>
-      <dependency.log4j.version>2.6.2</dependency.log4j.version>
-      <dependency.mockito.version>1.10.19</dependency.mockito.version>
-      <dependency.slf4j.version>1.7.21</dependency.slf4j.version>
-      <dependency.spring.version>4.3.3.RELEASE</dependency.spring.version>
-      <dependency.spring-data-redis.version>1.7.4.RELEASE</dependency.spring-data-redis.version>
+      <dependency.log4j.version>2.8.1</dependency.log4j.version>
+      <dependency.mockito.version>2.7.21</dependency.mockito.version>
+      <dependency.slf4j.version>1.7.25</dependency.slf4j.version>
+      <dependency.spring.version>4.3.7.RELEASE</dependency.spring.version>
+      <dependency.spring-data-redis.version>1.8.1.RELEASE</dependency.spring-data-redis.version>
 
       <integrationTest.redisPort>16379</integrationTest.redisPort>
       <integrationTest.sentinelPort>26379</integrationTest.sentinelPort>
