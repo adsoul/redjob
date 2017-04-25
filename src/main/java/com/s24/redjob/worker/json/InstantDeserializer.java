@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 @Component
 public class InstantDeserializer extends JsonDeserializer<Instant> {
    @Override
-   public Instant deserialize(JsonParser jp, DeserializationContext ctxt) throws IOException {
-      return Instant.ofEpochSecond(jp.getValueAsLong());
+   public Instant deserialize(JsonParser parser, DeserializationContext context) throws IOException {
+      return Instant.ofEpochSecond(parser.getValueAsLong());
    }
 }

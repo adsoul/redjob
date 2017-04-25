@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 @Component
 public class InstantSerializer extends JsonSerializer<Instant> {
    @Override
-   public void serialize(Instant value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
-      jgen.writeNumber(value.getEpochSecond());
+   public void serialize(Instant value, JsonGenerator generator, SerializerProvider provider) throws IOException {
+      generator.writeNumber(value.getEpochSecond());
    }
 }

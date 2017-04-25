@@ -53,7 +53,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
    private RedisTemplate<String, String> redis;
 
    /**
-    * JSNO serializer for {@link WorkerState}.
+    * JSON serializer for {@link WorkerState}.
     */
    private final Jackson2JsonRedisSerializer<WorkerState> workerStateSerializer =
          new Jackson2JsonRedisSerializer<>(WorkerState.class);
