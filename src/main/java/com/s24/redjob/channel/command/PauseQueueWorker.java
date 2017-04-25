@@ -1,15 +1,15 @@
 package com.s24.redjob.channel.command;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.s24.redjob.queue.QueueWorker;
+import static java.util.Collections.emptyList;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import static java.util.Collections.emptyList;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.s24.redjob.queue.QueueWorker;
 
 /**
  * Command to shutdown queue workers.
@@ -25,7 +25,7 @@ public class PauseQueueWorker {
     * Workers of which queues should be paused.
     * If empty, all workers will be paused.
     */
-   private Set<String> queues = new HashSet<>();
+   private final Set<String> queues = new HashSet<>();
 
    /**
     * Hidden default constructor for Jackson.

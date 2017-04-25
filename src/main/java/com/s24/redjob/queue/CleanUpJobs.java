@@ -17,7 +17,7 @@ public class CleanUpJobs {
     * Namespaces which should be cleaned up.
     * If empty, all namespaces will be cleaned up.
     */
-   private Set<String> namespaces = new HashSet<>();
+   private final Set<String> namespaces = new HashSet<>();
 
    /**
     * Constructor to clean up the given namespaces.

@@ -9,7 +9,7 @@ public class WorkerState {
    /**
     * Start time of worker.
     */
-   private LocalDateTime started = LocalDateTime.now();
+   private final LocalDateTime started = LocalDateTime.now();
 
    /**
     * State: Worker runs.

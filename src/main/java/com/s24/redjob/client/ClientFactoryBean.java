@@ -17,17 +17,17 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
    /**
     * Queue dao.
     */
-   private FifoDaoImpl fifoDao = new FifoDaoImpl();
+   private final FifoDaoImpl fifoDao = new FifoDaoImpl();
 
    /**
     * Channel dao.
     */
-   private ChannelDaoImpl channelDao = new ChannelDaoImpl();
+   private final ChannelDaoImpl channelDao = new ChannelDaoImpl();
 
    /**
     * Lock dao.
     */
-   private LockDaoImpl lockDao = new LockDaoImpl();
+   private final LockDaoImpl lockDao = new LockDaoImpl();
 
    /**
     * The instance.

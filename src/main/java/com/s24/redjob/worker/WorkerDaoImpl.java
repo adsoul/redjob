@@ -55,7 +55,7 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
    /**
     * JSNO serializer for {@link WorkerState}.
     */
-   private Jackson2JsonRedisSerializer<WorkerState> workerStateSerializer =
+   private final Jackson2JsonRedisSerializer<WorkerState> workerStateSerializer =
          new Jackson2JsonRedisSerializer<>(WorkerState.class);
 
    @Override
