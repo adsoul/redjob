@@ -1,6 +1,7 @@
 package com.s24.redjob.worker;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ResolvableType;
@@ -27,7 +28,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
       ResolvableType type = ResolvableType.forClassWithGenerics(JobRunner.class, job.getClass());
-      String[] beanNames = applicationContext.getBeanNamesForType(type);
+      String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, type);
       if (beanNames.length == 0) {
          throw new IllegalArgumentException(String.format(
                "No job runner found for %s.",
