@@ -411,7 +411,6 @@
                         </goals>
                         <configuration>
                            <executable>gpg2</executable>
-                           <useAgent>false</useAgent>
                         </configuration>
                      </execution>
                   </executions>
