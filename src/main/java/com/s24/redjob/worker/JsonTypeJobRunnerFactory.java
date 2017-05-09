@@ -1,10 +1,8 @@
 package com.s24.redjob.worker;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
@@ -15,15 +13,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  * jobs. The job runners are expected to be implement {@link Runnable} and to be prototypes providing a one argument
  * constructor accepting the job. Because they are prototypes, job runners are allowed to have state.
  */
-public class JsonTypeJobRunnerFactory implements JobRunnerFactory, BeanFactoryAware {
+public class JsonTypeJobRunnerFactory implements JobRunnerFactory, ApplicationContextAware {
    /**
-    * Bean factory.
+    * Application context.
     */
-   private ConfigurableListableBeanFactory beanFactory;
+   private ApplicationContext applicationContext;
 
    @Override
-   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-      this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
    }
 
    @Override
@@ -40,14 +38,12 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory, BeanFactoryAw
 
       // Check for bean existence and that bean is a prototype.
       // Beans have to be prototypes, because they are configured with the job vars below.
-      BeanDefinition beanDefinition = beanFactory.getBeanDefinition(jsonType);
-      if (!BeanDefinition.SCOPE_PROTOTYPE.equals(beanDefinition.getScope())) {
+      if (!applicationContext.isPrototype(jsonType)) {
          throw new IllegalArgumentException(String.format(
-               "Job runners have to be prototypes, but job runner %s has scope %s.",
-               jsonType, beanDefinition.getScope()));
+               "Job runners have to be prototypes, but job runner %s is none.", jsonType));
       }
 
-      Object runner = beanFactory.getBean(jsonType, job);
+      Object runner = applicationContext.getBean(jsonType, job);
       if (!(runner instanceof Runnable)) {
          throw new IllegalArgumentException(String.format(
                "Job runners need to be Runnable, but job runner %s (%s) is not.",

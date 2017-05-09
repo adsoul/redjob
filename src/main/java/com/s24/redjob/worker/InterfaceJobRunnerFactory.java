@@ -1,10 +1,8 @@
 package com.s24.redjob.worker;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -13,15 +11,15 @@ import org.springframework.util.StringUtils;
  * {@link JobRunnerFactory} using a Spring application context to retrieve job runners implementing {@link JobRunner}.
  * The job runners are expected to be prototypes. Because they are prototypes, job runners are allowed to have state.
  */
-public class InterfaceJobRunnerFactory implements JobRunnerFactory, BeanFactoryAware {
+public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationContextAware {
    /**
-    * Bean factory.
+    * Application context.
     */
-   private ConfigurableListableBeanFactory beanFactory;
+   private ApplicationContext applicationContext;
 
    @Override
-   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-      this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+   public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+      this.applicationContext = applicationContext;
    }
 
    @Override
@@ -29,7 +27,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, BeanFactoryA
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
       ResolvableType type = ResolvableType.forClassWithGenerics(JobRunner.class, job.getClass());
-      String[] beanNames = beanFactory.getBeanNamesForType(type);
+      String[] beanNames = applicationContext.getBeanNamesForType(type);
       if (beanNames.length == 0) {
          throw new IllegalArgumentException(String.format(
                "No job runner found for %s.",
@@ -44,14 +42,12 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, BeanFactoryA
 
       // Check for bean existence and that bean is a prototype.
       // Beans have to be prototypes, because they are configured with the job vars below.
-      BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanName);
-      if (!BeanDefinition.SCOPE_PROTOTYPE.equals(beanDefinition.getScope())) {
+      if (!applicationContext.isPrototype(beanName)) {
          throw new IllegalArgumentException(String.format(
-               "Job runners have to be prototypes, but job runner %s has scope %s.",
-               beanName, beanDefinition.getScope()));
+               "Job runners have to be prototypes, but job runner %s is none.", beanName));
       }
 
-      JobRunner<J> runner = (JobRunner<J>) beanFactory.getBean(beanName);
+      JobRunner<J> runner = (JobRunner<J>) applicationContext.getBean(beanName);
 
       return new WrappingRunnable(runner) {
          @Override
