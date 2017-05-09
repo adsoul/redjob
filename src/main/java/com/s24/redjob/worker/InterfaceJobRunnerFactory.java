@@ -1,6 +1,8 @@
 package com.s24.redjob.worker;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.ResolvableType;
@@ -11,12 +13,16 @@ import org.springframework.util.StringUtils;
  * {@link JobRunnerFactory} using a Spring application context to retrieve job runners implementing {@link JobRunner}.
  * The job runners are expected to be prototypes. Because they are prototypes, job runners are allowed to have state.
  */
-public class InterfaceJobRunnerFactory implements JobRunnerFactory {
+public class InterfaceJobRunnerFactory implements JobRunnerFactory, BeanFactoryAware {
    /**
     * Bean factory.
     */
-   @Autowired
    private ConfigurableListableBeanFactory beanFactory;
+
+   @Override
+   public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+      this.beanFactory = (ConfigurableListableBeanFactory) beanFactory;
+   }
 
    @Override
    public <J> Runnable runnerFor(J job) {
