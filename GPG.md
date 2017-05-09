@@ -24,3 +24,12 @@ gpg --list-keys --keyid-format short
 ```
 
 The short id is the part after the slash after the encoding algorithm.
+
+## Some link regarding Maven central deployment:
+
+* http://central.sonatype.org/pages/ossrh-guide.html
+* http://central.sonatype.org/pages/apache-maven.html
+* http://central.sonatype.org/pages/working-with-pgp-signatures.html#generating-a-key-pair
+* http://maven.apache.org/guides/mini/guide-encryption.html
+* http://central.sonatype.org/pages/releasing-the-deployment.html
+* https://oss.sonatype.org/#stagingRepositories
