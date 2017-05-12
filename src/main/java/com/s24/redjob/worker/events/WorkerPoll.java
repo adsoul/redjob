@@ -10,7 +10,7 @@ import com.s24.redjob.worker.Worker;
 /**
  * Worker polls one of its queues.
  */
-public class WorkerPoll extends ApplicationEvent implements WorkerEvent {
+public class WorkerPoll extends ApplicationEvent implements WorkerEvent, QueueEvent {
    /**
     * Worker.
     */
@@ -50,6 +50,7 @@ public class WorkerPoll extends ApplicationEvent implements WorkerEvent {
    /**
     * Queue.
     */
+   @Override
    public String getQueue() {
       return queue;
    }

@@ -5,12 +5,7 @@ import com.s24.redjob.worker.Execution;
 /**
  * Worker job event.
  */
-public interface JobEvent extends WorkerEvent {
-   /**
-    * Queue.
-    */
-   String getQueue();
-
+public interface JobEvent extends WorkerEvent, QueueEvent {
    /**
     * Job execution.
     */
