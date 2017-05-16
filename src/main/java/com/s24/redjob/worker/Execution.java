@@ -128,6 +128,13 @@ public class Execution {
    }
 
    /**
+    * Queue of this execution.
+    */
+   public String getQueue() {
+      return queue;
+   }
+
+   /**
     * Id of the job.
     */
    public long getId() {
@@ -175,13 +182,6 @@ public class Execution {
       start = Instant.now();
       // In case of restarts, reset end timestamp.
       end = null;
-   }
-
-   /**
-    * Queue of this execution.
-    */
-   public String getQueue() {
-      return queue;
    }
 
    /**
