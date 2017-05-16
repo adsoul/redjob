@@ -8,12 +8,18 @@ import com.s24.redjob.AbstractDao;
 import com.s24.redjob.channel.ChannelDaoImpl;
 import com.s24.redjob.lock.LockDaoImpl;
 import com.s24.redjob.queue.FifoDaoImpl;
+import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link Client}.
  */
 public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean {
+   /**
+    * Worker dao.
+    */
+   private final WorkerDaoImpl workerDao = new WorkerDaoImpl();
+
    /**
     * Queue dao.
     */
@@ -36,10 +42,12 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
 
    @Override
    public void afterPropertiesSet() throws Exception {
+      workerDao.afterPropertiesSet();
       fifoDao.afterPropertiesSet();
       channelDao.afterPropertiesSet();
       lockDao.afterPropertiesSet();
 
+      client.setWorkerDao(workerDao);
       client.setFifoDao(fifoDao);
       client.setChannelDao(channelDao);
       client.setLockDao(lockDao);
@@ -76,6 +84,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
     * {@link RedisConnectionFactory} to access Redis.
     */
    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
+      workerDao.setConnectionFactory(connectionFactory);
       fifoDao.setConnectionFactory(connectionFactory);
       channelDao.setConnectionFactory(connectionFactory);
       lockDao.setConnectionFactory(connectionFactory);
@@ -92,6 +101,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
     * Redis "namespace" to use. Prefix for all Redis keys. Defaults to {@value AbstractDao#DEFAULT_NAMESPACE}.
     */
    public void setNamespace(String namespace) {
+      workerDao.setNamespace(namespace);
       fifoDao.setNamespace(namespace);
       channelDao.setNamespace(namespace);
       lockDao.setNamespace(namespace);

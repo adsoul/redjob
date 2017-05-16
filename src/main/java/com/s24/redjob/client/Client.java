@@ -57,12 +57,20 @@ public interface Client {
    Execution execution(long id);
 
    /**
-    * Get all queued job executions.
+    * Get all queued job executions of the given queue.
     *
     * @param queue
     *           Queue name.
     */
    List<Execution> queuedExecutions(String queue);
+
+   /**
+    * Get all inflight job executions of the given queue.
+    *
+    * @param queue
+    *           Queue name.
+    */
+   List<Execution> inflightExecutions(String queue);
 
    /**
     * Get all job executions.

@@ -2,6 +2,7 @@ package com.s24.redjob.queue;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -14,7 +15,6 @@ import javax.annotation.PostConstruct;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.Execution;
@@ -144,13 +144,13 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
       return redis.execute((RedisConnection connection) -> {
          // Get all ids from queue.
          List<byte[]> idsBytes = connection.lRange(key(QUEUE, queue), 0, -1);
-         if (CollectionUtils.isEmpty(idsBytes)) {
+         if (isEmpty(idsBytes)) {
             return emptyList();
          }
 
          // Lookup all executions for all ids at once.
          List<byte[]> executionsBytes = connection.hMGet(key(JOBS), idsBytes.toArray(new byte[idsBytes.size()][]));
-         if (CollectionUtils.isEmpty(executionsBytes)) {
+         if (isEmpty(executionsBytes)) {
             return emptyList();
          }
          Assert.isTrue(executionsBytes.size() == idsBytes.size(),
@@ -167,7 +167,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public List<Execution> getAll() {
       return redis.execute((RedisConnection connection) -> {
          Map<byte[], byte[]> executionsBytes = connection.hGetAll(key(JOBS));
-         if (CollectionUtils.isEmpty(executionsBytes)) {
+         if (isEmpty(executionsBytes)) {
             return emptyList();
          }
 
@@ -182,7 +182,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public int cleanUp() {
       return redis.execute((RedisConnection connection) -> {
          Map<byte[], byte[]> executionsBytes = connection.hGetAll(key(JOBS));
-         if (CollectionUtils.isEmpty(executionsBytes)) {
+         if (isEmpty(executionsBytes)) {
             return 0;
          }
 
@@ -247,6 +247,29 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
             connection.lPush(key(QUEUE, queue), idBytes);
          }
          return null;
+      });
+   }
+
+   @Override
+   public List<Execution> getInflight(String queue, String worker) {
+      return redis.execute((RedisConnection connection) -> {
+         List<byte[]> idsBytes = connection.lRange(key(INFLIGHT, worker, queue), 0, -1);
+         if (isEmpty(idsBytes)) {
+            return emptyList();
+         }
+
+         // Lookup all executions for all ids at once.
+         List<byte[]> executionsBytes = connection.hMGet(key(JOBS), idsBytes.toArray(new byte[idsBytes.size()][]));
+         if (isEmpty(executionsBytes)) {
+            return emptyList();
+         }
+         Assert.isTrue(executionsBytes.size() == idsBytes.size(),
+               "Precondition violated: Redis response has the expected length.");
+
+         return executionsBytes.stream()
+               .map(this::parseExecution)
+               .filter(Objects::nonNull)
+               .collect(toList());
       });
    }
 

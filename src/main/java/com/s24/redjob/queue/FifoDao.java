@@ -103,4 +103,14 @@ public interface FifoDao extends Dao {
     *           Name of worker.
     */
    void restoreInflight(String queue, String worker);
+
+   /**
+    * Get all jobs from worker inflight queue.
+    *
+    * @param queue
+    *           Queue name.
+    * @param worker
+    *           Name of worker.
+    */
+   List<Execution> getInflight(String queue, String worker);
 }

@@ -1,5 +1,7 @@
 package com.s24.redjob.worker;
 
+import java.util.Set;
+
 import com.s24.redjob.Dao;
 
 /**
@@ -44,4 +46,9 @@ public interface WorkerDao extends Dao {
     *           Name of worker.
     */
    void failure(String name);
+
+   /**
+    * Names of all active workers.
+    */
+   Set<String> names();
 }

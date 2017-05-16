@@ -1,7 +1,10 @@
 package com.s24.redjob.worker;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -100,7 +103,6 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
          connection.sRem(key(WORKERS), value(name));
          connection.del(
                key(WORKER, name, STATE),
-               key(WORKER, name),
                key(STAT, PROCESSED, name),
                key(STAT, FAILED, name));
          return null;
@@ -126,6 +128,16 @@ public class WorkerDaoImpl extends AbstractDao implements WorkerDao {
          connection.incr(key(STAT, FAILED));
          connection.incr(key(STAT, FAILED, name));
          return null;
+      });
+   }
+
+   @Override
+   public Set<String> names() {
+      return redis.execute((RedisConnection connection) -> {
+         Set<byte[]> namesBytes = connection.sMembers(key(WORKERS));
+         return namesBytes.stream()
+               .map(this::parseString)
+               .collect(toSet());
       });
    }
 

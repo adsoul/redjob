@@ -1,5 +1,7 @@
 package com.s24.redjob.client;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -11,11 +13,17 @@ import com.s24.redjob.channel.ChannelDao;
 import com.s24.redjob.lock.LockDao;
 import com.s24.redjob.queue.FifoDao;
 import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.WorkerDao;
 
 /**
  * Default implementation of {@link Client}.
  */
 public class ClientImpl implements Client {
+   /**
+    * Worker dao.
+    */
+   private WorkerDao workerDao;
+
    /**
     * Queue dao.
     */
@@ -36,6 +44,7 @@ public class ClientImpl implements Client {
     */
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
+      Assert.notNull(workerDao, "Precondition violated: workerDao != null.");
       Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
       Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
       Assert.notNull(lockDao, "Precondition violated: lockDao != null.");
@@ -62,6 +71,14 @@ public class ClientImpl implements Client {
    }
 
    @Override
+   public List<Execution> inflightExecutions(String queue) {
+      return workerDao.names().stream()
+            .map(worker -> fifoDao.getInflight(queue, worker))
+            .flatMap(List::stream)
+            .collect(toList());
+   }
+
+   @Override
    public List<Execution> allExecutions() {
       return fifoDao.getAll();
    }
@@ -84,6 +101,20 @@ public class ClientImpl implements Client {
    //
    // Injections.
    //
+
+   /**
+    * Worker dao.
+    */
+   public WorkerDao getWorkerDao() {
+      return workerDao;
+   }
+
+   /**
+    * Worker dao.
+    */
+   public void setWorkerDao(WorkerDao workerDao) {
+      this.workerDao = workerDao;
+   }
 
    /**
     * Queue dao.
