@@ -25,7 +25,7 @@ gpg2 -o /dev/null --local-user [KEYID] -as <(echo 1234) && echo "The correct pas
 If you entered your key password once, the gpg agent stores it. 
 So on a second invocation you are no more prompted for your password.
 
-## Some link regarding Maven central deployment:
+## Some links regarding Maven central deployment:
 
 * http://central.sonatype.org/pages/ossrh-guide.html
 * http://central.sonatype.org/pages/apache-maven.html
