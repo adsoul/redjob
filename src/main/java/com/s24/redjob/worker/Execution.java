@@ -5,9 +5,9 @@ import java.time.Instant;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
@@ -42,6 +42,13 @@ public class Execution {
    private Instant created;
 
    /**
+    * Queue of this execution.
+    */
+   @JsonInclude(value = Include.NON_NULL)
+   @JsonProperty(value = "queue", required = false)
+   private String queue;
+
+   /**
     * Worker processing this execution.
     */
    @JsonInclude(value = Include.NON_NULL)
@@ -66,18 +73,22 @@ public class Execution {
    /**
     * Constructor.
     *
+    * @param queue
+    *           Queue.
     * @param id
     *           Id of job.
     * @param job
     *           Job.
     */
-   public Execution(long id, Object job) {
-      this(id, job, new NoResult());
+   public Execution(String queue, long id, Object job) {
+      this(queue, id, job, new NoResult());
    }
 
    /**
     * Constructor.
     *
+    * @param queue
+    *           Queue.
     * @param id
     *           Id of job.
     * @param job
@@ -85,14 +96,15 @@ public class Execution {
     * @param result
     *           Job result.
     */
-   public Execution(long id, Object job, Object result) {
-      this(id, job, result, Instant.now(), null, null, null);
+   public Execution(String queue, long id, Object job, Object result) {
+      this(queue, id, job, result, Instant.now(), null, null, null);
    }
 
    /**
     * Jackson constructor.
     */
    Execution(
+         @JsonProperty(value = "queue", required = true) String queue,
          @JsonProperty(value = "id", required = true) long id,
          @JsonProperty(value = "job", required = true) Object job,
          @JsonProperty(value = "result", required = true) Object result,
@@ -103,11 +115,13 @@ public class Execution {
       Assert.notNull(job, "Precondition violated: job != null.");
       Assert.notNull(result, "Precondition violated: result != null.");
       Assert.notNull(created, "Precondition violated: created != null.");
+      Assert.notNull(queue, "Precondition violated: queue != null.");
 
       this.id = id;
       this.job = job;
       this.result = result;
       this.created = created;
+      this.queue = queue;
       this.worker = worker;
       this.start = start;
       this.end = end;
@@ -161,6 +175,13 @@ public class Execution {
       start = Instant.now();
       // In case of restarts, reset end timestamp.
       end = null;
+   }
+
+   /**
+    * Queue of this execution.
+    */
+   public String getQueue() {
+      return queue;
    }
 
    /**

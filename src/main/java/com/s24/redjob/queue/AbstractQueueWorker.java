@@ -40,7 +40,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
     * Dummy execution to avoid "not null" checks.
     * Used for synchronizing access to {@link #execution}.
     */
-   private final Execution NO_EXECUTION = new Execution(-1, "dummy");
+   private final Execution NO_EXECUTION = new Execution("none", -1, "dummy");
 
    /**
     * Currently processed execution, if any.

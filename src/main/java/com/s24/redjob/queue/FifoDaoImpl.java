@@ -83,7 +83,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public Execution enqueue(String queue, Object job, boolean front) {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
-         Execution execution = new Execution(id, job);
+         Execution execution = new Execution(queue, id, job);
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
          byte[] executionBytes = value(execution);
