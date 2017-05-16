@@ -57,7 +57,7 @@ public interface Client {
    Execution execution(long id);
 
    /**
-    * Get all jobs executions.
+    * Get all queued job executions.
     *
     * @param queue
     *           Queue name.
@@ -65,7 +65,7 @@ public interface Client {
    List<Execution> queuedExecutions(String queue);
 
    /**
-    * Get all jobs executions.
+    * Get all job executions.
     */
    List<Execution> allExecutions();
 
