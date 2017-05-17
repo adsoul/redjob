@@ -17,7 +17,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.s24.redjob.worker.events.JobExecute;
-import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobFailure;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSkipped;
 import com.s24.redjob.worker.events.JobStart;
@@ -277,7 +277,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       } catch (Throwable cause) {
          log.warn("Job failed.", cause);
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailed(this, queue, execution, unwrappedRunner, cause));
+         eventBus.publishEvent(new JobFailure(this, queue, execution, unwrappedRunner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.debug("Job finished.", name, execution.getId());

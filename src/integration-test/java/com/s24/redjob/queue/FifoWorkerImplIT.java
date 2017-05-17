@@ -13,7 +13,7 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
-import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobFailure;
 import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
@@ -122,7 +122,7 @@ public class FifoWorkerImplIT {
 
       worker.stop();
 
-      assertEquals(new JobFailed(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
+      assertEquals(new JobFailure(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());

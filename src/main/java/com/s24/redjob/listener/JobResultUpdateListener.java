@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.events.JobEvent;
-import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobFailure;
 import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 
@@ -162,7 +162,7 @@ public class JobResultUpdateListener {
     *           Job failure event.
     */
    @EventListener(condition = "#event.worker instanceof T(com.s24.redjob.queue.QueueWorker)")
-   public void onJobFailed(JobFailed event) {
+   public void onJobFailure(JobFailure event) {
       Assert.notNull(event, "Pre-condition violated: event != null.");
       if (ignoreJob(event)) {
          return;
@@ -176,7 +176,7 @@ public class JobResultUpdateListener {
          return;
       }
 
-      handleJobFailed(event);
+      handleJobFailure(event);
       update(worker, execution);
    }
 
@@ -186,7 +186,7 @@ public class JobResultUpdateListener {
     * @param event
     *           Job failure event.
     */
-   protected void handleJobFailed(JobFailed event) {
+   protected void handleJobFailure(JobFailure event) {
    }
 
    /**

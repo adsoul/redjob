@@ -16,7 +16,7 @@ import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
-import com.s24.redjob.worker.events.WorkerFailed;
+import com.s24.redjob.worker.events.WorkerFailure;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
@@ -132,7 +132,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
             if (!WorkerState.FAILED.equals(state.getState())) {
                // No possibility to store the state in Redis...
                this.state.setState(WorkerState.FAILED);
-               eventBus.publishEvent(new WorkerFailed(this));
+               eventBus.publishEvent(new WorkerFailure(this));
             }
             Thread.sleep(RESTART_DELAY_MS);
          }

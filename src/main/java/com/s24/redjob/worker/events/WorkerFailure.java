@@ -10,7 +10,7 @@ import com.s24.redjob.worker.Worker;
 /**
  * Worker failed.
  */
-public class WorkerFailed extends ApplicationEvent implements WorkerEvent {
+public class WorkerFailure extends ApplicationEvent implements WorkerEvent {
    /**
     * Worker.
     */
@@ -22,7 +22,7 @@ public class WorkerFailed extends ApplicationEvent implements WorkerEvent {
     * @param worker
     *           Worker.
     */
-   public WorkerFailed(Worker worker) {
+   public WorkerFailure(Worker worker) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       this.worker = worker;
@@ -35,8 +35,8 @@ public class WorkerFailed extends ApplicationEvent implements WorkerEvent {
 
    @Override
    public boolean equals(Object o) {
-      return o instanceof WorkerFailed &&
-            Objects.equals(worker, ((WorkerFailed) o).worker);
+      return o instanceof WorkerFailure &&
+            Objects.equals(worker, ((WorkerFailure) o).worker);
    }
 
    @Override
