@@ -25,7 +25,7 @@ import com.s24.redjob.worker.events.WorkerStopped;
 /**
  * Base implementation of {@link Worker} for queues.
  */
-public abstract class AbstractQueueWorker extends AbstractWorker implements Runnable, QueueWorker {
+public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerState> implements Runnable, QueueWorker {
    /**
     * Restart delay after connection failures.
     */
@@ -102,7 +102,8 @@ public abstract class AbstractQueueWorker extends AbstractWorker implements Runn
       try {
          MDC.put("worker", getName());
          log.info("Starting worker {}.", getName());
-         state = new WorkerState();
+         state = new QueueWorkerState();
+         state.setQueues(queues);
          doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);

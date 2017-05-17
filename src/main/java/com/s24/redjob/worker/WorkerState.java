@@ -9,7 +9,7 @@ public class WorkerState {
    /**
     * Start time of worker.
     */
-   private final LocalDateTime started = LocalDateTime.now();
+   private LocalDateTime started;
 
    /**
     * State: Worker runs.
@@ -34,13 +34,38 @@ public class WorkerState {
    /**
     * State of worker.
     */
-   private String state = RUNNING;
+   private String state;
+
+   /**
+    * Successful job executions.
+    */
+   private int success = 0;
+
+   /**
+    * Failed job executions.
+    */
+   private int failed = 0;
+
+   /**
+    * Constructor.
+    */
+   public WorkerState() {
+      this.started = LocalDateTime.now();
+      this.state = RUNNING;
+   }
 
    /**
     * Start time of worker.
     */
    public LocalDateTime getStarted() {
       return started;
+   }
+
+   /**
+    * Start time of worker.
+    */
+   public void setStarted(LocalDateTime started) {
+      this.started = started;
    }
 
    /**
@@ -55,5 +80,47 @@ public class WorkerState {
     */
    public void setState(String state) {
       this.state = state;
+   }
+
+   /**
+    * Increase number of successful job executions.
+    */
+   public void incSuccess() {
+      success++;
+   }
+
+   /**
+    * Successful job executions.
+    */
+   public int getSuccess() {
+      return success;
+   }
+
+   /**
+    * Successful job executions.
+    */
+   public void setSuccess(int success) {
+      this.success = success;
+   }
+
+   /**
+    * Increase number of failed job executions.
+    */
+   public void incFailed() {
+      failed++;
+   }
+
+   /**
+    * Failed job executions.
+    */
+   public int getFailed() {
+      return failed;
+   }
+
+   /**
+    * Failed job executions.
+    */
+   public void setFailed(int failed) {
+      this.failed = failed;
    }
 }

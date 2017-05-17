@@ -26,7 +26,7 @@ import com.s24.redjob.worker.events.JobSuccess;
 /**
  * Base implementation of {@link Worker}.
  */
-public abstract class AbstractWorker implements Worker, ApplicationEventPublisherAware, DisposableBean {
+public abstract class AbstractWorker<S extends WorkerState> implements Worker, ApplicationEventPublisherAware, DisposableBean {
    /**
     * Log.
     */
@@ -91,7 +91,7 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    /**
     * Worker state.
     */
-   protected WorkerState state;
+   protected S state;
 
    /**
     * Event bus.
@@ -167,11 +167,18 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
    }
 
    /**
-    * Set worker state.
+    * Set worker state to the given values.
     */
    protected void setWorkerState(String state) {
+      this.state.setState(state);
+      saveWorkerState();
+   }
+
+   /**
+    * Save worker state.
+    */
+   protected void saveWorkerState() {
       try {
-         this.state.setState(state);
          workerDao.state(name, this.state);
       } catch (Exception e) {
          log.error("Failed to set worker state to {}.", state);
@@ -272,10 +279,14 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
       try {
          runner.run();
          log.debug("Job succeeded.");
+         state.incSuccess();
+         saveWorkerState();
          workerDao.success(name);
          eventBus.publishEvent(new JobSuccess(this, queue, execution, unwrappedRunner));
       } catch (Throwable cause) {
          log.warn("Job failed.", cause);
+         state.incFailed();
+         saveWorkerState();
          workerDao.failure(name);
          eventBus.publishEvent(new JobFailure(this, queue, execution, unwrappedRunner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
