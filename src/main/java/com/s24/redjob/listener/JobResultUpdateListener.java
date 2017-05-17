@@ -32,7 +32,7 @@ public class JobResultUpdateListener {
    /**
     * Logger.
     */
-   private final Logger log = LoggerFactory.getLogger(getClass());
+   protected final Logger log = LoggerFactory.getLogger(getClass());
 
    /**
     * Update interval in milliseconds.
@@ -80,10 +80,10 @@ public class JobResultUpdateListener {
     * On job start register for updates.
     *
     * @param event
-    *           Job execute event.
+    *           Job start event.
     */
    @EventListener(condition = "#event.worker instanceof T(com.s24.redjob.queue.QueueWorker)")
-   public void onStart(JobStart event) {
+   public void onJobStart(JobStart event) {
       Assert.notNull(event, "Pre-condition violated: event != null.");
       if (ignoreJob(event)) {
          return;
@@ -91,21 +91,19 @@ public class JobResultUpdateListener {
 
       QueueWorker worker = event.getWorker();
       Execution execution = event.getExecution();
-      handleStart(worker, execution);
 
+      handleJobStart(event);
       // Register execution for updates.
-      executions.put(execution.getId(), new SimpleImmutableEntry<>(event.getWorker(), execution));
+      executions.put(execution.getId(), new SimpleImmutableEntry<>(worker, execution));
    }
 
    /**
     * Add custom functionality on job start.
     *
-    * @param worker
-    *           Worker.
-    * @param execution
-    *           Execution.
+    * @param event
+    *           Job start event.
     */
-   protected void handleStart(QueueWorker worker, Execution execution) {
+   protected void handleJobStart(JobStart event) {
    }
 
    /**
@@ -115,33 +113,31 @@ public class JobResultUpdateListener {
     *           Job success event.
     */
    @EventListener(condition = "#event.worker instanceof T(com.s24.redjob.queue.QueueWorker)")
-   public void onSuccess(JobSuccess event) {
+   public void onJobSuccess(JobSuccess event) {
       Assert.notNull(event, "Pre-condition violated: event != null.");
       if (ignoreJob(event)) {
          return;
       }
 
-      Entry<QueueWorker, Execution> entry = executions.remove(event.getExecution().getId());
+      QueueWorker worker = event.getWorker();
+      Execution execution = event.getExecution();
+
+      Entry<QueueWorker, Execution> entry = executions.remove(execution.getId());
       if (entry == null) {
          return;
       }
 
-      QueueWorker worker = entry.getKey();
-      Execution execution = entry.getValue();
-      handleSuccess(worker, execution);
-
+      handleJobSuccess(event);
       worker.update(execution);
    }
 
    /**
     * Add custom functionality on job success.
     *
-    * @param worker
-    *           Worker.
-    * @param execution
-    *           Execution.
+    * @param event
+    *           Job success event.
     */
-   protected void handleSuccess(QueueWorker worker, Execution execution) {
+   protected void handleJobSuccess(JobSuccess event) {
    }
 
    /**
@@ -151,33 +147,31 @@ public class JobResultUpdateListener {
     *           Job failure event.
     */
    @EventListener(condition = "#event.worker instanceof T(com.s24.redjob.queue.QueueWorker)")
-   public void onFailure(JobFailed event) {
+   public void onJobFailed(JobFailed event) {
       Assert.notNull(event, "Pre-condition violated: event != null.");
       if (ignoreJob(event)) {
          return;
       }
 
-      Entry<QueueWorker, Execution> entry = executions.remove(event.getExecution().getId());
+      QueueWorker worker = event.getWorker();
+      Execution execution = event.getExecution();
+
+      Entry<QueueWorker, Execution> entry = executions.remove(execution.getId());
       if (entry == null) {
          return;
       }
 
-      QueueWorker worker = entry.getKey();
-      Execution execution = entry.getValue();
-      handleFailure(worker, execution);
-
+      handleJobFailed(event);
       worker.update(execution);
    }
 
    /**
     * Add custom functionality on job failure.
     *
-    * @param worker
-    *           Worker.
-    * @param execution
-    *           Execution.
+    * @param event
+    *           Job failure event.
     */
-   protected void handleFailure(QueueWorker worker, Execution execution) {
+   protected void handleJobFailed(JobFailed event) {
    }
 
    /**
