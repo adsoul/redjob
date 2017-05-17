@@ -62,13 +62,28 @@ public class JobResultUpdateListener {
                QueueWorker worker = entry.getKey();
                Execution execution = entry.getValue();
                try {
-                  worker.update(execution);
+                  update(worker, execution);
                } catch (Exception e) {
                   log.error("Failed to update job results.", e);
                }
             }
          }
       }, updateIntervalMillis, updateIntervalMillis);
+   }
+
+   /**
+    * Update execution.
+    *
+    * @param worker
+    *           Worker.
+    * @param execution
+    *           Execution.
+    */
+   protected void update(QueueWorker worker, Execution execution) {
+      Assert.notNull(worker, "Pre-condition violated: worker != null.");
+      Assert.notNull(execution, "Pre-condition violated: execution != null.");
+
+      worker.update(execution);
    }
 
    @PreDestroy
@@ -128,7 +143,7 @@ public class JobResultUpdateListener {
       }
 
       handleJobSuccess(event);
-      worker.update(execution);
+      update(worker, execution);
    }
 
    /**
@@ -162,7 +177,7 @@ public class JobResultUpdateListener {
       }
 
       handleJobFailed(event);
-      worker.update(execution);
+      update(worker, execution);
    }
 
    /**

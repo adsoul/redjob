@@ -1,6 +1,13 @@
 package com.s24.redjob.worker;
 
-import com.s24.redjob.worker.events.*;
+import java.lang.management.ManagementFactory;
+import java.net.InetAddress;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -9,12 +16,12 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailed;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobStart;
+import com.s24.redjob.worker.events.JobSuccess;
 
 /**
  * Base implementation of {@link Worker}.
@@ -260,20 +267,20 @@ public abstract class AbstractWorker implements Worker, ApplicationEventPublishe
     *           Job runner.
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
-      log.info("Starting job.");
+      log.debug("Starting job.");
       eventBus.publishEvent(new JobStart(this, queue, execution, unwrappedRunner));
       try {
          runner.run();
-         log.info("Job succeeded.");
+         log.debug("Job succeeded.");
          workerDao.success(name);
          eventBus.publishEvent(new JobSuccess(this, queue, execution, unwrappedRunner));
       } catch (Throwable cause) {
-         log.info("Job failed.", cause);
+         log.warn("Job failed.", cause);
          workerDao.failure(name);
          eventBus.publishEvent(new JobFailed(this, queue, execution, unwrappedRunner, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
-         log.info("Job finished.", name, execution.getId());
+         log.debug("Job finished.", name, execution.getId());
       }
    }
 
