@@ -30,6 +30,8 @@ import com.s24.redjob.worker.events.JobSuccess;
 /**
  * {@link QueueWorker} event listener for regularly updating job results.
  * So the client is able to see progress during job execution.
+ *
+ * Job results need to be thread safe for this to work reliably.
  */
 @Lazy(false)
 public class ExecutionResultUpdateListener {
