@@ -1,6 +1,10 @@
 package com.s24.redjob.listener;
 
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
+
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -28,7 +32,7 @@ import com.s24.redjob.worker.events.JobSuccess;
  * So the client is able to see progress during job execution.
  */
 @Lazy(false)
-public class JobResultUpdateListener {
+public class ExecutionResultUpdateListener {
    /**
     * Logger.
     */
@@ -61,34 +65,26 @@ public class JobResultUpdateListener {
             for (Entry<QueueWorker, Execution> entry : executions.values()) {
                QueueWorker worker = entry.getKey();
                Execution execution = entry.getValue();
-               try {
-                  update(worker, execution);
-               } catch (Exception e) {
-                  log.error("Failed to update job results.", e);
-               }
+               update(worker, execution);
             }
+            handleUpdates(executions.values().stream().map(Entry::getValue).collect(toList()));
          }
       }, updateIntervalMillis, updateIntervalMillis);
-   }
-
-   /**
-    * Update execution.
-    *
-    * @param worker
-    *           Worker.
-    * @param execution
-    *           Execution.
-    */
-   protected void update(QueueWorker worker, Execution execution) {
-      Assert.notNull(worker, "Pre-condition violated: worker != null.");
-      Assert.notNull(execution, "Pre-condition violated: execution != null.");
-
-      worker.update(execution);
    }
 
    @PreDestroy
    private void shutdown() {
       timer.cancel();
+   }
+
+   /**
+    * Completely ignore the job in this listener?.
+    *
+    * @param event
+    *           Job event.
+    */
+   protected boolean ignoreJob(JobEvent event) {
+      return false;
    }
 
    /**
@@ -110,6 +106,7 @@ public class JobResultUpdateListener {
       handleJobStart(event);
       // Register execution for updates.
       executions.put(execution.getId(), new SimpleImmutableEntry<>(worker, execution));
+      handleUpdate(execution);
    }
 
    /**
@@ -144,6 +141,7 @@ public class JobResultUpdateListener {
 
       handleJobSuccess(event);
       update(worker, execution);
+      handleUpdate(execution);
    }
 
    /**
@@ -178,6 +176,7 @@ public class JobResultUpdateListener {
 
       handleJobFailure(event);
       update(worker, execution);
+      handleUpdate(execution);
    }
 
    /**
@@ -190,13 +189,41 @@ public class JobResultUpdateListener {
    }
 
    /**
-    * Completely ignore the job in this listener?.
+    * Update execution.
     *
-    * @param event
-    *           Job event.
+    * @param worker
+    *           Worker.
+    * @param execution
+    *           Execution.
     */
-   protected boolean ignoreJob(JobEvent event) {
-      return false;
+   protected void update(QueueWorker worker, Execution execution) {
+      Assert.notNull(worker, "Pre-condition violated: worker != null.");
+      Assert.notNull(execution, "Pre-condition violated: execution != null.");
+
+      try {
+         worker.update(execution);
+      } catch (Exception e) {
+         log.error("Failed to update job results.", e);
+      }
+   }
+
+   /**
+    * Add custom functionality on update of {@link Execution}.
+    *
+    * @param execution
+    *           Execution.
+    */
+   private void handleUpdate(Execution execution) {
+      handleUpdates(singleton(execution));
+   }
+
+   /**
+    * Add custom functionality on update of {@link Execution}s.
+    *
+    * @param executions
+    *           Executions.
+    */
+   protected void handleUpdates(Collection<Execution> executions) {
    }
 
    //
