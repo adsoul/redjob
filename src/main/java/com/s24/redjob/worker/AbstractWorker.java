@@ -1,7 +1,6 @@
 package com.s24.redjob.worker;
 
 import java.lang.management.ManagementFactory;
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -36,16 +35,6 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Placeholder for the worker id.
     */
    public static final String ID = "[id]";
-
-   /**
-    * Placeholder for hostname without domain.
-    */
-   public static final String HOSTNAME = "[hostname]";
-
-   /**
-    * Placeholder for hostname without domain.
-    */
-   public static final String FULL_HOSTNAME = "[full-hostname]";
 
    /**
     * Sequence for worker ids.
@@ -134,14 +123,7 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    protected String resolvePlaceholders(String name) throws Exception {
       name = name.replaceAll(Pattern.quote(ID), Long.toString(id));
 
-      String fullHostname = InetAddress.getLocalHost().getHostName();
-      name = name.replaceAll(Pattern.quote(FULL_HOSTNAME), fullHostname);
-
-      int firstDot = fullHostname.indexOf(".");
-      String hostname = firstDot > 0? fullHostname.substring(0, firstDot) : fullHostname;
-      name = name.replaceAll(Pattern.quote(HOSTNAME), hostname);
-
-      return name;
+      return HostnameResolver.resolve(name);
    }
 
    /**
