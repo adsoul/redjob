@@ -1,15 +1,15 @@
 package com.s24.redjob.worker;
 
-import java.time.Instant;
-
-import org.springframework.util.Assert;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
+import org.springframework.util.Assert;
+
+import java.time.Instant;
 
 /**
  * Job execution. Stored as JSON in Redis.
@@ -101,8 +101,9 @@ public class Execution {
    }
 
    /**
-    * Jackson constructor.
+    * Hidden constructor for Jackson.
     */
+   @JsonCreator
    Execution(
          @JsonProperty(value = "queue", required = true) String queue,
          @JsonProperty(value = "id", required = true) long id,
