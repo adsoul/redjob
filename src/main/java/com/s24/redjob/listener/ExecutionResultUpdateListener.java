@@ -1,8 +1,19 @@
 package com.s24.redjob.listener;
 
-import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
+import com.s24.redjob.queue.QueueWorker;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.events.JobEvent;
+import com.s24.redjob.worker.events.JobFailure;
+import com.s24.redjob.worker.events.JobStart;
+import com.s24.redjob.worker.events.JobSuccess;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.EventListener;
+import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Collection;
 import java.util.Map;
@@ -11,21 +22,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.context.event.EventListener;
-import org.springframework.util.Assert;
-
-import com.s24.redjob.queue.QueueWorker;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.events.JobEvent;
-import com.s24.redjob.worker.events.JobFailure;
-import com.s24.redjob.worker.events.JobStart;
-import com.s24.redjob.worker.events.JobSuccess;
+import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
 /**
  * {@link QueueWorker} event listener for regularly updating job results.
@@ -215,7 +213,7 @@ public class ExecutionResultUpdateListener {
     * @param execution
     *           Execution.
     */
-   private void handleUpdate(Execution execution) {
+   protected final void handleUpdate(Execution execution) {
       handleUpdates(singleton(execution));
    }
 
