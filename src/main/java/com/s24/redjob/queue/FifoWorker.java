@@ -1,11 +1,10 @@
 package com.s24.redjob.queue;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.util.Assert;
-
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
+import org.springframework.util.Assert;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Default implementation of {@link Worker} for queues based on a Redis list.
@@ -25,6 +24,11 @@ public class FifoWorker extends AbstractQueueWorker {
       Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
 
       super.afterPropertiesSet();
+   }
+
+   @Override
+   protected Execution get(long id) throws Throwable {
+      return fifoDao.get(id);
    }
 
    @Override

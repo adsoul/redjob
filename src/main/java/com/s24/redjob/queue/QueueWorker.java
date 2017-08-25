@@ -1,9 +1,9 @@
 package com.s24.redjob.queue;
 
-import java.util.List;
-
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
+
+import java.util.List;
 
 /**
  * {@link Worker} handling queues.
@@ -20,10 +20,10 @@ public interface QueueWorker extends Worker {
    void pause(boolean pause);
 
    /**
-    * Stop the given job.
+    * Stop the given execution.
     *
     * @param id
-    *           Job id.
+    *           Execution id.
     */
    void stop(long id);
 

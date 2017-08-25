@@ -1,26 +1,25 @@
 package com.s24.redjob.queue;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import javax.annotation.PostConstruct;
-
-import org.slf4j.MDC;
-import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.WorkerState;
+import com.s24.redjob.worker.events.JobStale;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerFailure;
 import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+import org.slf4j.MDC;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Base implementation of {@link Worker} for queues.
@@ -273,9 +272,32 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
             if (thread != null) {
                thread.interrupt();
             }
+         } else {
+            try {
+               Execution execution = get(id);
+               if (execution != null && name.equals(execution.getWorker())) {
+                  execution.stop();
+                  eventBus.publishEvent(new JobStale(this, execution.getQueue(), execution));
+                  update(execution);
+               }
+            } catch (Throwable t) {
+               log.error("Failed to stop execution {}.", id, t);
+            }
          }
       }
    }
+
+   /**
+    * Get the given execution.
+    *
+    *
+    * @param id
+    *           Execution id.
+    * @return Execution or null, if not found.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   protected abstract Execution get(long id) throws Throwable;
 
    /**
     * Poll the given queue.
