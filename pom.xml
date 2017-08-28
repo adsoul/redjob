@@ -5,7 +5,7 @@
    <groupId>com.s24</groupId>
    <artifactId>redjob</artifactId>
    <name>${project.artifactId}</name>
-   <version>0.3.3-SNAPSHOT</version>
+   <version>0.3.3</version>
    <packaging>jar</packaging>
 
    <description>Spring based implementation of a Redis-backed job queue.</description>
@@ -23,7 +23,7 @@
       <connection>scm:git:git@github.com:shopping24/redjob.git</connection>
       <developerConnection>scm:git:git@github.com:shopping24/redjob.git</developerConnection>
       <url>https://github.com/shopping24/redjob</url>
-      <tag>HEAD</tag>
+      <tag>v0.3.3</tag>
    </scm>
    <issueManagement>
       <system>Github Issues</system>
