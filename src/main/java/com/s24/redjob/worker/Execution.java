@@ -173,6 +173,13 @@ public class Execution {
    }
 
    /**
+    * Is currently executing?.
+    */
+   public boolean isRunning() {
+      return start != null && end == null;
+   }
+
+   /**
     * Start execution by the given worker.
     *
     * @param worker

@@ -274,16 +274,30 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
             }
          } else {
             try {
-               Execution execution = get(id);
-               if (execution != null && name.equals(execution.getWorker())) {
-                  execution.stop();
-                  eventBus.publishEvent(new JobStale(this, execution.getQueue(), execution));
-                  update(execution);
-               }
+               stopStale(id);
             } catch (Throwable t) {
                log.error("Failed to stop execution {}.", id, t);
             }
          }
+      }
+   }
+
+   /**
+    * Stop possibly stale execution.
+    *
+    * @param id
+    *           Execution id.
+    * @throws Throwable
+    *            In case of errors.
+    */
+   private void stopStale(long id) throws Throwable {
+      Execution execution = get(id);
+      // An execution is stale if it is marked as being executed by this worker,
+      // without the worker knowing about it.
+      if (execution != null && execution.isRunning() && name.equals(execution.getWorker())) {
+         execution.stop();
+         eventBus.publishEvent(new JobStale(this, execution.getQueue(), execution));
+         update(execution);
       }
    }
 
