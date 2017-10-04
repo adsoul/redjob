@@ -76,7 +76,7 @@
       <dependency.mockito.version>2.10.0</dependency.mockito.version>
       <dependency.slf4j.version>1.7.25</dependency.slf4j.version>
       <dependency.spring.version>5.0.0.RELEASE</dependency.spring.version>
-      <dependency.spring-data-redis.version>1.8.1.RELEASE</dependency.spring-data-redis.version>
+      <dependency.spring-data-redis.version>2.0.0.RELEASE</dependency.spring-data-redis.version>
 
       <integrationTest.redisPort>16379</integrationTest.redisPort>
       <integrationTest.sentinelPort>26379</integrationTest.sentinelPort>
