@@ -2,10 +2,9 @@ package com.s24.redjob;
 
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-
-import redis.clients.jedis.JedisPoolConfig;
 
 /**
  * Creates connection factories for the integration test Redis.
@@ -16,14 +15,9 @@ public class TestRedis {
     * Flushes the Redis database before returning the connection factory.
     */
    public static RedisConnectionFactory connectionFactory() {
-      JedisPoolConfig pool = new JedisPoolConfig();
-      pool.setMaxTotal(100);
-
-      JedisConnectionFactory connectionFactory = new JedisConnectionFactory();
-      connectionFactory.setHostName("localhost");
-      connectionFactory.setPort(16379);
-      connectionFactory.setDatabase(0);
-      connectionFactory.setPoolConfig(pool);
+      RedisStandaloneConfiguration redis = new RedisStandaloneConfiguration("localhost", 16379);
+      redis.setDatabase(0);
+      JedisConnectionFactory connectionFactory = new JedisConnectionFactory(redis);
       connectionFactory.afterPropertiesSet();
 
       flushDb(connectionFactory);
