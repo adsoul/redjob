@@ -1,12 +1,11 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker failed to execute a job.
@@ -66,6 +65,7 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
@@ -81,6 +81,7 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <R> R getRunner() {
       return (R) runner;
    }

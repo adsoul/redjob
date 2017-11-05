@@ -47,6 +47,7 @@ public class JobStale extends ApplicationEvent implements JobEvent {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }

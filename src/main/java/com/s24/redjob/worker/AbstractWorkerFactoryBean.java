@@ -1,5 +1,6 @@
 package com.s24.redjob.worker;
 
+import com.s24.redjob.channel.ChannelWorker;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -7,8 +8,6 @@ import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
-
-import com.s24.redjob.channel.ChannelWorker;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
@@ -71,6 +70,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public Class<W> getObjectType() {
       return (Class<W>) worker.getClass();
    }

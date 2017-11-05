@@ -48,6 +48,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
                "Job runners have to be prototypes, but job runner %s is none.", beanName));
       }
 
+      @SuppressWarnings("unchecked")
       JobRunner<J> runner = (JobRunner<J>) applicationContext.getBean(beanName);
 
       return new WrappingRunnable(runner) {

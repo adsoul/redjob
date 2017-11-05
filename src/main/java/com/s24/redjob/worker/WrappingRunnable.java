@@ -22,6 +22,7 @@ public abstract class WrappingRunnable implements Runnable {
    /**
     * Job runner.
     */
+   @SuppressWarnings("unchecked")
    public <R> R unwrap() {
       return (R) runner;
    }

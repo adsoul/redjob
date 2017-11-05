@@ -1,12 +1,11 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker executes a job. Can be vetoed. Veto leads to {@link JobSkipped} event.
@@ -62,6 +61,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
@@ -79,6 +79,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    /**
     * Job runner.
     */
+   @SuppressWarnings("unchecked")
    public <R> R getRunner() {
       return (R) runner;
    }

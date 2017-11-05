@@ -1,16 +1,14 @@
 package com.s24.redjob.worker.json;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.GenericTypeResolver;
-
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.s24.redjob.worker.Execution;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.GenericTypeResolver;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 /**
  * Jackson module with all serializers needed for {@link Execution} and containing classes.
@@ -58,6 +56,7 @@ public class ExecutionModule extends SimpleModule {
    /**
     * Extract type from serializer and register it.
     */
+   @SuppressWarnings("unchecked")
    protected <T> void addTypedSerializer(JsonSerializer<T> serializer) {
       addSerializer(
             (Class<? extends T>) GenericTypeResolver.resolveTypeArgument(serializer.getClass(), JsonSerializer.class),
@@ -67,6 +66,7 @@ public class ExecutionModule extends SimpleModule {
    /**
     * Extract type from deserializer and register it.
     */
+   @SuppressWarnings("unchecked")
    protected <T> void addTypedDeserializer(JsonDeserializer<? extends T> deserializer) {
       addDeserializer(
             (Class<T>) GenericTypeResolver.resolveTypeArgument(deserializer.getClass(), JsonDeserializer.class),

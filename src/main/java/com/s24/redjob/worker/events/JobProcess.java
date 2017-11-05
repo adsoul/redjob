@@ -1,12 +1,11 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker processes a job.
@@ -53,6 +52,7 @@ public class JobProcess extends ApplicationEvent implements JobEvent {
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }

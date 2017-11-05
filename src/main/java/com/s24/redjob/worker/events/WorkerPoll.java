@@ -1,11 +1,10 @@
 package com.s24.redjob.worker.events;
 
-import java.util.Objects;
-
+import com.s24.redjob.worker.Worker;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.Worker;
+import java.util.Objects;
 
 /**
  * Worker polls one of its queues.
@@ -43,6 +42,7 @@ public class WorkerPoll extends ApplicationEvent implements WorkerEvent, QueueEv
    }
 
    @Override
+   @SuppressWarnings("unchecked")
    public <W extends Worker> W getWorker() {
       return (W) worker;
    }
