@@ -1,20 +1,19 @@
 package com.s24.redjob.queue;
 
+import com.s24.redjob.TestRedis;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-
-import com.s24.redjob.TestRedis;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.json.ExecutionRedisSerializer;
-import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
 
 /**
  * Integration test for {@link FifoDaoImpl}.
@@ -159,5 +158,8 @@ public class FifoDaoImplIT {
 
       assertEquals(1, dao.cleanUp());
       assertNull(dao.get(id));
+
+      // Test, that there is nothing to cleanup now.
+      assertEquals(0, dao.cleanUp());
    }
 }

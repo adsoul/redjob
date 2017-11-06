@@ -1,24 +1,22 @@
 package com.s24.redjob.queue;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static org.springframework.util.CollectionUtils.isEmpty;
+import com.s24.redjob.AbstractDao;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.Assert;
 
+import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import javax.annotation.PostConstruct;
-
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.Assert;
-
-import com.s24.redjob.AbstractDao;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  * Default implementation of {@link FifoDao}.
@@ -190,6 +188,9 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
                .filter(entry -> tryParseExecution(entry.getValue()) == null)
                .map(Entry::getKey)
                .toArray(byte[][]::new);
+         if (toDelete.length == 0) {
+            return 0;
+         }
 
          connection.hDel(key(JOBS), toDelete);
          return toDelete.length;
