@@ -1,7 +1,8 @@
 package com.s24.redjob.lock;
 
 import com.s24.redjob.AbstractDao;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import com.s24.redjob.ByteArrayRedisSerializer;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.util.Assert;
 
@@ -19,14 +20,16 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
    /**
     * Redis access.
     */
-   private StringRedisTemplate redis;
+   private RedisTemplate<byte[], byte[]> redis;
 
    @Override
    public void afterPropertiesSet() {
       super.afterPropertiesSet();
 
-      redis = new StringRedisTemplate();
+      redis = new RedisTemplate<>();
       redis.setConnectionFactory(connectionFactory);
+      redis.setKeySerializer(new ByteArrayRedisSerializer());
+      redis.setValueSerializer(new ByteArrayRedisSerializer());
       redis.afterPropertiesSet();
    }
 
@@ -36,6 +39,8 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.notNull(holder, "Pre-condition violated: holder != null.");
       Assert.isTrue(timeout > 0, "Pre-condition violated: timeout > 0.");
       Assert.notNull(unit, "Pre-condition violated: unit != null.");
+      long timeoutMillis = unit.toMillis(timeout);
+      Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
       DefaultRedisScript<Boolean> s = new DefaultRedisScript<>(
             "local key = KEYS[1]; " +
@@ -54,10 +59,7 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
             "return true;",
             Boolean.class);
 
-      long timeoutMillis = unit.toMillis(timeout);
-      Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
-
-      return redis.execute(s, keys(keyString(LOCK, lock)), valueString(holder), valueString(timeoutMillis));
+      return redis.execute(s, keys(key(LOCK, lock)), value(holder), value(timeoutMillis));
    }
 
    @Override
@@ -74,6 +76,7 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
                "redis.call('del', key); " +
             "end;");
 
-      redis.execute(s, keys(keyString(LOCK, lock)), valueString(holder));
+      redis.execute(s, keys(key(LOCK, lock)), value(holder));
    }
+
 }

@@ -53,7 +53,7 @@ public abstract class AbstractDao implements Dao {
    /**
     * List of multiple keys.
     */
-   protected List<String> keys(String... keys) {
+   protected List<byte[]> keys(byte[]... keys) {
       return asList(keys);
    }
 
@@ -99,26 +99,6 @@ public abstract class AbstractDao implements Dao {
     */
    protected byte[] value(String value) {
       return strings.serialize(value);
-   }
-
-   /**
-    * Serialize long value.
-    *
-    * @param value
-    *           Long.
-    */
-   protected String valueString(long value) {
-      return valueString(Long.toString(value));
-   }
-
-   /**
-    * Serialize string value.
-    *
-    * @param value
-    *           String.
-    */
-   protected String valueString(String value) {
-      return value;
    }
 
    //
