@@ -72,11 +72,11 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
       // Try to extend existing lock.
-      if (Arrays.equals(value, connection.get(key))) {
-         if (connection.pExpire(key, timeoutMillis) && Arrays.equals(value, connection.get(key))) {
-            // Expiration has successfully been set and we are the new holder -> We got the lock.
-            return true;
-         }
+      if (Arrays.equals(value, connection.get(key)) &&
+            connection.pExpire(key, timeoutMillis) &&
+            Arrays.equals(value, connection.get(key))) {
+         // Expiration has successfully been set and we are the new holder -> We got the lock.
+         return true;
       }
 
       // Try to acquire lock.
