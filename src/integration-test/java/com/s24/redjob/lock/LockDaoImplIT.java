@@ -1,9 +1,10 @@
 package com.s24.redjob.lock;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import com.s24.redjob.TestRedis;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -11,12 +12,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
-
-import com.s24.redjob.TestRedis;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Integration test for {@link LockDaoImpl}.
@@ -60,7 +59,7 @@ public class LockDaoImplIT {
 
    @Test
    public void tryLock_parallel() throws Exception {
-      final int threads = 100;
+      final int threads = 1000;
 
       CompletableFuture<Void> lock = new CompletableFuture<>();
       AtomicInteger acquired = new AtomicInteger(0);
@@ -92,16 +91,16 @@ public class LockDaoImplIT {
       }
 
       // Wait at max 10 seconds for all threads to arrive at start lock.
-      for (int i = 0; i < 10 && lock.getNumberOfDependents() < threads; i++) {
-         Thread.sleep(1000);
+      for (int i = 0; i < 100 && lock.getNumberOfDependents() < threads; i++) {
+         Thread.sleep(100);
       }
 
       // Start all threads at once.
       lock.complete(null);
 
       // Wait at max 10 seconds for all threads to try to acquire lock.
-      for (int i = 0; i < 10 && acquired.get() + notAcquired.get() < threads; i++) {
-         Thread.sleep(1000);
+      for (int i = 0; i < 100 && acquired.get() + notAcquired.get() < threads; i++) {
+         Thread.sleep(100);
       }
 
       // Check that exactly one thread was able to acquire the lock.
