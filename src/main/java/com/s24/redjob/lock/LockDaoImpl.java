@@ -1,12 +1,13 @@
 package com.s24.redjob.lock;
 
 import com.s24.redjob.AbstractDao;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.util.Assert;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Default implementation of {@link LockDao}.
@@ -38,59 +39,27 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.isTrue(timeout > 0, "Pre-condition violated: timeout > 0.");
       Assert.notNull(unit, "Pre-condition violated: unit != null.");
 
-      return redis.execute((RedisConnection connection) -> {
-         byte[] key = key(LOCK, lock);
-         byte[] value = value(holder);
+      DefaultRedisScript<Boolean> s = new DefaultRedisScript<>(
+            "local key = KEYS[1]; " +
+            "local value = ARGV[1]; " +
+            "local timeout = ARGV[2]; " +
 
-         return doTryLock(connection, key, value, timeout, unit);
-      });
-   }
-
-   /**
-    * Try to acquire a lock.
-    *
-    * @param connection
-    *           Connection.
-    * @param key
-    *           Name of the lock.
-    * @param value
-    *           Holder for the lock.
-    * @param timeout
-    *           Timeout for the lock. Should be >= 100 ms.
-    * @param unit
-    *           Unit of the timeout.
-    * @return Lock has been acquired.
-    */
-   private boolean doTryLock(RedisConnection connection, byte[] key, byte[] value, int timeout, TimeUnit unit) {
-      Assert.notNull(connection, "Pre-condition violated: connection != null.");
-      Assert.notNull(key, "Pre-condition violated: key != null.");
-      Assert.notNull(value, "Pre-condition violated: value != null.");
-      Assert.isTrue(timeout > 0, "Pre-condition violated: timeout > 0.");
-      Assert.notNull(unit, "Pre-condition violated: unit != null.");
+            "local lock = redis.call('get', key); " +
+            "if (lock == value) then " +
+               "redis.call('pexpire', key, timeout); " +
+               "return true; " +
+            "end; " +
+            "if (lock) then " +
+               "return false; " +
+            "end; " +
+            "redis.call('psetex', key, timeout, value); " +
+            "return true;",
+            Boolean.class);
 
       long timeoutMillis = unit.toMillis(timeout);
       Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
-      // Try to extend existing lock.
-      if (Arrays.equals(value, connection.get(key)) &&
-            connection.pExpire(key, timeoutMillis) &&
-            Arrays.equals(value, connection.get(key))) {
-         // Expiration has successfully been set and we are the new holder -> We got the lock.
-         return true;
-      }
-
-      // Try to acquire lock.
-      if (!connection.setNX(key, value)) {
-         // Key exists and is not set to our holder (see above) -> Lock is hold by someone else.
-         return false;
-      }
-      if (!connection.pExpire(key, timeoutMillis)) {
-         // Failed to set expiration -> Maybe someone else deleted our key? -> Lock cannot be acquired now.
-         return false;
-      }
-
-      // Lock has successfully been acquired if we are finally the new holder.
-      return Arrays.equals(value, connection.get(key));
+      return redis.execute(s, singletonList(keyString(LOCK, lock)), holder, Long.toString(timeoutMillis));
    }
 
    @Override
@@ -98,16 +67,15 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.notNull(lock, "Pre-condition violated: lock != null.");
       Assert.notNull(holder, "Pre-condition violated: holder != null.");
 
-      redis.execute((RedisConnection connection) -> {
-         byte[] key = key(LOCK, lock);
-         byte[] value = value(holder);
+      DefaultRedisScript<Void> s = new DefaultRedisScript<>(
+            "local key = KEYS[1]; " +
+            "local value = ARGV[1]; " +
 
-         // Try to acquire lock first to avoid race conditions.
-         if (connection.exists(key) && doTryLock(connection, key, value, 1, TimeUnit.SECONDS)) {
-            connection.del(key);
-         }
+            "local lock = redis.call('get', key); " +
+            "if (lock == value) then " +
+               "redis.call('del', key); " +
+            "end;");
 
-         return null;
-      });
+      redis.execute(s, singletonList(keyString(LOCK, lock)), holder);
    }
 }
