@@ -7,8 +7,6 @@ import org.springframework.util.Assert;
 
 import java.util.concurrent.TimeUnit;
 
-import static java.util.Collections.singletonList;
-
 /**
  * Default implementation of {@link LockDao}.
  */
@@ -59,7 +57,7 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       long timeoutMillis = unit.toMillis(timeout);
       Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
-      return redis.execute(s, singletonList(keyString(LOCK, lock)), holder, Long.toString(timeoutMillis));
+      return redis.execute(s, keys(keyString(LOCK, lock)), valueString(holder), valueString(timeoutMillis));
    }
 
    @Override
@@ -76,6 +74,6 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
                "redis.call('del', key); " +
             "end;");
 
-      redis.execute(s, singletonList(keyString(LOCK, lock)), holder);
+      redis.execute(s, keys(keyString(LOCK, lock)), valueString(holder));
    }
 }

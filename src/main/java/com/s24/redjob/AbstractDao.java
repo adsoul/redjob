@@ -1,15 +1,17 @@
 package com.s24.redjob;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
+
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 /**
  * Base dao.
@@ -47,6 +49,13 @@ public abstract class AbstractDao implements Dao {
    //
    // Serialization.
    //
+
+   /**
+    * List of multiple keys.
+    */
+   protected List<String> keys(String... keys) {
+      return asList(keys);
+   }
 
    /**
     * Construct Redis key name. Created by joining the namespace and the parts together with ':'.
@@ -90,6 +99,26 @@ public abstract class AbstractDao implements Dao {
     */
    protected byte[] value(String value) {
       return strings.serialize(value);
+   }
+
+   /**
+    * Serialize long value.
+    *
+    * @param value
+    *           Long.
+    */
+   protected String valueString(long value) {
+      return valueString(Long.toString(value));
+   }
+
+   /**
+    * Serialize string value.
+    *
+    * @param value
+    *           String.
+    */
+   protected String valueString(String value) {
+      return value;
    }
 
    //
