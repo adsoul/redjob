@@ -1,13 +1,12 @@
 package com.s24.redjob.lock;
 
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
+import com.s24.redjob.AbstractDao;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.AbstractDao;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Default implementation of {@link LockDao}.
@@ -74,7 +73,7 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
 
       // Try to extend existing lock.
       if (Arrays.equals(value, connection.get(key))) {
-         if (connection.expire(key, timeout) && Arrays.equals(value, connection.get(key))) {
+         if (connection.pExpire(key, timeoutMillis) && Arrays.equals(value, connection.get(key))) {
             // Expiration has successfully been set and we are the new holder -> We got the lock.
             return true;
          }
