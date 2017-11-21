@@ -42,24 +42,26 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       long timeoutMillis = unit.toMillis(timeout);
       Assert.isTrue(timeoutMillis >= 100, "Pre-condition violated: timeoutMillis >= 100.");
 
+      // KEYS[1]: key
+      // ARGV[1]: timeout
+      // ARGV[2]: value
       DefaultRedisScript<Boolean> s = new DefaultRedisScript<>(
-            "local key = KEYS[1]; " +
-            "local value = ARGV[1]; " +
-            "local timeout = ARGV[2]; " +
-
-            "local lock = redis.call('get', key); " +
-            "if (lock == value) then " +
-               "redis.call('pexpire', key, timeout); " +
+            "local lock = redis.call('get', KEYS[1]); " +
+            "if (lock == ARGV[2]) then " +
+               // We own the lock -> Refresh expiration.
+               "redis.call('pexpire', KEYS[1], ARGV[1]); " +
                "return true; " +
             "end; " +
             "if (lock) then " +
+               // Someone else owns the lock -> Abort.
                "return false; " +
             "end; " +
-            "redis.call('psetex', key, timeout, value); " +
+            // No one owns the lock -> Create lock with expiration.
+            "redis.call('psetex', KEYS[1], ARGV[1], ARGV[2]); " +
             "return true;",
             Boolean.class);
 
-      return redis.execute(s, keys(key(LOCK, lock)), value(holder), value(timeoutMillis));
+      return redis.execute(s, keys(key(LOCK, lock)), value(timeoutMillis), value(holder));
    }
 
    @Override
@@ -67,13 +69,13 @@ public class LockDaoImpl extends AbstractDao implements LockDao {
       Assert.notNull(lock, "Pre-condition violated: lock != null.");
       Assert.notNull(holder, "Pre-condition violated: holder != null.");
 
+      // KEYS[1]: key
+      // ARGV[1]: value
       DefaultRedisScript<Void> s = new DefaultRedisScript<>(
-            "local key = KEYS[1]; " +
-            "local value = ARGV[1]; " +
-
-            "local lock = redis.call('get', key); " +
-            "if (lock == value) then " +
-               "redis.call('del', key); " +
+            "local lock = redis.call('get', KEYS[1]); " +
+            "if (lock == ARGV[1]) then " +
+               // We own the lock -> We may release it by deleting the lock.
+               "redis.call('del', KEYS[1]); " +
             "end;");
 
       redis.execute(s, keys(key(LOCK, lock)), value(holder));
