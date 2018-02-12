@@ -58,6 +58,7 @@
       <maven.compiler.target>1.8</maven.compiler.target>
 
       <plugin.build-helper-maven-plugin.version>3.0.0</plugin.build-helper-maven-plugin.version>
+      <plugin.docker-maven-plugin.version>0.23.0</plugin.docker-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.7.0</plugin.maven-compiler-plugin.version>
       <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
@@ -263,96 +264,6 @@
                </execution>
             </executions>
          </plugin>
-         <!-- Run a Redis with Sentinel. Copy conf files, because Redis Sentinel rewrites them... -->
-         <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>${plugin.maven-resources-plugin.version}</version>
-            <executions>
-               <execution>
-                  <id>copy-resources</id>
-                  <phase>pre-integration-test</phase>
-                  <goals>
-                     <goal>copy-resources</goal>
-                  </goals>
-                  <configuration>
-                     <outputDirectory>${basedir}/target/redis</outputDirectory>
-                     <resources>
-                        <resource>
-                           <directory>${project.basedir}/src/integration-test/redis</directory>
-                        </resource>
-                     </resources>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>${plugin.exec-maven-plugin.version}</version>
-            <executions>
-               <execution>
-                  <id>launch-redis</id>
-                  <phase>pre-integration-test</phase>
-                  <goals>
-                     <goal>exec</goal>
-                  </goals>
-                  <configuration>
-                     <executable>redis-server</executable>
-                     <arguments>
-                        <argument>${basedir}/target/redis/redis.conf</argument>
-                        <argument>--port</argument>
-                        <argument>${integrationTest.redisPort}</argument>
-                     </arguments>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>launch-redis-sentinel</id>
-                  <phase>pre-integration-test</phase>
-                  <goals>
-                     <goal>exec</goal>
-                  </goals>
-                  <configuration>
-                     <executable>redis-server</executable>
-                     <arguments>
-                        <argument>${basedir}/target/redis/redis-sentinel.conf</argument>
-                        <argument>--sentinel</argument>
-                        <argument>--port</argument>
-                        <argument>${integrationTest.sentinelPort}</argument>
-                     </arguments>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>shutdown-redis-sentinel</id>
-                  <phase>post-integration-test</phase>
-                  <goals>
-                     <goal>exec</goal>
-                  </goals>
-                  <configuration>
-                     <executable>redis-cli</executable>
-                     <arguments>
-                        <argument>-p</argument>
-                        <argument>${integrationTest.sentinelPort}</argument>
-                        <argument>shutdown</argument>
-                     </arguments>
-                  </configuration>
-               </execution>
-               <execution>
-                  <id>shutdown-redis</id>
-                  <phase>post-integration-test</phase>
-                  <goals>
-                     <goal>exec</goal>
-                  </goals>
-                  <configuration>
-                     <executable>redis-cli</executable>
-                     <arguments>
-                        <argument>-p</argument>
-                        <argument>${integrationTest.redisPort}</argument>
-                        <argument>shutdown</argument>
-                     </arguments>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
 
          <!-- Execute integration tests -->
          <plugin>
@@ -365,6 +276,86 @@
                   </goals>
                </execution>
             </executions>
+         </plugin>
+
+         <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>${plugin.docker-maven-plugin.version}</version>
+            <executions>
+               <execution>
+                  <id>start-integration-test-environment</id>
+                  <phase>pre-integration-test</phase>
+                  <goals>
+                     <goal>start</goal>
+                  </goals>
+               </execution>
+               <execution>
+                  <id>stop-integration-test-environment</id>
+                  <phase>post-integration-test</phase>
+                  <goals>
+                     <goal>stop</goal>
+                  </goals>
+               </execution>
+            </executions>
+            <configuration>
+               <!-- Re-enable logs to debug startup of containers below.-->
+               <showLogs>true</showLogs>
+               <startParallel>false</startParallel>
+               <images>
+                  <image>
+                     <name>hub.s24.com/s24/redis:latest</name>
+                     <alias>it-redis</alias>
+                     <run>
+                        <network>
+                           <mode>bridge</mode>
+                           <name>bridge</name>
+                           <alias>it-redis</alias>
+                        </network>
+                        <ports>
+                           <port>+it-redis.ip:it-redis.port:6379</port>
+                        </ports>
+                        <wait>
+                           <log>(?s)The server is now ready to accept connections on port</log>
+                           <time>90000</time>
+                           <shutdown>5000</shutdown>
+                           <kill>5000</kill>
+                        </wait>
+                     </run>
+                  </image>
+                  <image>
+                     <name>hub.s24.com/s24/redis:latest</name>
+                     <alias>it-sentinel</alias>
+                     <run>
+                        <network>
+                           <mode>bridge</mode>
+                           <name>bridge</name>
+                           <alias>it-sentinel</alias>
+                        </network>
+                        <ports>
+                           <port>+it-sentinel.ip:it-sentinel.port:6379</port>
+                        </ports>
+                        <cmd>
+                           <exec>
+                              <arg>redis-server</arg>
+                              <arg>--sentinel</arg>
+                              <arg>monitor</arg>
+                              <arg>godzilla</arg>
+                              <arg>${it-redis.ip}</arg>
+                              <arg>${it-redis.port}</arg>
+                              <arg>2</arg>
+                           </exec>
+                        </cmd>
+                        <wait>
+                           <log>(?s)The server is now ready to accept connections on port</log>
+                           <time>90000</time>
+                           <shutdown>5000</shutdown>
+                           <kill>5000</kill>
+                        </wait>
+                     </run>
+                  </image>
+               </images>
+            </configuration>
          </plugin>
       </plugins>
    </build>
