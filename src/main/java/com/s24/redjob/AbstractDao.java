@@ -141,7 +141,7 @@ public abstract class AbstractDao implements Dao {
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
-   public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
+   public void setConnectionFactory(@RedJobRedis RedisConnectionFactory connectionFactory) {
       this.connectionFactory = connectionFactory;
    }
 
