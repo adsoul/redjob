@@ -12,5 +12,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Qualifier
-public @interface RedJobRedis {
+public @interface RedJobRedisConnectionFactory {
 }

@@ -1,7 +1,7 @@
 package com.s24.redjob.client;
 
 import com.s24.redjob.AbstractDao;
-import com.s24.redjob.RedJobRedis;
+import com.s24.redjob.RedJobRedisConnectionFactory;
 import com.s24.redjob.channel.ChannelDaoImpl;
 import com.s24.redjob.lock.LockDaoImpl;
 import com.s24.redjob.queue.FifoDaoImpl;
@@ -83,7 +83,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
-   public void setConnectionFactory(@RedJobRedis RedisConnectionFactory connectionFactory) {
+   public void setConnectionFactory(@RedJobRedisConnectionFactory RedisConnectionFactory connectionFactory) {
       workerDao.setConnectionFactory(connectionFactory);
       fifoDao.setConnectionFactory(connectionFactory);
       channelDao.setConnectionFactory(connectionFactory);
