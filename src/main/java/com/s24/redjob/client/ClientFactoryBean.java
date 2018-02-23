@@ -9,6 +9,7 @@ import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 /**
@@ -83,7 +84,7 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
-   public void setConnectionFactory(@RedJobRedisConnectionFactory RedisConnectionFactory connectionFactory) {
+   public void setConnectionFactory(@Autowired @RedJobRedisConnectionFactory RedisConnectionFactory connectionFactory) {
       workerDao.setConnectionFactory(connectionFactory);
       fifoDao.setConnectionFactory(connectionFactory);
       channelDao.setConnectionFactory(connectionFactory);
