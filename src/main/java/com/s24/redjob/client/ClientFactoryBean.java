@@ -84,7 +84,9 @@ public class ClientFactoryBean implements FactoryBean<Client>, InitializingBean 
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
-   public void setConnectionFactory(@Autowired @RedJobRedisConnectionFactory RedisConnectionFactory connectionFactory) {
+   @RedJobRedisConnectionFactory
+   @Autowired
+   public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
       workerDao.setConnectionFactory(connectionFactory);
       fifoDao.setConnectionFactory(connectionFactory);
       channelDao.setConnectionFactory(connectionFactory);
