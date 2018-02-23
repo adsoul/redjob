@@ -1,25 +1,20 @@
 package com.s24.redjob.worker.json;
 
-import static org.mockito.Mockito.verify;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.s24.redjob.mockito.EnableMockito;
 import com.s24.redjob.queue.TestJob;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+
+import static org.mockito.Mockito.verify;
 
 /**
  * Test of {@link TypeScanner}.
  */
-public class TypeScannerTest {
-   @Rule
-   public MockitoRule mockitoRule = MockitoJUnit.rule();
-
+@EnableMockito
+class TypeScannerTest {
    /**
     * JSON mapper.
     */
@@ -34,7 +29,7 @@ public class TypeScannerTest {
    private ExecutionRedisSerializer executions;
 
    @Test
-   public void afterPropertiesSet() {
+   void afterPropertiesSet() {
       scanForJsonSubtypes(executions, TestJob.class);
 
       verify(objectMapper).registerSubtypes(TestJob.class);
@@ -48,7 +43,7 @@ public class TypeScannerTest {
     * @param basePackage
     *           Class in package to scan recursively.
     */
-   public static void scanForJsonSubtypes(ExecutionRedisSerializer executions, Class<?> basePackage) {
+   static void scanForJsonSubtypes(ExecutionRedisSerializer executions, Class<?> basePackage) {
       scanForJsonSubtypes(executions, basePackage.getPackage());
    }
 
@@ -60,7 +55,7 @@ public class TypeScannerTest {
     * @param basePackage
     *           Package to scan recursively.
     */
-   public static void scanForJsonSubtypes(ExecutionRedisSerializer executions, Package basePackage) {
+   static void scanForJsonSubtypes(ExecutionRedisSerializer executions, Package basePackage) {
       scanForJsonSubtypes(executions, basePackage.getName());
    }
 
@@ -72,7 +67,7 @@ public class TypeScannerTest {
     * @param basePackages
     *           Base packages to scan.
     */
-   public static void scanForJsonSubtypes(ExecutionRedisSerializer executions, String... basePackages) {
+   static void scanForJsonSubtypes(ExecutionRedisSerializer executions, String... basePackages) {
       TypeScanner scanner = new TypeScanner();
       scanner.setExecutions(executions);
       scanner.setBasePackages(basePackages);

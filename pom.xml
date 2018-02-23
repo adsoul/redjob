@@ -48,7 +48,7 @@
    </developers>
 
    <prerequisites>
-      <maven>3.2</maven>
+      <maven>3.5</maven>
    </prerequisites>
 
    <properties>
@@ -60,9 +60,9 @@
       <plugin.build-helper-maven-plugin.version>3.0.0</plugin.build-helper-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.7.0</plugin.maven-compiler-plugin.version>
-      <plugin.maven-surefire-plugin.version>2.19.1</plugin.maven-surefire-plugin.version>
+      <plugin.maven-surefire-plugin.version>2.20.1</plugin.maven-surefire-plugin.version>
       <plugin.maven-gpg-plugin.version>1.6</plugin.maven-gpg-plugin.version>
-      <plugin.maven-javadoc-plugin.version>2.10.4</plugin.maven-javadoc-plugin.version>
+      <plugin.maven-javadoc-plugin.version>3.0.0</plugin.maven-javadoc-plugin.version>
       <plugin.maven-resources-plugin.version>3.0.2</plugin.maven-resources-plugin.version>
       <plugin.maven-release-plugin.version>2.5.3</plugin.maven-release-plugin.version>
       <plugin.maven-source-plugin.version>3.0.1</plugin.maven-source-plugin.version>
@@ -71,7 +71,8 @@
       <dependency.assertj.version>3.8.0</dependency.assertj.version>
       <dependency.jackson.version>2.9.2</dependency.jackson.version>
       <dependency.jedis.version>2.9.0</dependency.jedis.version>
-      <dependency.junit.version>4.12</dependency.junit.version>
+      <dependency.junit-platform.version>1.1.0</dependency.junit-platform.version>
+      <dependency.junit-jupiter.version>5.1.0</dependency.junit-jupiter.version>
       <dependency.log4j.version>2.9.1</dependency.log4j.version>
       <dependency.mockito.version>2.11.0</dependency.mockito.version>
       <dependency.slf4j.version>1.7.25</dependency.slf4j.version>
@@ -156,9 +157,21 @@
       </dependency>
 
       <dependency>
-         <groupId>junit</groupId>
-         <artifactId>junit</artifactId>
-         <version>${dependency.junit.version}</version>
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter-api</artifactId>
+         <version>${dependency.junit-jupiter.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter-params</artifactId>
+         <version>${dependency.junit-jupiter.version}</version>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.junit.jupiter</groupId>
+         <artifactId>junit-jupiter-migrationsupport</artifactId>
+         <version>${dependency.junit-jupiter.version}</version>
          <scope>test</scope>
       </dependency>
       <dependency>

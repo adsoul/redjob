@@ -1,22 +1,19 @@
 package com.s24.redjob.worker;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.junit.Before;
-import org.junit.Test;
+import com.s24.redjob.TestRedis;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import com.s24.redjob.TestRedis;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test for {@link WorkerDaoImpl}.
  */
-public class WorkerDaoImplIT {
+class WorkerDaoImplIT {
    /**
     * DAO under test.
     */
@@ -27,8 +24,8 @@ public class WorkerDaoImplIT {
     */
    private RedisTemplate<String, String> redis;
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp() {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
       dao.setConnectionFactory(connectionFactory);
       dao.setNamespace("namespace");
@@ -40,12 +37,12 @@ public class WorkerDaoImplIT {
    }
 
    @Test
-   public void ping() {
+   void ping() {
       dao.ping();
    }
 
    @Test
-   public void state() throws Exception {
+   void state() {
       WorkerState test = new WorkerState();
       dao.state("test", test);
 
@@ -54,7 +51,7 @@ public class WorkerDaoImplIT {
    }
 
    @Test
-   public void stop() throws Exception {
+   void stop() {
       WorkerState test = new WorkerState();
       dao.state("test", test);
       dao.success("test");
@@ -70,7 +67,7 @@ public class WorkerDaoImplIT {
    }
 
    @Test
-   public void success() throws Exception {
+   void success() {
       dao.success("test1");
       dao.success("test2");
 
@@ -81,7 +78,7 @@ public class WorkerDaoImplIT {
    }
 
    @Test
-   public void failure() throws Exception {
+   void failure() {
       dao.failure("test1");
       dao.failure("test2");
 
@@ -92,7 +89,7 @@ public class WorkerDaoImplIT {
    }
 
    @Test
-   public void names() throws Exception {
+   void names() {
       WorkerState test1 = new WorkerState();
       dao.state("test1", test1);
       WorkerState test2 = new WorkerState();

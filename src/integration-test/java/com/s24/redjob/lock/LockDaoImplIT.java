@@ -1,8 +1,8 @@
 package com.s24.redjob.lock;
 
 import com.s24.redjob.TestRedis;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
@@ -12,15 +12,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test for {@link LockDaoImpl}.
  */
-public class LockDaoImplIT {
+class LockDaoImplIT {
    /**
     * DAO under test.
     */
@@ -31,8 +28,8 @@ public class LockDaoImplIT {
     */
    private StringRedisTemplate redis;
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp() {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
 
       dao.setConnectionFactory(connectionFactory);
@@ -45,7 +42,7 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void tryLock() {
+   void tryLock() {
       String key = "namespace:lock:test";
 
       assertTrue(dao.tryLock("test", "holder", 10, TimeUnit.SECONDS));
@@ -58,7 +55,7 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void tryLock_parallel() throws Exception {
+   void tryLock_parallel() throws Exception {
       final int threads = 1000;
 
       CompletableFuture<Void> lock = new CompletableFuture<>();
@@ -109,7 +106,7 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void releaseLock() {
+   void releaseLock() {
       String key = "namespace:lock:test";
 
       assertTrue(dao.tryLock("test", "holder", 10, TimeUnit.SECONDS));
