@@ -1,24 +1,5 @@
 package com.s24.redjob.channel;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.slf4j.MDC;
-import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.Topic;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
@@ -27,6 +8,23 @@ import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+import org.slf4j.MDC;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * {@link Worker} for channels (admin jobs).
@@ -126,13 +124,17 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          String channel = channelDao.getChannel(message);
          MDC.put("queue", channel);
          Execution execution = channelDao.getExecution(message);
+         if (execution == null) {
+            log.warn("Failed to deserialize job execution.");
+            return;
+         }
+
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
-
          process(channel, execution);
 
       } catch (Throwable t) {
-         log.error("Uncaught exception in worker.", name, t);
+         log.error("Uncaught exception in worker.", t);
          eventBus.publishEvent(new WorkerError(this, t));
 
       } finally {
