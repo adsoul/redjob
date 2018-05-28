@@ -106,9 +106,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
+         state.setState(WorkerState.FAILED);
          eventBus.publishEvent(new WorkerError(this, t));
       } finally {
-         log.info("Stop worker {}.", getName());
+         log.info("Stopped worker {}.", getName());
+         state.setState(WorkerState.STOPPED);
          eventBus.publishEvent(new WorkerStopped(this));
          workerDao.stop(name);
       }

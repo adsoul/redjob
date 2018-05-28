@@ -114,13 +114,22 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
 
    @Override
    public void stop(Runnable callback) {
-      new Thread(() -> {
+      Thread thread = new Thread(() -> {
          try {
             stop();
          } finally {
-            run = false;
+            while (!worker.state.getState().equals(WorkerState.STOPPED)) {
+               try {
+                  Thread.sleep(100);
+               } catch (InterruptedException e) {
+                  // Ignore.
+               }
+            }
+            callback.run();
          }
-      }, "Stopping " + worker.getName()).start();
+      }, "Stopping " + worker.getName());
+      thread.setDaemon(true);
+      thread.start();
    }
 
    @Override
