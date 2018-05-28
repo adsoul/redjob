@@ -1,6 +1,7 @@
 package com.s24.redjob.worker;
 
 import com.s24.redjob.channel.ChannelWorker;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -118,21 +119,28 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
          try {
             stop();
          } finally {
-            while (!worker.state.getState().equals(WorkerState.STOPPED)) {
-               try {
-                  Thread.sleep(100);
-               } catch (InterruptedException e) {
-                  // Ignore.
-               }
-            }
-            callback.run();
+             waitUntilStopped();
+             callback.run();
          }
       }, "Stopping " + worker.getName());
       thread.setDaemon(true);
       thread.start();
    }
 
-   @Override
+   /**
+    * Wait until worker has stopped.
+    */
+   private void waitUntilStopped() {
+      while (!worker.state.getState().equals(WorkerState.STOPPED)) {
+         try {
+            Thread.sleep(100);
+         } catch (InterruptedException e) {
+            // Ignore.
+         }
+      }
+    }
+
+    @Override
    public void stop() {
       if (!run) {
          return;
