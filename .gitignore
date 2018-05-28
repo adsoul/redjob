@@ -7,7 +7,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.idea2/*
+.idea/*
 *.iml
 
 ### Unignore shared code style settings
