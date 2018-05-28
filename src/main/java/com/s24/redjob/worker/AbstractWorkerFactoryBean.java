@@ -9,6 +9,8 @@ import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.EventListener;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
@@ -111,6 +113,13 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
       } finally {
          run = true;
       }
+   }
+
+   @EventListener
+   public void onContextClosed(ContextClosedEvent event) {
+      // When the context get closed, stop the worker and wait for the currently executing job to finish.
+      stop();
+      worker.waitUntilStopped();
    }
 
    @Override

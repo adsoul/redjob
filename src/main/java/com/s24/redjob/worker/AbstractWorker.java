@@ -178,12 +178,14 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    @Override
    public void waitUntilStopped() {
       while (!this.state.getState().equals(WorkerState.STOPPED)) {
+         log.info("Waiting for worker {} to stop.", getName());
          try {
             Thread.sleep(100);
          } catch (InterruptedException e) {
             // Ignore.
          }
       }
+      log.info("Worker {} stopped.", getName());
    }
 
    /**
