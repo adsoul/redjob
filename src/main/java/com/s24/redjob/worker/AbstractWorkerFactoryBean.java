@@ -86,7 +86,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
 
    @Override
    public int getPhase() {
-      return 1000000;
+      return Integer.MAX_VALUE;
    }
 
    @Override
