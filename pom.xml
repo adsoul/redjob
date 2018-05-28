@@ -57,6 +57,8 @@
       <maven.compiler.source>1.8</maven.compiler.source>
       <maven.compiler.target>1.8</maven.compiler.target>
 
+      <maven-profiler-report-directory>${project.build.directory}/maven-profiler</maven-profiler-report-directory>
+
       <plugin.build-helper-maven-plugin.version>3.0.0</plugin.build-helper-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.7.0</plugin.maven-compiler-plugin.version>
