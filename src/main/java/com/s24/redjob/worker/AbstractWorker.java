@@ -1,6 +1,18 @@
 package com.s24.redjob.worker;
 
-import com.s24.redjob.worker.events.*;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailure;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobStart;
+import com.s24.redjob.worker.events.JobSuccess;
+
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -8,12 +20,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * Base implementation of {@link Worker}.
@@ -167,6 +173,17 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
       log.info("Stopping worker {}.", getName());
       run.set(false);
       setWorkerState(WorkerState.STOPPING);
+   }
+
+   @Override
+   public void waitUntilStopped() {
+      while (!this.state.getState().equals(WorkerState.STOPPED)) {
+         try {
+            Thread.sleep(100);
+         } catch (InterruptedException e) {
+            // Ignore.
+         }
+      }
    }
 
    /**

@@ -119,25 +119,12 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
          try {
             stop();
          } finally {
-            waitUntilStopped();
+            worker.waitUntilStopped();
             callback.run();
          }
       }, "Stopping " + worker.getName());
       thread.setDaemon(true);
       thread.start();
-   }
-
-   /**
-    * Wait until worker has stopped.
-    */
-   private void waitUntilStopped() {
-      while (!worker.state.getState().equals(WorkerState.STOPPED)) {
-         try {
-            Thread.sleep(100);
-         } catch (InterruptedException e) {
-            // Ignore.
-         }
-      }
    }
 
    @Override
