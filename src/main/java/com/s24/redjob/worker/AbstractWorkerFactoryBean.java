@@ -34,7 +34,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
     * Constructor.
     *
     * @param worker
-    *           Worker instance.
+    *       Worker instance.
     */
    protected AbstractWorkerFactoryBean(W worker) {
       this.worker = worker;
@@ -119,8 +119,8 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
          try {
             stop();
          } finally {
-             waitUntilStopped();
-             callback.run();
+            waitUntilStopped();
+            callback.run();
          }
       }, "Stopping " + worker.getName());
       thread.setDaemon(true);
@@ -138,9 +138,9 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
             // Ignore.
          }
       }
-    }
+   }
 
-    @Override
+   @Override
    public void stop() {
       if (!run) {
          return;
