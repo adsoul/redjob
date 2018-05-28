@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
@@ -115,9 +117,12 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
       }
    }
 
+   /**
+    * When the context gets closed, stop the worker and wait for the currently executing job to finish.
+    */
+   @Order(Ordered.HIGHEST_PRECEDENCE)
    @EventListener
    public void onContextClosed(ContextClosedEvent event) {
-      // When the context get closed, stop the worker and wait for the currently executing job to finish.
       stop();
       worker.waitUntilStopped();
    }
