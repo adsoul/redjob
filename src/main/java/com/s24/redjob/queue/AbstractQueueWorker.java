@@ -4,13 +4,7 @@ import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.WorkerState;
-import com.s24.redjob.worker.events.JobStale;
-import com.s24.redjob.worker.events.WorkerError;
-import com.s24.redjob.worker.events.WorkerFailure;
-import com.s24.redjob.worker.events.WorkerNext;
-import com.s24.redjob.worker.events.WorkerPoll;
-import com.s24.redjob.worker.events.WorkerStart;
-import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.events.*;
 import org.slf4j.MDC;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.util.Assert;
@@ -79,6 +73,12 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    public void start() {
       thread = new Thread(this, getName());
       thread.start();
+   }
+
+   @Override
+   public void stop() {
+      super.stop();
+      pause(false);
    }
 
    @Override
