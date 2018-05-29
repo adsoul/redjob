@@ -8,13 +8,6 @@ import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
-import org.slf4j.MDC;
-import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.Topic;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -22,6 +15,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.slf4j.MDC;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -95,9 +96,11 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
       // Wait for jobs to finish.
       try {
          active.writeLock().lock();
+         state.setState(WorkerState.STOPPED);
          eventBus.publishEvent(new WorkerStopped(this));
          workerDao.stop(name);
       } finally {
+         state.setState(WorkerState.STOPPED);
          active.writeLock().unlock();
       }
    }
