@@ -91,12 +91,12 @@ pipeline {
 
       unstable {
          echo 'Build unstable.'
-         slackSend color: "warning", message: "Build of branch ${env.BRANCH_NAME} unstable. See <${JENKINS_BUILD_URL}|Jenkins>"
+         slackSend color: "warning", message: "${JOB_NAME}: Build unstable. See <${JENKINS_BUILD_URL}|Jenkins>"
       }
 
       failure {
          echo 'Build failed.'
-         slackSend color: "danger", message: "Build of branch ${env.BRANCH_NAME} failed. See <${JENKINS_BUILD_URL}|Jenkins>"
+         slackSend color: "danger", message: "${JOB_NAME}: Build failed. See <${JENKINS_BUILD_URL}|Jenkins>"
       }
 
       always {
