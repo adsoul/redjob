@@ -102,6 +102,7 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
       } finally {
          state.setState(WorkerState.STOPPED);
          active.writeLock().unlock();
+         log.info("Worker {} stopped.", getName());
       }
    }
 
