@@ -4,16 +4,23 @@ import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
 import com.s24.redjob.worker.WorkerState;
-import com.s24.redjob.worker.events.*;
-import org.slf4j.MDC;
-import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import com.s24.redjob.worker.events.JobStale;
+import com.s24.redjob.worker.events.WorkerError;
+import com.s24.redjob.worker.events.WorkerFailure;
+import com.s24.redjob.worker.events.WorkerNext;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.MDC;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Base implementation of {@link Worker} for queues.
@@ -84,7 +91,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    @Override
    public void destroy() {
       super.destroy();
-      log.info("Waiting for worker to shutdown.");
+      log.info("Waiting for worker {} to shutdown.", name);
       if (thread != null) {
          try {
             thread.interrupt();
@@ -93,7 +100,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
             // Ignore
          }
       }
-      log.info("Worker has been shut down.");
+      log.info("Worker {} has been shut down.", name);
    }
 
    @Override
