@@ -14,6 +14,7 @@ import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -57,6 +58,13 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
     * Should worker pause?.
     */
    protected final AtomicBoolean pause = new AtomicBoolean(false);
+
+   /**
+    * Constructor.
+    */
+   public AbstractQueueWorker() {
+      super(new QueueWorkerState());
+   }
 
    /**
     * Init.
@@ -114,7 +122,6 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       try {
          MDC.put("worker", getName());
          log.info("Starting worker {}.", getName());
-         state = new QueueWorkerState();
          state.setQueues(queues);
          doRun();
       } catch (Throwable t) {
@@ -137,6 +144,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          try {
             // Test connection to avoid marking this worker as running and fail immediately afterwards.
             workerDao.ping();
+            state.setStarted(LocalDateTime.now());
             setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
             startup();
             poll();

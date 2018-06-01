@@ -16,6 +16,11 @@ public class WorkerState {
    /**
     * State: Worker runs.
     */
+   public static final String INIT = "init";
+
+   /**
+    * State: Worker runs.
+    */
    public static final String RUNNING = "running";
 
    /**
@@ -41,7 +46,7 @@ public class WorkerState {
    /**
     * State of worker.
     */
-   private volatile String state;
+   private volatile String state = INIT;
 
    /**
     * Successful job executions.
@@ -52,14 +57,6 @@ public class WorkerState {
     * Failed job executions.
     */
    private int failed = 0;
-
-   /**
-    * Constructor.
-    */
-   public WorkerState() {
-      this.started = LocalDateTime.now();
-      this.state = RUNNING;
-   }
 
    /**
     * Start time of worker.

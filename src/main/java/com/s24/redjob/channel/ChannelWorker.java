@@ -11,6 +11,7 @@ import com.s24.redjob.worker.events.WorkerStopped;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -61,6 +62,13 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
     */
    private List<QueueWorker> workers;
 
+   /**
+    * Constructor.
+    */
+   public ChannelWorker() {
+      super(new ChannelWorkerState());
+   }
+
    @Override
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
@@ -79,7 +87,7 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          listenerContainer.addMessageListener(listener, topics);
       }
 
-      state = new ChannelWorkerState();
+      state.setStarted(LocalDateTime.now());
       state.setChannels(topics.stream().map(Topic::getTopic).collect(toSet()));
       setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
    }

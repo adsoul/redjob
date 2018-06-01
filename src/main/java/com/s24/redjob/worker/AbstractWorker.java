@@ -81,12 +81,24 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    /**
     * Worker state.
     */
-   protected S state;
+   protected final S state;
 
    /**
     * Event bus.
     */
    protected ApplicationEventPublisher eventBus;
+
+   /**
+    * Constructor.
+    *
+    * @param state
+    *       Initial state.
+    */
+   public AbstractWorker(S state) {
+      Assert.notNull(state, "Pre-condition violated: state != null.");
+
+      this.state = state;
+   }
 
    /**
     * Init.
@@ -113,12 +125,12 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    /**
     * Resolve placeholder in custom worker names.
-    *
+    * <p>
     * Supported placeholders:
     * <ul>
-    *    <li>id: Worker id.</li>
-    *    <li>hostname: Hostname without domain.</li>
-    *    <li>full-hostname: Hostname with domain.</li>
+    * <li>id: Worker id.</li>
+    * <li>hostname: Hostname without domain.</li>
+    * <li>full-hostname: Hostname with domain.</li>
     * </ul>
     */
    protected String resolvePlaceholders(String name) throws Exception {
@@ -153,10 +165,8 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Set worker state to the given value.
     */
    protected void setWorkerState(String state, WorkerEvent event) {
-      if (this.state != null) {
-         this.state.setState(state);
-         saveWorkerState();
-      }
+      this.state.setState(state);
+      saveWorkerState();
       eventBus.publishEvent(event);
    }
 
@@ -173,7 +183,7 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void stop() {
-      if (state != null && !state.isState(WorkerState.STOPPING, WorkerState.STOPPED, WorkerState.FAILED)) {
+      if (!state.isState(WorkerState.STOPPING, WorkerState.STOPPED, WorkerState.FAILED)) {
          log.info("Stopping worker {}.", getName(), new Exception());
          run.set(false);
          setWorkerState(WorkerState.STOPPING, new WorkerStopping(this));
@@ -182,7 +192,7 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void waitUntilStopped() {
-      if (this.state == null || this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
+      if (this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
          return;
       }
 
@@ -200,12 +210,12 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Process job. Sends {@link JobProcess} event.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @return true, if job needs to be re-enqueued. false, otherwise.
     * @throws Throwable
-    *            In case of errors.
+    *       In case of errors.
     */
    protected <J> boolean process(String queue, Execution execution) throws Throwable {
       J job = execution.getJob();
@@ -236,18 +246,18 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Execute job. Sends {@link JobExecute} event.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @param runner
-    *           Job runner.
+    *       Job runner.
     * @throws Throwable
-    *            In case of errors.
+    *       In case of errors.
     */
    protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
       Object unwrappedRunner = runner;
       if (runner instanceof WrappingRunnable) {
-         unwrappedRunner =  ((WrappingRunnable) runner).unwrap();
+         unwrappedRunner = ((WrappingRunnable) runner).unwrap();
       }
       prepareRunner(unwrappedRunner);
 
@@ -271,11 +281,11 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Run job.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @param runner
-    *           Job runner.
+    *       Job runner.
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
       log.debug("Starting job.");
