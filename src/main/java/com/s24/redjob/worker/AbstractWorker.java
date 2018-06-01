@@ -189,7 +189,6 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
             // Ignore.
          }
       }
-      log.info("Worker {} stopped.", getName());
    }
 
    /**
