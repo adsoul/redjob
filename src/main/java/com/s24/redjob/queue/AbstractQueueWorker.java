@@ -91,16 +91,21 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    @Override
    public void destroy() {
       super.destroy();
-      log.info("Waiting for worker {} to shutdown.", name);
+
       if (thread != null) {
          try {
             thread.interrupt();
-            thread.join();
+            Thread.yield();
+            if (thread.isAlive()) {
+               log.info("Waiting for worker {} to shutdown.", name);
+               thread.join();
+               log.info("Worker {} has been shut down.", name);
+            }
+            thread = null;
          } catch (InterruptedException e) {
             // Ignore
          }
       }
-      log.info("Worker {} has been shut down.", name);
    }
 
    @Override
