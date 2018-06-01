@@ -96,6 +96,7 @@ class FifoWorkerImplIT {
 
       worker.stop();
 
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
       assertEquals(new JobSuccess(worker, "test-queue", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
