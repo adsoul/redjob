@@ -73,7 +73,7 @@
       <dependency.assertj.version>3.10.0</dependency.assertj.version>
       <dependency.jackson.version>2.9.5</dependency.jackson.version>
       <dependency.jedis.version>2.9.0</dependency.jedis.version>
-      <dependency.junit-platform.version>1.1.0</dependency.junit-platform.version>
+      <dependency.junit-platform.version>1.2.0</dependency.junit-platform.version>
       <dependency.junit-jupiter.version>5.2.0</dependency.junit-jupiter.version>
       <dependency.log4j.version>2.11.0</dependency.log4j.version>
       <dependency.mockito.version>2.18.3</dependency.mockito.version>
@@ -202,11 +202,34 @@
             <plugin>
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${plugin.maven-surefire-plugin.version}</version>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.junit.platform</groupId>
+                     <artifactId>junit-platform-surefire-provider</artifactId>
+                     <version>${dependency.junit-platform.version}</version>
+                  </dependency>
+                  <dependency>
+                     <groupId>org.junit.jupiter</groupId>
+                     <artifactId>junit-jupiter-engine</artifactId>
+                     <version>${dependency.junit-jupiter.version}</version>
+                  </dependency>
+               </dependencies>
             </plugin>
-
             <plugin>
                <artifactId>maven-failsafe-plugin</artifactId>
                <version>${plugin.maven-surefire-plugin.version}</version>
+               <dependencies>
+                  <dependency>
+                     <groupId>org.junit.platform</groupId>
+                     <artifactId>junit-platform-surefire-provider</artifactId>
+                     <version>${dependency.junit-platform.version}</version>
+                  </dependency>
+                  <dependency>
+                     <groupId>org.junit.jupiter</groupId>
+                     <artifactId>junit-jupiter-engine</artifactId>
+                     <version>${dependency.junit-jupiter.version}</version>
+                  </dependency>
+               </dependencies>
             </plugin>
 
             <plugin>
