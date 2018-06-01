@@ -4,8 +4,18 @@ import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WorkerDaoImpl;
-import com.s24.redjob.worker.events.*;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailure;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobStart;
+import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerNext;
+import com.s24.redjob.worker.events.WorkerPoll;
+import com.s24.redjob.worker.events.WorkerStart;
+import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.events.WorkerStopping;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -113,6 +123,7 @@ class FifoWorkerImplIT {
 
       worker.stop();
 
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
       assertEquals(new JobFailure(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
