@@ -81,8 +81,7 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
 
       state = new ChannelWorkerState();
       state.setChannels(topics.stream().map(Topic::getTopic).collect(toSet()));
-      setWorkerState(WorkerState.RUNNING);
-      eventBus.publishEvent(new WorkerStart(this));
+      setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
    }
 
    @Override
@@ -96,11 +95,9 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
       // Wait for jobs to finish.
       try {
          active.writeLock().lock();
-         state.setState(WorkerState.STOPPED);
-         eventBus.publishEvent(new WorkerStopped(this));
+         setWorkerState(WorkerState.STOPPED, new WorkerStopped(this));
          workerDao.stop(name);
       } finally {
-         state.setState(WorkerState.STOPPED);
          active.writeLock().unlock();
          log.info("Worker {} stopped.", getName());
       }

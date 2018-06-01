@@ -2,6 +2,8 @@ package com.s24.redjob.worker;
 
 import java.time.LocalDateTime;
 
+import static java.util.Arrays.stream;
+
 /**
  * State of worker.
  */
@@ -71,6 +73,15 @@ public class WorkerState {
     */
    public void setStarted(LocalDateTime started) {
       this.started = started;
+   }
+
+   /**
+    * Is the state one of the given ones?.
+    *
+    * @params states States.
+    */
+   public boolean isState(String... states) {
+      return stream(states).anyMatch(state::equals);
    }
 
    /**

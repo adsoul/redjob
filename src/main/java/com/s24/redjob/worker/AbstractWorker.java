@@ -6,6 +6,8 @@ import com.s24.redjob.worker.events.JobProcess;
 import com.s24.redjob.worker.events.JobSkipped;
 import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerEvent;
+import com.s24.redjob.worker.events.WorkerStopping;
 
 import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
@@ -148,13 +150,14 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    }
 
    /**
-    * Set worker state to the given values.
+    * Set worker state to the given value.
     */
-   protected void setWorkerState(String state) {
+   protected void setWorkerState(String state, WorkerEvent event) {
       if (this.state != null) {
          this.state.setState(state);
          saveWorkerState();
       }
+      eventBus.publishEvent(event);
    }
 
    /**
@@ -170,19 +173,21 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void stop() {
-      log.info("Stopping worker {}.", getName());
-      run.set(false);
-      setWorkerState(WorkerState.STOPPING);
+      if (state != null && !state.isState(WorkerState.STOPPING, WorkerState.STOPPED, WorkerState.FAILED)) {
+         log.info("Stopping worker {}.", getName(), new Exception());
+         run.set(false);
+         setWorkerState(WorkerState.STOPPING, new WorkerStopping(this));
+      }
    }
 
    @Override
    public void waitUntilStopped() {
-      if (this.state.getState().equals(WorkerState.STOPPED)) {
+      if (this.state == null || this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
          return;
       }
 
       log.info("Waiting for worker {} to stop.", getName());
-      while (!this.state.getState().equals(WorkerState.STOPPED)) {
+      while (!this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
          try {
             Thread.sleep(100);
          } catch (InterruptedException e) {

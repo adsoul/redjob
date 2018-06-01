@@ -8,6 +8,7 @@ import com.s24.redjob.worker.events.JobStale;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerFailure;
 import com.s24.redjob.worker.events.WorkerNext;
+import com.s24.redjob.worker.events.WorkerPause;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
@@ -118,13 +119,13 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
-         state.setState(WorkerState.FAILED);
-         eventBus.publishEvent(new WorkerError(this, t));
+         setWorkerState(WorkerState.FAILED, new WorkerError(this, t));
       } finally {
-         log.info("Stopped worker {}.", getName());
-         state.setState(WorkerState.STOPPED);
-         eventBus.publishEvent(new WorkerStopped(this));
-         workerDao.stop(name);
+         if (!state.isState(WorkerState.FAILED)) {
+            log.info("Stopped worker {}.", getName());
+            setWorkerState(WorkerState.STOPPED, new WorkerStopped(this));
+            workerDao.stop(name);
+         }
       }
    }
 
@@ -136,17 +137,15 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          try {
             // Test connection to avoid marking this worker as running and fail immediately afterwards.
             workerDao.ping();
-            setWorkerState(WorkerState.RUNNING);
-            eventBus.publishEvent(new WorkerStart(this));
+            setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
             startup();
             poll();
          } catch (RedisConnectionFailureException e) {
             // Do not report the same connection error over and over again.
             log.warn("Worker {} failed to connect to Redis. Restarting in {} ms.", getName(), RESTART_DELAY_MS);
-            if (!WorkerState.FAILED.equals(state.getState())) {
+            if (!state.isState(WorkerState.FAILED)) {
                // No possibility to store the state in Redis...
-               this.state.setState(WorkerState.FAILED);
-               eventBus.publishEvent(new WorkerFailure(this));
+               setWorkerState(WorkerState.FAILED, new WorkerFailure(this));
             }
             Thread.sleep(RESTART_DELAY_MS);
          }
@@ -177,10 +176,10 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       synchronized (this.pause) {
          while (pause.get()) {
             try {
-               setWorkerState(WorkerState.PAUSED);
+               setWorkerState(WorkerState.PAUSED, new WorkerPause(this));
                this.pause.wait();
             } finally {
-               setWorkerState(WorkerState.RUNNING);
+               setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
             }
          }
       }
