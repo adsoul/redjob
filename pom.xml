@@ -20,9 +20,9 @@
    </licenses>
 
    <scm>
-      <connection>scm:git:git@github.com:shopping24/redjob.git</connection>
-      <developerConnection>scm:git:git@github.com:shopping24/redjob.git</developerConnection>
-      <url>https://github.com/shopping24/redjob</url>
+      <connection>scm:git:git@github.com:adsoul/redjob.git</connection>
+      <developerConnection>scm:git:git@github.com:adsoul/redjob.git</developerConnection>
+      <url>https://github.com/adsoul/redjob</url>
       <tag>HEAD</tag>
    </scm>
    <issueManagement>
