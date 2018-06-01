@@ -39,7 +39,7 @@ public class WorkerState {
    /**
     * State of worker.
     */
-   private String state;
+   private volatile String state;
 
    /**
     * Successful job executions.
