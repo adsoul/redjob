@@ -11,7 +11,6 @@ import com.s24.redjob.worker.events.WorkerStopped;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -87,9 +86,8 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          listenerContainer.addMessageListener(listener, topics);
       }
 
-      state.setStarted(LocalDateTime.now());
       state.setChannels(topics.stream().map(Topic::getTopic).collect(toSet()));
-      setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
+      setWorkerState(WorkerState::start, new WorkerStart(this));
    }
 
    @Override
@@ -103,7 +101,7 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
       // Wait for jobs to finish.
       try {
          active.writeLock().lock();
-         setWorkerState(WorkerState.STOPPED, new WorkerStopped(this));
+         setWorkerState(WorkerState::stopped, new WorkerStopped(this));
          workerDao.stop(name);
       } finally {
          active.writeLock().unlock();

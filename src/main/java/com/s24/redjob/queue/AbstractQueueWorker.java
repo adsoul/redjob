@@ -14,7 +14,6 @@ import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 
 import javax.annotation.PostConstruct;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -126,11 +125,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
-         setWorkerState(WorkerState.FAILED, new WorkerError(this, t));
+         setWorkerState(WorkerState::failed, new WorkerError(this, t));
       } finally {
-         if (!state.isState(WorkerState.FAILED)) {
+         if (!state.isFailed()) {
             log.info("Stopped worker {}.", getName());
-            setWorkerState(WorkerState.STOPPED, new WorkerStopped(this));
+            setWorkerState(WorkerState::stopped, new WorkerStopped(this));
             workerDao.stop(name);
          }
       }
@@ -144,16 +143,15 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          try {
             // Test connection to avoid marking this worker as running and fail immediately afterwards.
             workerDao.ping();
-            state.setStarted(LocalDateTime.now());
-            setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
+            setWorkerState(WorkerState::start, new WorkerStart(this));
             startup();
             poll();
          } catch (RedisConnectionFailureException e) {
             // Do not report the same connection error over and over again.
             log.warn("Worker {} failed to connect to Redis. Restarting in {} ms.", getName(), RESTART_DELAY_MS);
-            if (!state.isState(WorkerState.FAILED)) {
+            if (!state.isFailed()) {
                // No possibility to store the state in Redis...
-               setWorkerState(WorkerState.FAILED, new WorkerFailure(this));
+               setWorkerState(WorkerState::failed, new WorkerFailure(this));
             }
             Thread.sleep(RESTART_DELAY_MS);
          }
@@ -184,10 +182,10 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       synchronized (this.pause) {
          while (pause.get()) {
             try {
-               setWorkerState(WorkerState.PAUSED, new WorkerPause(this));
+               setWorkerState(WorkerState::pause, new WorkerPause(this));
                this.pause.wait();
             } finally {
-               setWorkerState(WorkerState.RUNNING, new WorkerStart(this));
+               setWorkerState(WorkerState::start, new WorkerStart(this));
             }
          }
       }

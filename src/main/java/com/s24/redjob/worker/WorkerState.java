@@ -59,6 +59,63 @@ public class WorkerState {
    private int failed = 0;
 
    /**
+    * Start worker.
+    */
+   public void start() {
+      this.started = LocalDateTime.now();
+      this.state = RUNNING;
+   }
+
+   /**
+    * Pause worker.
+    */
+   public void pause() {
+      this.state = PAUSED;
+   }
+
+   /**
+    * Stopping worker.
+    */
+   public void stop() {
+      this.state = STOPPING;
+   }
+
+   /**
+    * Is the worker stopping?.
+    */
+   public boolean isStopping() {
+      return isState(STOPPING);
+   }
+
+   /**
+    * Worker stopped.
+    */
+   public void stopped() {
+      this.state = STOPPED;
+   }
+
+   /**
+    * Worker failed.
+    */
+   public void failed() {
+      this.state = FAILED;
+   }
+
+   /**
+    * Has the worker failed?.
+    */
+   public boolean isFailed() {
+      return isState(FAILED);
+   }
+
+   /**
+    * Has the worker terminated?.
+    */
+   public boolean isTerminated() {
+      return isState(STOPPED, FAILED);
+   }
+
+   /**
     * Start time of worker.
     */
    public LocalDateTime getStarted() {
@@ -68,7 +125,7 @@ public class WorkerState {
    /**
     * Start time of worker.
     */
-   public void setStarted(LocalDateTime started) {
+   void setStarted(LocalDateTime started) {
       this.started = started;
    }
 
@@ -77,7 +134,7 @@ public class WorkerState {
     *
     * @params states States.
     */
-   public boolean isState(String... states) {
+   boolean isState(String... states) {
       return stream(states).anyMatch(state::equals);
    }
 
@@ -91,7 +148,7 @@ public class WorkerState {
    /**
     * Set state of worker.
     */
-   public void setState(String state) {
+   void setState(String state) {
       this.state = state;
    }
 
@@ -112,7 +169,7 @@ public class WorkerState {
    /**
     * Successful job executions.
     */
-   public void setSuccess(int success) {
+   void setSuccess(int success) {
       this.success = success;
    }
 
@@ -133,7 +190,7 @@ public class WorkerState {
    /**
     * Failed job executions.
     */
-   public void setFailed(int failed) {
+   void setFailed(int failed) {
       this.failed = failed;
    }
 }

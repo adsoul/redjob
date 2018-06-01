@@ -13,6 +13,7 @@ import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
@@ -164,8 +165,8 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    /**
     * Set worker state to the given value.
     */
-   protected void setWorkerState(String state, WorkerEvent event) {
-      this.state.setState(state);
+   protected void setWorkerState(Consumer<WorkerState> change, WorkerEvent event) {
+      change.accept(this.state);
       saveWorkerState();
       eventBus.publishEvent(event);
    }
@@ -183,10 +184,10 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void stop() {
-      if (!state.isState(WorkerState.STOPPING, WorkerState.STOPPED, WorkerState.FAILED)) {
-         log.info("Stopping worker {}.", getName(), new Exception());
+      if (!state.isState(WorkerState.STOPPING) && !state.isTerminated()) {
+         log.info("Stopping worker {}.", getName());
          run.set(false);
-         setWorkerState(WorkerState.STOPPING, new WorkerStopping(this));
+         setWorkerState(WorkerState::stop, new WorkerStopping(this));
       }
    }
 
