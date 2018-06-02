@@ -184,8 +184,8 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void stop() {
-      if (!state.isState(WorkerState.STOPPING) && !state.isTerminated()) {
-         log.info("Stopping worker {}.", getName());
+      if (!state.isStopping() && !state.isTerminated()) {
+         log.debug("Stopping worker {}.", getName());
          run.set(false);
          setWorkerState(WorkerState::stop, new WorkerStopping(this));
       }
@@ -193,12 +193,12 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void waitUntilStopped() {
-      if (this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
+      if (state.isTerminated()) {
          return;
       }
 
       log.info("Waiting for worker {} to stop.", getName());
-      while (!this.state.isState(WorkerState.STOPPED, WorkerState.FAILED)) {
+      while (!state.isTerminated()) {
          try {
             Thread.sleep(100);
          } catch (InterruptedException e) {
