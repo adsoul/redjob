@@ -105,7 +105,7 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          workerDao.stop(name);
       } finally {
          active.writeLock().unlock();
-         log.info("Worker {} stopped.", getName());
+         log.info("Stopped worker {}.", getName());
       }
    }
 
