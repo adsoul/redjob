@@ -47,10 +47,6 @@
       </developer>
    </developers>
 
-   <prerequisites>
-      <maven>3.5</maven>
-   </prerequisites>
-
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -62,12 +58,13 @@
       <plugin.build-helper-maven-plugin.version>3.0.0</plugin.build-helper-maven-plugin.version>
       <plugin.exec-maven-plugin.version>1.5.0</plugin.exec-maven-plugin.version>
       <plugin.maven-compiler-plugin.version>3.7.0</plugin.maven-compiler-plugin.version>
-      <plugin.maven-surefire-plugin.version>2.21.0</plugin.maven-surefire-plugin.version>
+      <plugin.maven-enforcer-plugin.version>1.4.1</plugin.maven-enforcer-plugin.version>
       <plugin.maven-gpg-plugin.version>1.6</plugin.maven-gpg-plugin.version>
       <plugin.maven-javadoc-plugin.version>3.0.0</plugin.maven-javadoc-plugin.version>
-      <plugin.maven-resources-plugin.version>3.1.0</plugin.maven-resources-plugin.version>
       <plugin.maven-release-plugin.version>2.5.3</plugin.maven-release-plugin.version>
+      <plugin.maven-resources-plugin.version>3.1.0</plugin.maven-resources-plugin.version>
       <plugin.maven-source-plugin.version>3.0.1</plugin.maven-source-plugin.version>
+      <plugin.maven-surefire-plugin.version>2.21.0</plugin.maven-surefire-plugin.version>
       <plugin.nexus-staging-maven-plugin.version>1.6.8</plugin.nexus-staging-maven-plugin.version>
 
       <dependency.assertj.version>3.10.0</dependency.assertj.version>
@@ -200,6 +197,11 @@
       <pluginManagement>
          <plugins>
             <plugin>
+               <artifactId>maven-enforcer-plugin</artifactId>
+               <version>${plugin.maven-enforcer-plugin.version}</version>
+            </plugin>
+
+            <plugin>
                <artifactId>maven-surefire-plugin</artifactId>
                <version>${plugin.maven-surefire-plugin.version}</version>
                <dependencies>
@@ -244,6 +246,41 @@
       </pluginManagement>
 
       <plugins>
+         <plugin>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+               <execution>
+                  <id>display-info</id>
+                  <goals>
+                     <goal>display-info</goal>
+                  </goals>
+                  <phase>initialize</phase>
+               </execution>
+               <execution><id>enforce-build-environment</id>
+                  <goals>
+                     <goal>enforce</goal>
+                  </goals>
+                  <configuration>
+                     <rules>
+                        <requireMavenVersion>
+                           <version>[3.5,)</version>
+                        </requireMavenVersion>
+                        <requireJavaVersion>
+                           <version>[1.8,)</version>
+                        </requireJavaVersion>
+                        <requireSameVersions>
+                           <plugins>
+                              <plugin>org.apache.maven.plugins:maven-surefire-plugin</plugin>
+                              <plugin>org.apache.maven.plugins:maven-failsafe-plugin</plugin>
+                              <plugin>org.apache.maven.plugins:maven-surefire-report-plugin</plugin>
+                           </plugins>
+                        </requireSameVersions>
+                     </rules>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+
          <plugin>
             <artifactId>maven-compiler-plugin</artifactId>
             <version>${plugin.maven-compiler-plugin.version}</version>
