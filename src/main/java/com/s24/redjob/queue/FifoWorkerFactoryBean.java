@@ -1,10 +1,10 @@
 package com.s24.redjob.queue;
 
+import com.s24.redjob.worker.AbstractWorkerFactoryBean;
+
 import java.util.List;
 
 import org.springframework.beans.factory.FactoryBean;
-
-import com.s24.redjob.worker.AbstractWorkerFactoryBean;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link FifoWorker}.
@@ -16,6 +16,11 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    private FifoDaoImpl fifoDao;
 
    /**
+    * Should worker start paused?. Defaults to false.
+    */
+   private boolean startPaused = false;
+
+   /**
     * Constructor.
     */
    public FifoWorkerFactoryBean() {
@@ -25,6 +30,7 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    @Override
    public void afterPropertiesSet() throws Exception {
       worker.setFifoDao(fifoDao);
+      worker.pause(true);
 
       super.afterPropertiesSet();
    }
@@ -66,5 +72,19 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
     */
    public void setQueues(List<String> queues) {
       worker.setQueues(queues);
+   }
+
+   /**
+    * Should worker start paused?. Defaults to false.
+    */
+   public boolean isStartPaused() {
+      return startPaused;
+   }
+
+   /**
+    * Should worker start paused?. Defaults to false.
+    */
+   public void setStartPaused(boolean startPaused) {
+      this.startPaused = startPaused;
    }
 }
