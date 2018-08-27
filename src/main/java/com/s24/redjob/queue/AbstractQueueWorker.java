@@ -182,9 +182,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       synchronized (this.pause) {
          while (pause.get()) {
             try {
+               log.info("Pausing worker {}.", this.name);
                setWorkerState(WorkerState::pause, new WorkerPause(this));
                this.pause.wait();
             } finally {
+               log.info("Resuming worker {}.", this.name);
                setWorkerState(WorkerState::start, new WorkerStart(this));
             }
          }
