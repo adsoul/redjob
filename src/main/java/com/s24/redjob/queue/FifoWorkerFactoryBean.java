@@ -30,7 +30,7 @@ public class FifoWorkerFactoryBean extends AbstractWorkerFactoryBean<FifoWorker>
    @Override
    public void afterPropertiesSet() throws Exception {
       worker.setFifoDao(fifoDao);
-      worker.pause(true);
+      worker.pause(startPaused);
 
       super.afterPropertiesSet();
    }
