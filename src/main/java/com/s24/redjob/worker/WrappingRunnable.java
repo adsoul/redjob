@@ -1,5 +1,7 @@
 package com.s24.redjob.worker;
 
+import org.springframework.util.Assert;
+
 /**
  * Wrapper for job runners which do not implement {@link Runnable}.
  */
@@ -16,6 +18,7 @@ public abstract class WrappingRunnable implements Runnable {
     *           Job runner.
     */
    public WrappingRunnable(Object runner) {
+      Assert.notNull(runner, "Pre-condition violated: runner != null.");
       this.runner = runner;
    }
 
