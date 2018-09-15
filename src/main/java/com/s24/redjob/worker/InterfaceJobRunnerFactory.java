@@ -50,6 +50,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
 
       @SuppressWarnings("unchecked")
       JobRunner<J> runner = (JobRunner<J>) applicationContext.getBean(beanName);
+      Assert.notNull(runner, "Pre-condition violated: runner != null.");
 
       return new WrappingRunnable(runner) {
          @Override
