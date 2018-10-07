@@ -1,10 +1,12 @@
 #!/usr/bin/env groovy
 
+def DOCKER_IMAGE = 'hub.s24.com/s24/java-maven:2018-08-07-jdk8'
+
 pipeline {
    agent any
 
    environment { // https://jenkins.io/doc/book/pipeline/syntax/#environment
-      GIT_REPOSITORY_NAME = 'shopping24/redjob'
+      GIT_REPOSITORY_NAME = 'adsoul/redjob'
       GITHUB_API_TOKEN = credentials('github-api-token')
 
       BRANCH_NAME_URL = java.net.URLEncoder.encode(env.BRANCH_NAME, "UTF-8")
@@ -29,7 +31,7 @@ pipeline {
       stage('Build and Test') {
          agent {
             docker {
-               image 'hub.s24.com/s24/java-maven:latest'
+               image "${DOCKER_IMAGE}"
                // Map docker sockets for integration test containers.
                args '''
                   --net bridge
@@ -57,7 +59,7 @@ pipeline {
       stage('SonarQube code quality') {
          agent {
             docker {
-               image 'hub.s24.com/s24/java-maven:latest'
+               image "${DOCKER_IMAGE}"
                args '''
                   -v ${HUDSON_HOME}/.m2/repository:/build/repository
                   -e HOME=/tmp
