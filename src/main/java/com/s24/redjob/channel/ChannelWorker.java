@@ -17,6 +17,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.MDC;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -139,6 +140,11 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          process(channel, execution);
+
+      } catch (InvalidDataAccessApiUsageException e) {
+         // Suppress stacktrace for technical Redis errors.
+         log.error("Uncaught exception in worker: {}", e.getMessage());
+         eventBus.publishEvent(new WorkerError(this, e));
 
       } catch (Throwable t) {
          log.error("Uncaught exception in worker.", t);

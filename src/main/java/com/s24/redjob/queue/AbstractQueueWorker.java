@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.MDC;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -263,6 +264,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          restore = process(queue, execution);
+         return true;
+
+      } catch (InvalidDataAccessApiUsageException e) {
+         // Suppress stacktrace for technical Redis errors.
+         log.error("Job processing failed: {}", e.getMessage());
          return true;
 
       } catch (Throwable t) {
