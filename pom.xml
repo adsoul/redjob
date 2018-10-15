@@ -5,7 +5,7 @@
    <groupId>com.s24</groupId>
    <artifactId>redjob</artifactId>
    <name>${project.artifactId}</name>
-   <version>0.5.11-SNAPSHOT</version>
+   <version>0.6.0-SNAPSHOT</version>
    <packaging>jar</packaging>
 
    <description>Spring based implementation of a Redis-backed job queue.</description>
@@ -50,8 +50,8 @@
    <properties>
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.target>1.8</maven.compiler.target>
+      <maven.compiler.source>1.10</maven.compiler.source>
+      <maven.compiler.target>1.10</maven.compiler.target>
 
       <maven-profiler-report-directory>${project.build.directory}/maven-profiler</maven-profiler-report-directory>
 
