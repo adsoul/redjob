@@ -1,10 +1,6 @@
 package com.s24.redjob.lock;
 
 import com.s24.redjob.TestRedis;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -12,7 +8,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration test for {@link LockDaoImpl}.
@@ -91,6 +95,7 @@ class LockDaoImplIT {
       for (int i = 0; i < 100 && lock.getNumberOfDependents() < threads; i++) {
          Thread.sleep(100);
       }
+      assertEquals(threads, lock.getNumberOfDependents());
 
       // Start all threads at once.
       lock.complete(null);
