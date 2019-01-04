@@ -60,7 +60,7 @@ class LockDaoImplIT {
 
    @Test
    void tryLock_parallel() throws Exception {
-      final int threads = 1000;
+      final int threads = 100;
 
       CompletableFuture<Void> lock = new CompletableFuture<>();
       AtomicInteger acquired = new AtomicInteger(0);
@@ -96,6 +96,7 @@ class LockDaoImplIT {
          Thread.sleep(100);
       }
       assertEquals(threads, lock.getNumberOfDependents());
+      System.out.println("All locks started.");
 
       // Start all threads at once.
       lock.complete(null);
@@ -103,6 +104,8 @@ class LockDaoImplIT {
       // Wait at max 10 seconds for all threads to try to acquire lock.
       for (int i = 0; i < 100 && acquired.get() + notAcquired.get() < threads; i++) {
          Thread.sleep(100);
+         System.out.println(acquired.get() + " locks acquired.");
+         System.out.println(notAcquired.get() + " locks not acquired.");
       }
 
       // Check that exactly one thread was able to acquire the lock.
