@@ -129,6 +129,14 @@
          <version>${dependency.javax-annotation.version}</version>
       </dependency>
 
+      <!-- Create build time component index for faster startup. -->
+      <!--dependency>
+         <groupId>org.springframework</groupId>
+         <artifactId>spring-context-indexer</artifactId>
+         <version>${dependency.spring.version}</version>
+         <optional>true</optional>
+      </dependency-->
+
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-core</artifactId>
