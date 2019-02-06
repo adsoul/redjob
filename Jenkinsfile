@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def DOCKER_IMAGE = 'hub.s24.com/s24/java-maven:2018-08-07-jdk8'
+def DOCKER_IMAGE = 'hub-adsoul.s24.com/adsoul/java-maven:11-3.6.0'
 
 pipeline {
    agent any
@@ -71,11 +71,11 @@ pipeline {
          }
          steps {
              sh '''
+                # When branch plugin is installed, add: -Dsonar.branch.name=${BRANCH_NAME}
                 mvn -Dsonar.host.url=${SONAR_URL} \
                     -Dsonar.login=${SONAR_API_TOKEN} \
                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                     -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                    -Dsonar.branch=${BRANCH_NAME} \
                     -Dsonar.github.repository=${GIT_REPOSITORY_NAME} \
                     -Dsonar.github.oauth=${GITHUB_API_TOKEN} \
                     -Dsonar.analysis.buildNumber=${BUILD_NUMBER} \
