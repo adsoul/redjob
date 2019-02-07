@@ -166,11 +166,9 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Set worker state to the given value.
     */
    protected void setWorkerState(Consumer<WorkerState> change, WorkerEvent event) {
-      if (this.state != null) {
-         change.accept(this.state);
-         saveWorkerState();
-         eventBus.publishEvent(event);
-      }
+      change.accept(this.state);
+      saveWorkerState();
+      eventBus.publishEvent(event);
    }
 
    /**
