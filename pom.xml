@@ -52,12 +52,10 @@
    </prerequisites>
 
    <properties>
-      <docker.hub>hub-adsoul.s24.com</docker.hub>
-      <docker.hub.path>adsoul/redis</docker.hub.path>
       <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
       <docker.image.tag>${git.commit.id.describe}</docker.image.tag>
 
-      <docker.redis.image>${docker.hub}/${docker.hub.path}:3.2.12</docker.redis.image>
+      <docker.redis.image>hub-adsoul.s24.com/adsoul/redis:3.2.12</docker.redis.image>
 
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
