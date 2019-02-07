@@ -53,8 +53,8 @@
 
    <properties>
       <docker.hub>hub-adsoul.s24.com</docker.hub>
-      <docker.username>***REMOVED***</docker.username>
-      <docker.password>***REMOVED***</docker.password>
+      <docker.username>user</docker.username>
+      <docker.password>password</docker.password>
       <docker.hub.path>adsoul/seasupport</docker.hub.path>
       <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
       <docker.image.tag>${git.commit.id.describe}</docker.image.tag>
@@ -292,7 +292,7 @@
                            <version>[3.5,)</version>
                         </requireMavenVersion>
                         <requireJavaVersion>
-                           <version>[1.8,)</version>
+                           <version>[${maven.compiler.source},)</version>
                         </requireJavaVersion>
                         <requireSameVersions>
                            <plugins>
@@ -426,7 +426,8 @@
                            <alias>it-redis</alias>
                         </network>
                         <ports>
-                           <port>+it-redis.ip:it-redis.port:6379</port>
+                           <!--port>+it-redis.ip:it-redis.port:6379</port-->
+                           <port>${integrationTest.redisPort}:6379</port>
                         </ports>
                         <wait>
                            <log>(?s)The server is now ready to accept connections on port</log>
@@ -436,7 +437,7 @@
                         </wait>
                      </run>
                   </image>
-                  <image>
+                  <!--image>
                      <name>${docker.redis.image}</name>
                      <alias>it-sentinel</alias>
                      <run>
@@ -451,7 +452,7 @@
                         <cmd>
                            <exec>
                               <arg>redis-server</arg>
-                              <arg>--sentinel</arg>
+                              <arg>&#45;&#45;sentinel</arg>
                               <arg>monitor</arg>
                               <arg>godzilla</arg>
                               <arg>${it-redis.ip}</arg>
@@ -466,7 +467,7 @@
                            <kill>5000</kill>
                         </wait>
                      </run>
-                  </image>
+                  </image-->
                </images>
             </configuration>
          </plugin>
