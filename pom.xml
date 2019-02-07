@@ -437,7 +437,7 @@
                      </run>
                   </image>
                   <image>
-                     <name>hub.s24.com/s24/redis:latest</name>
+                     <name>${docker.redis.image}</name>
                      <alias>it-sentinel</alias>
                      <run>
                         <network>
