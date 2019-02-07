@@ -1,10 +1,12 @@
 #!/usr/bin/env groovy
 
+def DOCKER_IMAGE = 'hub-adsoul.s24.com/adsoul/java-maven:11-3.6.0'
+
 pipeline {
    agent any
 
    environment { // https://jenkins.io/doc/book/pipeline/syntax/#environment
-      GIT_REPOSITORY_NAME = 'shopping24/redjob'
+      GIT_REPOSITORY_NAME = 'adsoul/redjob'
       GITHUB_API_TOKEN = credentials('github-api-token')
 
       BRANCH_NAME_URL = java.net.URLEncoder.encode(env.BRANCH_NAME, "UTF-8")
@@ -29,7 +31,7 @@ pipeline {
       stage('Build and Test') {
          agent {
             docker {
-               image 'hub.s24.com/s24/java-maven:latest'
+               image "${DOCKER_IMAGE}"
                // Map docker sockets for integration test containers.
                args '''
                   --net bridge
@@ -57,7 +59,7 @@ pipeline {
       stage('SonarQube code quality') {
          agent {
             docker {
-               image 'hub.s24.com/s24/java-maven:latest'
+               image "${DOCKER_IMAGE}"
                args '''
                   -v ${HUDSON_HOME}/.m2/repository:/build/repository
                   -e HOME=/tmp
@@ -69,11 +71,11 @@ pipeline {
          }
          steps {
              sh '''
+                # When branch plugin is installed, add: -Dsonar.branch.name=${BRANCH_NAME}
                 mvn -Dsonar.host.url=${SONAR_URL} \
                     -Dsonar.login=${SONAR_API_TOKEN} \
                     -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                     -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                    -Dsonar.branch=${BRANCH_NAME} \
                     -Dsonar.github.repository=${GIT_REPOSITORY_NAME} \
                     -Dsonar.github.oauth=${GITHUB_API_TOKEN} \
                     -Dsonar.analysis.buildNumber=${BUILD_NUMBER} \
@@ -91,12 +93,12 @@ pipeline {
 
       unstable {
          echo 'Build unstable.'
-         slackSend color: "warning", message: "Build of branch ${env.BRANCH_NAME} unstable. See <${JENKINS_BUILD_URL}|Jenkins>"
+         slackSend color: "warning", message: "${JOB_NAME}: Build unstable. See <${JENKINS_BUILD_URL}|Jenkins>"
       }
 
       failure {
          echo 'Build failed.'
-         slackSend color: "danger", message: "Build of branch ${env.BRANCH_NAME} failed. See <${JENKINS_BUILD_URL}|Jenkins>"
+         slackSend color: "danger", message: "${JOB_NAME}: Build failed. See <${JENKINS_BUILD_URL}|Jenkins>"
       }
 
       always {

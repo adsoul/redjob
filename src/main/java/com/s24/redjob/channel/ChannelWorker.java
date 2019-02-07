@@ -1,24 +1,5 @@
 package com.s24.redjob.channel;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.slf4j.MDC;
-import org.springframework.data.redis.connection.Message;
-import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.Topic;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.AbstractWorker;
 import com.s24.redjob.worker.Execution;
@@ -27,6 +8,25 @@ import com.s24.redjob.worker.WorkerState;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import org.slf4j.MDC;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.Topic;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * {@link Worker} for channels (admin jobs).
@@ -62,6 +62,13 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
     */
    private List<QueueWorker> workers;
 
+   /**
+    * Constructor.
+    */
+   public ChannelWorker() {
+      super(new ChannelWorkerState());
+   }
+
    @Override
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
@@ -80,10 +87,8 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          listenerContainer.addMessageListener(listener, topics);
       }
 
-      state = new ChannelWorkerState();
       state.setChannels(topics.stream().map(Topic::getTopic).collect(toSet()));
-      setWorkerState(WorkerState.RUNNING);
-      eventBus.publishEvent(new WorkerStart(this));
+      setWorkerState(WorkerState::start, new WorkerStart(this));
    }
 
    @Override
@@ -97,10 +102,11 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
       // Wait for jobs to finish.
       try {
          active.writeLock().lock();
-         eventBus.publishEvent(new WorkerStopped(this));
+         setWorkerState(WorkerState::stopped, new WorkerStopped(this));
          workerDao.stop(name);
       } finally {
          active.writeLock().unlock();
+         log.info("Stopped worker {}.", getName());
       }
    }
 
@@ -126,13 +132,22 @@ public class ChannelWorker extends AbstractWorker<ChannelWorkerState> {
          String channel = channelDao.getChannel(message);
          MDC.put("queue", channel);
          Execution execution = channelDao.getExecution(message);
+         if (execution == null) {
+            log.warn("Failed to deserialize job execution.");
+            return;
+         }
+
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
-
          process(channel, execution);
 
+      } catch (InvalidDataAccessApiUsageException e) {
+         // Suppress stacktrace for technical Redis errors.
+         log.error("Uncaught exception in worker: {}", e.getMessage());
+         eventBus.publishEvent(new WorkerError(this, e));
+
       } catch (Throwable t) {
-         log.error("Uncaught exception in worker.", name, t);
+         log.error("Uncaught exception in worker.", t);
          eventBus.publishEvent(new WorkerError(this, t));
 
       } finally {

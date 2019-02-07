@@ -1,11 +1,12 @@
 package com.s24.redjob.channel;
 
+import com.s24.redjob.worker.WorkerState;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.s24.redjob.worker.WorkerState;
 
 /**
  * Queue worker state.
@@ -16,12 +17,6 @@ public class ChannelWorkerState extends WorkerState {
     * All concrete queues the worker polls.
     */
    private final Set<String> channels = new HashSet<>();
-
-   /**
-    * Constructor.
-    */
-   public ChannelWorkerState() {
-   }
 
    /**
     * All concrete queues the worker polls.

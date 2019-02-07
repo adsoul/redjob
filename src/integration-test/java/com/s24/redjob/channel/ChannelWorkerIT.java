@@ -1,13 +1,5 @@
 package com.s24.redjob.channel;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.queue.TestJob;
@@ -21,12 +13,21 @@ import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.events.WorkerStopping;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Integration test for {@link ChannelDao} and {@link ChannelWorker}.
  */
-public class ChannelWorkerIT {
+class ChannelWorkerIT {
    /**
     * Channel DAO.
     */
@@ -42,8 +43,8 @@ public class ChannelWorkerIT {
     */
    private TestEventPublisher eventBus = new TestEventPublisher();
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp() throws Exception {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
 
       WorkerDaoImpl workerDao = new WorkerDaoImpl();
@@ -79,14 +80,14 @@ public class ChannelWorkerIT {
       Thread.sleep(1000);
    }
 
-   @After
-   public void tearDown() throws Exception {
+   @AfterEach
+   void tearDown() {
       eventBus.doNotBlock();
       channelWorker.stop();
    }
 
    @Test
-   public void testLifecycle() throws Exception {
+   void testLifecycle() throws Exception {
       TestJob job = new TestJob();
       TestJobRunner runner = new TestJobRunner(job);
 
@@ -101,6 +102,7 @@ public class ChannelWorkerIT {
       // Asynchronously stop worker, because stop blocks until the last job finished.
       new Thread(channelWorker::stop).start();
 
+      assertEquals(new WorkerStopping(channelWorker), eventBus.waitForEvent());
       assertEquals(new JobSuccess(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
 

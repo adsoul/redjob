@@ -2,6 +2,8 @@ package com.s24.redjob.worker;
 
 import java.time.LocalDateTime;
 
+import static java.util.Arrays.stream;
+
 /**
  * State of worker.
  */
@@ -10,6 +12,11 @@ public class WorkerState {
     * Start time of worker.
     */
    private LocalDateTime started;
+
+   /**
+    * State: Worker runs.
+    */
+   public static final String INIT = "init";
 
    /**
     * State: Worker runs.
@@ -27,6 +34,11 @@ public class WorkerState {
    public static final String STOPPING = "stopping";
 
    /**
+    * State: Worker has stopped.
+    */
+   public static final String STOPPED = "stopped";
+
+   /**
     * State: Worker failed.
     */
    public static final String FAILED = "failed";
@@ -34,7 +46,7 @@ public class WorkerState {
    /**
     * State of worker.
     */
-   private String state;
+   private volatile String state = INIT;
 
    /**
     * Successful job executions.
@@ -47,11 +59,60 @@ public class WorkerState {
    private int failed = 0;
 
    /**
-    * Constructor.
+    * Start worker.
     */
-   public WorkerState() {
+   public void start() {
       this.started = LocalDateTime.now();
       this.state = RUNNING;
+   }
+
+   /**
+    * Pause worker.
+    */
+   public void pause() {
+      this.state = PAUSED;
+   }
+
+   /**
+    * Stopping worker.
+    */
+   public void stop() {
+      this.state = STOPPING;
+   }
+
+   /**
+    * Is the worker stopping?.
+    */
+   public boolean isStopping() {
+      return isState(STOPPING);
+   }
+
+   /**
+    * Worker stopped.
+    */
+   public void stopped() {
+      this.state = STOPPED;
+   }
+
+   /**
+    * Worker failed.
+    */
+   public void failed() {
+      this.state = FAILED;
+   }
+
+   /**
+    * Has the worker failed?.
+    */
+   public boolean isFailed() {
+      return isState(FAILED);
+   }
+
+   /**
+    * Has the worker terminated?.
+    */
+   public boolean isTerminated() {
+      return isState(STOPPED, FAILED);
    }
 
    /**
@@ -64,8 +125,17 @@ public class WorkerState {
    /**
     * Start time of worker.
     */
-   public void setStarted(LocalDateTime started) {
+   void setStarted(LocalDateTime started) {
       this.started = started;
+   }
+
+   /**
+    * Is the state one of the given ones?.
+    *
+    * @params states States.
+    */
+   boolean isState(String... states) {
+      return stream(states).anyMatch(state::equals);
    }
 
    /**
@@ -78,7 +148,7 @@ public class WorkerState {
    /**
     * Set state of worker.
     */
-   public void setState(String state) {
+   void setState(String state) {
       this.state = state;
    }
 
@@ -99,7 +169,7 @@ public class WorkerState {
    /**
     * Successful job executions.
     */
-   public void setSuccess(int success) {
+   void setSuccess(int success) {
       this.success = success;
    }
 
@@ -120,7 +190,7 @@ public class WorkerState {
    /**
     * Failed job executions.
     */
-   public void setFailed(int failed) {
+   void setFailed(int failed) {
       this.failed = failed;
    }
 }

@@ -1,13 +1,5 @@
 package com.s24.redjob.queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
@@ -21,12 +13,21 @@ import com.s24.redjob.worker.events.WorkerNext;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
+import com.s24.redjob.worker.events.WorkerStopping;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration test for {@link FifoWorker}.
  */
-public class FifoWorkerImplIT {
+class FifoWorkerImplIT {
    /**
     * Recording event publisher.
     */
@@ -42,8 +43,8 @@ public class FifoWorkerImplIT {
     */
    private FifoWorker worker;
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp() throws Exception {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
 
       WorkerDaoImpl workerDao = new WorkerDaoImpl();
@@ -69,13 +70,13 @@ public class FifoWorkerImplIT {
       this.fifoDao = worker.getFifoDao();
    }
 
-   @After
-   public void tearDown() throws Exception {
+   @AfterEach
+   void tearDown() {
       worker.stop();
    }
 
    @Test
-   public void testLifecycle() throws Exception {
+   void testLifecycle() throws Exception {
       TestJob job = new TestJob();
       TestJobRunner runner = new TestJobRunner(job);
 
@@ -95,6 +96,7 @@ public class FifoWorkerImplIT {
 
       worker.stop();
 
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
       assertEquals(new JobSuccess(worker, "test-queue", execution, runner), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
@@ -102,7 +104,7 @@ public class FifoWorkerImplIT {
    }
 
    @Test
-   public void testJobError() throws Exception {
+   void testJobError() throws Exception {
       TestJob job = new TestJob(TestJobRunner.EXCEPTION_VALUE);
       TestJobRunner runner = new TestJobRunner(job);
 
@@ -122,6 +124,7 @@ public class FifoWorkerImplIT {
 
       worker.stop();
 
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
       assertEquals(new JobFailure(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());

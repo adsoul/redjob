@@ -1,6 +1,21 @@
 package com.s24.redjob.worker;
 
-import com.s24.redjob.worker.events.*;
+import com.s24.redjob.worker.events.JobExecute;
+import com.s24.redjob.worker.events.JobFailure;
+import com.s24.redjob.worker.events.JobProcess;
+import com.s24.redjob.worker.events.JobSkipped;
+import com.s24.redjob.worker.events.JobStart;
+import com.s24.redjob.worker.events.JobSuccess;
+import com.s24.redjob.worker.events.WorkerEvent;
+import com.s24.redjob.worker.events.WorkerStopping;
+
+import javax.annotation.PostConstruct;
+import java.lang.management.ManagementFactory;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
@@ -8,12 +23,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import javax.annotation.PostConstruct;
-import java.lang.management.ManagementFactory;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 /**
  * Base implementation of {@link Worker}.
@@ -73,12 +82,24 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    /**
     * Worker state.
     */
-   protected S state;
+   protected final S state;
 
    /**
     * Event bus.
     */
    protected ApplicationEventPublisher eventBus;
+
+   /**
+    * Constructor.
+    *
+    * @param state
+    *       Initial state.
+    */
+   public AbstractWorker(S state) {
+      Assert.notNull(state, "Pre-condition violated: state != null.");
+
+      this.state = state;
+   }
 
    /**
     * Init.
@@ -105,12 +126,12 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    /**
     * Resolve placeholder in custom worker names.
-    *
+    * <p>
     * Supported placeholders:
     * <ul>
-    *    <li>id: Worker id.</li>
-    *    <li>hostname: Hostname without domain.</li>
-    *    <li>full-hostname: Hostname with domain.</li>
+    * <li>id: Worker id.</li>
+    * <li>hostname: Hostname without domain.</li>
+    * <li>full-hostname: Hostname with domain.</li>
     * </ul>
     */
    protected String resolvePlaceholders(String name) throws Exception {
@@ -142,12 +163,13 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    }
 
    /**
-    * Set worker state to the given values.
+    * Set worker state to the given value.
     */
-   protected void setWorkerState(String state) {
+   protected void setWorkerState(Consumer<WorkerState> change, WorkerEvent event) {
       if (this.state != null) {
-         this.state.setState(state);
+         change.accept(this.state);
          saveWorkerState();
+         eventBus.publishEvent(event);
       }
    }
 
@@ -164,21 +186,39 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
 
    @Override
    public void stop() {
-      log.info("Stopping worker {}.", getName());
-      run.set(false);
-      setWorkerState(WorkerState.STOPPING);
+      if (!state.isStopping() && !state.isTerminated()) {
+         log.debug("Stopping worker {}.", getName());
+         run.set(false);
+         setWorkerState(WorkerState::stop, new WorkerStopping(this));
+      }
+   }
+
+   @Override
+   public void waitUntilStopped() {
+      if (state.isTerminated()) {
+         return;
+      }
+
+      log.info("Waiting for worker {} to stop.", getName());
+      while (!state.isTerminated()) {
+         try {
+            Thread.sleep(100);
+         } catch (InterruptedException e) {
+            // Ignore.
+         }
+      }
    }
 
    /**
     * Process job. Sends {@link JobProcess} event.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @return true, if job needs to be re-enqueued. false, otherwise.
     * @throws Throwable
-    *            In case of errors.
+    *       In case of errors.
     */
    protected <J> boolean process(String queue, Execution execution) throws Throwable {
       J job = execution.getJob();
@@ -209,18 +249,18 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Execute job. Sends {@link JobExecute} event.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @param runner
-    *           Job runner.
+    *       Job runner.
     * @throws Throwable
-    *            In case of errors.
+    *       In case of errors.
     */
    protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
       Object unwrappedRunner = runner;
       if (runner instanceof WrappingRunnable) {
-         unwrappedRunner =  ((WrappingRunnable) runner).unwrap();
+         unwrappedRunner = ((WrappingRunnable) runner).unwrap();
       }
       prepareRunner(unwrappedRunner);
 
@@ -244,11 +284,11 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     * Run job.
     *
     * @param queue
-    *           Name of queue.
+    *       Name of queue.
     * @param execution
-    *           Job.
+    *       Job.
     * @param runner
-    *           Job runner.
+    *       Job runner.
     */
    protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
       log.debug("Starting job.");

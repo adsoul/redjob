@@ -1,30 +1,25 @@
 package com.s24.redjob.worker.json;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import com.fasterxml.jackson.core.JsonParser;
+import com.s24.redjob.mockito.EnableMockito;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import java.time.Instant;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-
-import com.fasterxml.jackson.core.JsonParser;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 /**
  * Test for {@link InstantDeserializer}.
  */
-public class InstantDeserializerTest {
-   @Rule
-   public MockitoRule mockitoRule = MockitoJUnit.rule();
-
+@EnableMockito
+class InstantDeserializerTest {
    @Mock
    private JsonParser jp;
 
    @Test
-   public void deserializer() throws Exception {
+   void deserializer() throws Exception {
       InstantDeserializer deserializer = new InstantDeserializer();
 
       when(jp.getValueAsLong()).thenReturn(12345678L);

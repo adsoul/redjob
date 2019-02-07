@@ -2,6 +2,7 @@ package com.s24.redjob;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.util.Assert;
@@ -141,6 +142,8 @@ public abstract class AbstractDao implements Dao {
    /**
     * {@link RedisConnectionFactory} to access Redis.
     */
+   @RedJobRedisConnectionFactory
+   @Autowired
    public void setConnectionFactory(RedisConnectionFactory connectionFactory) {
       this.connectionFactory = connectionFactory;
    }

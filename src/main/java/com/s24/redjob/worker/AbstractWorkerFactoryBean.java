@@ -1,6 +1,7 @@
 package com.s24.redjob.worker;
 
 import com.s24.redjob.channel.ChannelWorker;
+
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -33,7 +34,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
     * Constructor.
     *
     * @param worker
-    *           Worker instance.
+    *       Worker instance.
     */
    protected AbstractWorkerFactoryBean(W worker) {
       this.worker = worker;
@@ -86,7 +87,7 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
 
    @Override
    public int getPhase() {
-      return 1000000;
+      return Integer.MAX_VALUE;
    }
 
    @Override
@@ -114,13 +115,16 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
 
    @Override
    public void stop(Runnable callback) {
-      new Thread(() -> {
+      Thread thread = new Thread(() -> {
          try {
             stop();
          } finally {
-            run = false;
+            worker.waitUntilStopped();
+            callback.run();
          }
-      }, "Stopping " + worker.getName()).start();
+      }, "Stopping " + worker.getName());
+      thread.setDaemon(true);
+      thread.start();
    }
 
    @Override

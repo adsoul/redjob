@@ -28,4 +28,9 @@ public interface Worker {
     * Stop worker.
     */
    void stop();
+
+   /**
+    * Wait until worker has stopped.
+    */
+   void waitUntilStopped();
 }

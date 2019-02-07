@@ -1,10 +1,6 @@
 package com.s24.redjob.lock;
 
 import com.s24.redjob.TestRedis;
-import org.junit.Before;
-import org.junit.Test;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -12,15 +8,20 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.StringRedisTemplate;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Integration test for {@link LockDaoImpl}.
  */
-public class LockDaoImplIT {
+class LockDaoImplIT {
    /**
     * DAO under test.
     */
@@ -31,8 +32,8 @@ public class LockDaoImplIT {
     */
    private StringRedisTemplate redis;
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp() {
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
 
       dao.setConnectionFactory(connectionFactory);
@@ -45,7 +46,7 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void tryLock() {
+   void tryLock() {
       String key = "namespace:lock:test";
 
       assertTrue(dao.tryLock("test", "holder", 10, TimeUnit.SECONDS));
@@ -58,8 +59,8 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void tryLock_parallel() throws Exception {
-      final int threads = 1000;
+   void tryLock_parallel() throws Exception {
+      final int threads = 100;
 
       CompletableFuture<Void> lock = new CompletableFuture<>();
       AtomicInteger acquired = new AtomicInteger(0);
@@ -94,6 +95,8 @@ public class LockDaoImplIT {
       for (int i = 0; i < 100 && lock.getNumberOfDependents() < threads; i++) {
          Thread.sleep(100);
       }
+      assertEquals(threads, lock.getNumberOfDependents());
+      System.out.println("All locks started.");
 
       // Start all threads at once.
       lock.complete(null);
@@ -101,6 +104,8 @@ public class LockDaoImplIT {
       // Wait at max 10 seconds for all threads to try to acquire lock.
       for (int i = 0; i < 100 && acquired.get() + notAcquired.get() < threads; i++) {
          Thread.sleep(100);
+         System.out.println(acquired.get() + " locks acquired.");
+         System.out.println(notAcquired.get() + " locks not acquired.");
       }
 
       // Check that exactly one thread was able to acquire the lock.
@@ -109,7 +114,7 @@ public class LockDaoImplIT {
    }
 
    @Test
-   public void releaseLock() {
+   void releaseLock() {
       String key = "namespace:lock:test";
 
       assertTrue(dao.tryLock("test", "holder", 10, TimeUnit.SECONDS));

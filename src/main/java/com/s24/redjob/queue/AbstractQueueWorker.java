@@ -8,18 +8,21 @@ import com.s24.redjob.worker.events.JobStale;
 import com.s24.redjob.worker.events.WorkerError;
 import com.s24.redjob.worker.events.WorkerFailure;
 import com.s24.redjob.worker.events.WorkerNext;
+import com.s24.redjob.worker.events.WorkerPause;
 import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
-import org.slf4j.MDC;
-import org.springframework.data.redis.RedisConnectionFailureException;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.slf4j.MDC;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * Base implementation of {@link Worker} for queues.
@@ -57,6 +60,13 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    protected final AtomicBoolean pause = new AtomicBoolean(false);
 
    /**
+    * Constructor.
+    */
+   public AbstractQueueWorker() {
+      super(new QueueWorkerState());
+   }
+
+   /**
     * Init.
     */
    @Override
@@ -82,18 +92,29 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    }
 
    @Override
+   public void stop() {
+      super.stop();
+      pause(false);
+   }
+
+   @Override
    public void destroy() {
       super.destroy();
-      log.info("Waiting for worker to shutdown.");
+
       if (thread != null) {
          try {
             thread.interrupt();
-            thread.join();
+            Thread.yield();
+            if (thread.isAlive()) {
+               log.info("Waiting for worker {} to shutdown.", name);
+               thread.join();
+               log.info("Worker {} has been shut down.", name);
+            }
+            thread = null;
          } catch (InterruptedException e) {
             // Ignore
          }
       }
-      log.info("Worker has been shut down.");
    }
 
    @Override
@@ -101,16 +122,17 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       try {
          MDC.put("worker", getName());
          log.info("Starting worker {}.", getName());
-         state = new QueueWorkerState();
          state.setQueues(queues);
          doRun();
       } catch (Throwable t) {
          log.error("Uncaught exception in worker. Worker stopped.", name, t);
-         eventBus.publishEvent(new WorkerError(this, t));
+         setWorkerState(WorkerState::failed, new WorkerError(this, t));
       } finally {
-         log.info("Stop worker {}.", getName());
-         eventBus.publishEvent(new WorkerStopped(this));
-         workerDao.stop(name);
+         if (!state.isFailed()) {
+            log.info("Stopped worker {}.", getName());
+            setWorkerState(WorkerState::stopped, new WorkerStopped(this));
+            workerDao.stop(name);
+         }
       }
    }
 
@@ -122,17 +144,15 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          try {
             // Test connection to avoid marking this worker as running and fail immediately afterwards.
             workerDao.ping();
-            setWorkerState(WorkerState.RUNNING);
-            eventBus.publishEvent(new WorkerStart(this));
+            setWorkerState(WorkerState::start, new WorkerStart(this));
             startup();
             poll();
          } catch (RedisConnectionFailureException e) {
             // Do not report the same connection error over and over again.
             log.warn("Worker {} failed to connect to Redis. Restarting in {} ms.", getName(), RESTART_DELAY_MS);
-            if (!WorkerState.FAILED.equals(state.getState())) {
+            if (!state.isFailed()) {
                // No possibility to store the state in Redis...
-               this.state.setState(WorkerState.FAILED);
-               eventBus.publishEvent(new WorkerFailure(this));
+               setWorkerState(WorkerState::failed, new WorkerFailure(this));
             }
             Thread.sleep(RESTART_DELAY_MS);
          }
@@ -163,10 +183,12 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
       synchronized (this.pause) {
          while (pause.get()) {
             try {
-               setWorkerState(WorkerState.PAUSED);
+               log.info("Pausing worker {}.", this.name);
+               setWorkerState(WorkerState::pause, new WorkerPause(this));
                this.pause.wait();
             } finally {
-               setWorkerState(WorkerState.RUNNING);
+               log.info("Resuming worker {}.", this.name);
+               setWorkerState(WorkerState::start, new WorkerStart(this));
             }
          }
       }
@@ -242,6 +264,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
          MDC.put("execution", Long.toString(execution.getId()));
          MDC.put("job", execution.getJob().getClass().getSimpleName());
          restore = process(queue, execution);
+         return true;
+
+      } catch (InvalidDataAccessApiUsageException e) {
+         // Suppress stacktrace for technical Redis errors.
+         log.error("Job processing failed: {}", e.getMessage());
          return true;
 
       } catch (Throwable t) {

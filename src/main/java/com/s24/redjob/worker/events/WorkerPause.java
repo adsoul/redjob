@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.util.Assert;
 
 /**
- * New worker starts or resumes.
+ * Worker gets paused.
  */
-public class WorkerStart extends ApplicationEvent implements WorkerEvent {
+public class WorkerPause extends ApplicationEvent implements WorkerEvent {
    /**
     * Worker.
     */
@@ -22,7 +22,7 @@ public class WorkerStart extends ApplicationEvent implements WorkerEvent {
     * @param worker
     *           Worker.
     */
-   public WorkerStart(Worker worker) {
+   public WorkerPause(Worker worker) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       this.worker = worker;
@@ -36,8 +36,8 @@ public class WorkerStart extends ApplicationEvent implements WorkerEvent {
 
    @Override
    public boolean equals(Object o) {
-      return o instanceof WorkerStart &&
-            Objects.equals(worker, ((WorkerStart) o).worker);
+      return o instanceof WorkerPause &&
+            Objects.equals(worker, ((WorkerPause) o).worker);
    }
 
    @Override

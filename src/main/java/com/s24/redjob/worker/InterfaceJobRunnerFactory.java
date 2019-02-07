@@ -1,5 +1,8 @@
 package com.s24.redjob.worker;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -18,6 +21,11 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
     */
    private ApplicationContext applicationContext;
 
+   /**
+    * Bean names of job runners by job class.
+    */
+   private final Map<Class<?>, String[]> jobRunnerNames = new ConcurrentHashMap<>();
+
    @Override
    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
       this.applicationContext = applicationContext;
@@ -27,8 +35,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
    public <J> Runnable runnerFor(J job) {
       Assert.notNull(job, "Pre-condition violated: job != null.");
 
-      ResolvableType type = ResolvableType.forClassWithGenerics(JobRunner.class, job.getClass());
-      String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, type);
+      String[] beanNames = this.jobRunnerNames.computeIfAbsent(job.getClass(), this::jobRunnerNamesFor);
       if (beanNames.length == 0) {
          throw new IllegalArgumentException(String.format(
                "No job runner found for %s.",
@@ -50,6 +57,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
 
       @SuppressWarnings("unchecked")
       JobRunner<J> runner = (JobRunner<J>) applicationContext.getBean(beanName);
+      Assert.notNull(runner, "Pre-condition violated: runner != null.");
 
       return new WrappingRunnable(runner) {
          @Override
@@ -57,5 +65,13 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
             runner.execute(job);
          }
       };
+   }
+
+   /**
+    * Find bean names of job runners for jobs of the given class.
+    */
+   private String[] jobRunnerNamesFor(Class<?> jobClass) {
+      ResolvableType jobRunnerType = ResolvableType.forClassWithGenerics(JobRunner.class, jobClass);
+      return BeanFactoryUtils.beanNamesForTypeIncludingAncestors(applicationContext, jobRunnerType);
    }
 }

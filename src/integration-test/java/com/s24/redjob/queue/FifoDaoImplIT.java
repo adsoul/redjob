@@ -4,33 +4,29 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Integration test for {@link FifoDaoImpl}.
  */
-public class FifoDaoImplIT {
+class FifoDaoImplIT {
    /**
     * Test queue.
     */
-   public static final String QUEUE = "test-queue";
+   private static final String QUEUE = "test-queue";
 
    /**
     * DAO under test.
     */
    private FifoDaoImpl dao = new FifoDaoImpl();
 
-   @Before
-   public void setUp() throws Exception {
+   @BeforeEach
+   void setUp()  {
       ExecutionRedisSerializer executions = new TestExecutionRedisSerializer(TestJob.class);
 
       RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
@@ -41,7 +37,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void enqueue_normal() {
+   void enqueue_normal() {
       TestJob job1 = new TestJob();
       long id1 = dao.enqueue(QUEUE, job1, false).getId();
       assertTrue(id1 > 0);
@@ -61,7 +57,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void enqueue_priority() {
+   void enqueue_priority() {
       TestJob jobNormal = new TestJob();
       long idNormal = dao.enqueue(QUEUE, jobNormal, false).getId();
       assertTrue(idNormal > 0);
@@ -82,7 +78,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void dequeue() {
+   void dequeue() {
       // Nothing to delete -> return false.
       assertFalse(dao.dequeue(QUEUE, Long.MAX_VALUE));
 
@@ -96,7 +92,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void get() {
+   void get() {
       // No job -> return null.
       assertNull(dao.get(Long.MAX_VALUE));
 
@@ -113,7 +109,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void getQueued() {
+   void getQueued() {
       // No job -> return null.
       assertNull(dao.get(Long.MAX_VALUE));
 
@@ -133,7 +129,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void getAll() {
+   void getAll() {
       // No job -> return null.
       assertNull(dao.get(Long.MAX_VALUE));
 
@@ -150,7 +146,7 @@ public class FifoDaoImplIT {
    }
 
    @Test
-   public void cleanUp() {
+   void cleanUp() {
       TestJob job = new TestJob();
       dao.enqueue(QUEUE, job, false);
       TestJob notDeserializableJob = TestJob.FAILURE;
