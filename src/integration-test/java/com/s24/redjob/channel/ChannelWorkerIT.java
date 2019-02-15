@@ -2,9 +2,6 @@ package com.s24.redjob.channel;
 
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
-import com.s24.redjob.queue.TestJob;
-import com.s24.redjob.queue.TestJobRunner;
-import com.s24.redjob.queue.TestJobRunnerFactory;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
@@ -15,6 +12,9 @@ import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 import com.s24.redjob.worker.events.WorkerStopping;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import com.s24.redjob.worker.runner.TestJob;
+import com.s24.redjob.worker.runner.TestJobRunner;
+import com.s24.redjob.worker.runner.TestJobRunnerFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

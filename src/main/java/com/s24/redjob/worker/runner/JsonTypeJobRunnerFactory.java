@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.runner;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

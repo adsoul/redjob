@@ -15,6 +15,9 @@ import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 import com.s24.redjob.worker.events.WorkerStopping;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import com.s24.redjob.worker.runner.TestJob;
+import com.s24.redjob.worker.runner.TestJobRunner;
+import com.s24.redjob.worker.runner.TestJobRunnerFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -8,6 +8,7 @@ import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerEvent;
 import com.s24.redjob.worker.events.WorkerStopping;
+import com.s24.redjob.worker.runner.JobRunnerFactory;
 
 import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;

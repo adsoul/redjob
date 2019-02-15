@@ -1,4 +1,6 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.runner;
+
+import com.s24.redjob.worker.WrappingRunnable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

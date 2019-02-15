@@ -1,6 +1,7 @@
 package com.s24.redjob.worker;
 
 import com.s24.redjob.channel.ChannelWorker;
+import com.s24.redjob.worker.runner.JobRunnerFactory;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;

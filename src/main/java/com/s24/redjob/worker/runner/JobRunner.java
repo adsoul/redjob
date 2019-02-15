@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.runner;
 
 /**
  * Interface for job runners.

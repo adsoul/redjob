@@ -1,4 +1,4 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.runner;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

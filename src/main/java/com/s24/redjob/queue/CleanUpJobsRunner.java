@@ -1,7 +1,7 @@
 package com.s24.redjob.queue;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
+import com.s24.redjob.worker.runner.JobRunner;
+import com.s24.redjob.worker.runner.JobRunnerComponent;
 
 import java.util.List;
 
@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
-import com.s24.redjob.worker.JobRunner;
-import com.s24.redjob.worker.JobRunnerComponent;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * {@link JobRunner} for {@link CleanUpJobs} command.

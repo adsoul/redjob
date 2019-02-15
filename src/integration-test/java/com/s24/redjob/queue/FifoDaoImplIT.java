@@ -4,12 +4,18 @@ import com.s24.redjob.TestRedis;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import com.s24.redjob.worker.runner.TestJob;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration test for {@link FifoDaoImpl}.
