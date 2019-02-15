@@ -1,5 +1,7 @@
 package com.s24.redjob.worker.runner;
 
+import com.s24.redjob.worker.Execution;
+
 /**
  * Interface for factories creating job runners.
  */
@@ -7,9 +9,9 @@ public interface JobRunnerFactory {
    /**
     * Get runner for job.
     *
-    * @param job
-    *           Job.
+    * @param execution
+    *           Job execution.
     * @return Job runner.
     */
-   <J> Runnable runnerFor(J job);
+   Runnable runnerFor(Execution execution);
 }

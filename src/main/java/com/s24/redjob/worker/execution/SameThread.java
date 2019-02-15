@@ -33,7 +33,7 @@ public class SameThread implements ExecutionStrategy {
 
    @Override
    public void execute(String queue, Execution execution) {
-      Runnable runner = jobRunnerFactory.runnerFor(execution.getJob());
+      Runnable runner = jobRunnerFactory.runnerFor(execution);
       if (runner == null) {
          log.error("No job runner found.", execution.getWorker());
          throw new IllegalArgumentException("No job runner found.");

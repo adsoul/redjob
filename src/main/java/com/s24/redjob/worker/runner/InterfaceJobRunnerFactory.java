@@ -1,5 +1,6 @@
 package com.s24.redjob.worker.runner;
 
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WrappingRunnable;
 
 import java.util.Map;
@@ -34,9 +35,10 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
    }
 
    @Override
-   public <J> Runnable runnerFor(J job) {
-      Assert.notNull(job, "Pre-condition violated: job != null.");
+   public Runnable runnerFor(Execution execution) {
+      Assert.notNull(execution, "Pre-condition violated: execution != null.");
 
+      Object job = execution.getJob();
       String[] beanNames = this.jobRunnerNames.computeIfAbsent(job.getClass(), this::jobRunnerNamesFor);
       if (beanNames.length == 0) {
          throw new IllegalArgumentException(String.format(
@@ -58,7 +60,7 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
       }
 
       @SuppressWarnings("unchecked")
-      JobRunner<J> runner = (JobRunner<J>) applicationContext.getBean(beanName);
+      JobRunner runner = (JobRunner) applicationContext.getBean(beanName);
       Assert.notNull(runner, "Pre-condition violated: runner != null.");
 
       return new WrappingRunnable(runner) {
