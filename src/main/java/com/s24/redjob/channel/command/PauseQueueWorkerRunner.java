@@ -48,7 +48,7 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
     * Does the worker match the selectors of the job?.
     */
    private boolean matches(QueueWorker worker, PauseQueueWorker job) {
-      return worker.getNamespace().equals(job.getNamespace()) &&
-            (job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains));
+      // worker.getNamespace().equals(job.getNamespace()) &&
+      return job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains);
    }
 }

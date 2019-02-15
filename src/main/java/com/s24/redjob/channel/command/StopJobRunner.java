@@ -45,6 +45,7 @@ public class StopJobRunner implements JobRunner<StopJob> {
     * Does the worker match the selectors of the job?.
     */
    private boolean matches(QueueWorker worker, StopJob job) {
-      return worker.getNamespace().equals(job.getNamespace());
+      // worker.getNamespace().equals(job.getNamespace()) &&
+      return true;
    }
 }

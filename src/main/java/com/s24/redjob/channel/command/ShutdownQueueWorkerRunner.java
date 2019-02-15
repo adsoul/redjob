@@ -44,6 +44,7 @@ public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker>
     * Does the worker match the selectors of the job?.
     */
    private boolean matches(QueueWorker worker, ShutdownQueueWorker job) {
-      return worker.getNamespace().equals(job.getNamespace());
+      // worker.getNamespace().equals(job.getNamespace()) &&
+      return true;
    }
 }
