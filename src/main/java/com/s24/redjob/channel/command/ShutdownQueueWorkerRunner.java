@@ -1,6 +1,5 @@
 package com.s24.redjob.channel.command;
 
-import com.s24.redjob.channel.WorkersAware;
 import com.s24.redjob.queue.QueueWorker;
 import com.s24.redjob.worker.runner.JobRunner;
 import com.s24.redjob.worker.runner.JobRunnerComponent;
@@ -9,48 +8,35 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * {@link JobRunner} for {@link ShutdownQueueWorker} command.
  */
 @JobRunnerComponent
-public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker>, WorkersAware {
+public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker> {
    /**
     * Logger.
     */
    private static final Logger log = LoggerFactory.getLogger(ShutdownQueueWorkerRunner.class);
 
    /**
-    * Workers to shutdown.
+    * All {@link QueueWorker}s.
     */
-   private List<QueueWorker> workers;
+   @Autowired(required = false)
+   private List<QueueWorker> allWorkers = List.of();
 
    @Override
    public void execute(ShutdownQueueWorker job) {
-      log.info("Shutting down {} workers.", workers.size());
-
-      for (QueueWorker worker : workers) {
-         try {
-            worker.stop();
-         } catch (Exception e) {
-            log.error("Failed to stop worker {}: {}.", worker.getName(), e.getMessage());
-         }
-      }
-   }
-
-   //
-   // Injections.
-   //
-
-   /**
-    * Workers to shutdown.
-    */
-   public List<QueueWorker> getWorkers() {
-      return workers;
-   }
-
-   @Override
-   public void setWorkers(List<QueueWorker> workers) {
-      this.workers = workers;
+      allWorkers.stream()
+            .filter(job::matches)
+            .forEach(worker -> {
+               try {
+                  log.info("Shutting down worker {}.", worker.getName());
+                  worker.stop();
+               } catch (Exception e) {
+                  log.error("Failed to stop worker {}: {}.", worker.getName(), e.getMessage());
+               }
+            });
    }
 }

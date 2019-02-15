@@ -1,15 +1,11 @@
 package com.s24.redjob.channel;
 
-import java.util.Collections;
+import com.s24.redjob.worker.AbstractWorkerFactoryBean;
+
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-
-import com.s24.redjob.queue.QueueWorker;
-import com.s24.redjob.worker.AbstractWorkerFactoryBean;
 
 /**
  * {@link FactoryBean} for easy creation of a {@link ChannelWorker}.
@@ -21,38 +17,10 @@ public class ChannelWorkerFactoryBean extends AbstractWorkerFactoryBean<ChannelW
    private ChannelDao channelDao;
 
    /**
-    * All {@link QueueWorker}s.
-    */
-   @Autowired(required = false)
-   private List<QueueWorker> allWorkers = Collections.emptyList();
-
-   /**
-    * {@link QueueWorker}s this worker should execute commands for.
-    * Defaults to all {@link QueueWorker}s of the namespace.
-    */
-   private List<QueueWorker> workers;
-
-   /**
     * Constructor.
     */
    public ChannelWorkerFactoryBean() {
       super(new ChannelWorker());
-   }
-
-   @Override
-   public void afterPropertiesSet() throws Exception {
-      // All workers of this namespace, if workers are not injected.
-      if (workers == null) {
-         String namespace = channelDao.getNamespace();
-         workers = allWorkers.stream()
-               .filter(worker -> worker.getNamespace().equals(namespace))
-               .collect(Collectors.toList());
-      }
-
-      worker.setChannelDao(channelDao);
-      worker.setWorkers(workers);
-
-      super.afterPropertiesSet();
    }
 
    //
@@ -63,14 +31,14 @@ public class ChannelWorkerFactoryBean extends AbstractWorkerFactoryBean<ChannelW
     * Channel dao.
     */
    public ChannelDao getChannelDao() {
-      return channelDao;
+      return worker.getChannelDao();
    }
 
    /**
     * Channel dao.
     */
    public void setChannelDao(ChannelDao channelDao) {
-      this.channelDao = channelDao;
+      this.worker.setChannelDao(channelDao);
    }
 
    /**
@@ -106,21 +74,5 @@ public class ChannelWorkerFactoryBean extends AbstractWorkerFactoryBean<ChannelW
     */
    public void setListenerContainer(RedisMessageListenerContainer listenerContainer) {
       worker.setListenerContainer(listenerContainer);
-   }
-
-   /**
-    * {@link QueueWorker}s this worker should execute commands for.
-    * Defaults to all {@link QueueWorker}s of the namespace.
-    */
-   public List<QueueWorker> getWorkers() {
-      return workers;
-   }
-
-   /**
-    * {@link QueueWorker}s this worker should execute commands for.
-    * Defaults to all {@link QueueWorker}s of the namespace.
-    */
-   public void setWorkers(List<QueueWorker> workers) {
-      this.workers = workers;
    }
 }

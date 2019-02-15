@@ -8,7 +8,7 @@ import com.s24.redjob.worker.events.JobStart;
 import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerEvent;
 import com.s24.redjob.worker.events.WorkerStopping;
-import com.s24.redjob.worker.runner.JobRunnerFactory;
+import com.s24.redjob.worker.execution.ExecutionStrategy;
 
 import javax.annotation.PostConstruct;
 import java.lang.management.ManagementFactory;
@@ -60,9 +60,9 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    protected WorkerDao workerDao;
 
    /**
-    * Factory for creating job runners.
+    * Execution strategy.
     */
-   private JobRunnerFactory jobRunnerFactory;
+   private ExecutionStrategy executionStrategy;
 
    /**
     * Default: Number of milliseconds the worker pauses, if none of the queues contained a job.
@@ -107,7 +107,7 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     */
    @PostConstruct
    public void afterPropertiesSet() throws Exception {
-      Assert.notNull(jobRunnerFactory, "Precondition violated: jobRunnerFactory != null.");
+      Assert.notNull(executionStrategy, "Precondition violated: executionStrategy != null.");
       Assert.isTrue(emptyQueuesSleepMillis > 0, "Precondition violated: emptyQueuesSleepMillis > 0.");
       Assert.notNull(eventBus, "Precondition violated: eventBus != null.");
 
@@ -230,17 +230,11 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
       eventBus.publishEvent(jobProcess);
       if (jobProcess.isVeto()) {
          log.debug("Job processing vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, execution, null));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution));
          return true;
       }
 
-      Runnable runner = jobRunnerFactory.runnerFor(job);
-      if (runner == null) {
-         log.error("No job runner found.", name);
-         throw new IllegalArgumentException("No job runner found.");
-      }
-
-      execute(queue, execution, runner);
+      execute(queue, execution);
       return false;
    }
 
@@ -251,29 +245,21 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     *       Name of queue.
     * @param execution
     *       Job.
-    * @param runner
-    *       Job runner.
     * @throws Throwable
     *       In case of errors.
     */
-   protected void execute(String queue, Execution execution, Runnable runner) throws Throwable {
-      Object unwrappedRunner = runner;
-      if (runner instanceof WrappingRunnable) {
-         unwrappedRunner = ((WrappingRunnable) runner).unwrap();
-      }
-      prepareRunner(unwrappedRunner);
-
-      JobExecute jobExecute = new JobExecute(this, queue, execution, unwrappedRunner);
+   protected void execute(String queue, Execution execution) throws Throwable {
+      JobExecute jobExecute = new JobExecute(this, queue, execution);
       eventBus.publishEvent(jobExecute);
       if (jobExecute.isVeto()) {
          log.debug("Job execution vetoed.");
-         eventBus.publishEvent(new JobSkipped(this, queue, execution, unwrappedRunner));
+         eventBus.publishEvent(new JobSkipped(this, queue, execution));
          return;
       }
 
       try {
          execution.start(getName());
-         run(queue, execution, runner, unwrappedRunner);
+         run(queue, execution);
       } finally {
          execution.stop();
       }
@@ -286,36 +272,27 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
     *       Name of queue.
     * @param execution
     *       Job.
-    * @param runner
-    *       Job runner.
     */
-   protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
+   protected void run(String queue, Execution execution) {
       log.debug("Starting job.");
-      eventBus.publishEvent(new JobStart(this, queue, execution, unwrappedRunner));
+      eventBus.publishEvent(new JobStart(this, queue, execution));
       try {
-         runner.run();
+         executionStrategy.execute(queue, execution);
          log.debug("Job succeeded.");
          state.incSuccess();
          saveWorkerState();
          workerDao.success(name);
-         eventBus.publishEvent(new JobSuccess(this, queue, execution, unwrappedRunner));
+         eventBus.publishEvent(new JobSuccess(this, queue, execution));
       } catch (Throwable cause) {
          log.warn("Job failed.", cause);
          state.incFailed();
          saveWorkerState();
          workerDao.failure(name);
-         eventBus.publishEvent(new JobFailure(this, queue, execution, unwrappedRunner, cause));
+         eventBus.publishEvent(new JobFailure(this, queue, execution, cause));
          throw new IllegalArgumentException("Job failed.", cause);
       } finally {
          log.debug("Job finished.", name, execution.getId());
       }
-   }
-
-   /**
-    * Prepare runner.
-    */
-   protected void prepareRunner(Object runner) {
-      // Overwrite, if needed.
    }
 
    @Override
@@ -359,17 +336,17 @@ public abstract class AbstractWorker<S extends WorkerState> implements Worker, A
    }
 
    /**
-    * Factory for creating job runners.
+    * Execution strategy.
     */
-   public JobRunnerFactory getJobRunnerFactory() {
-      return jobRunnerFactory;
+   public ExecutionStrategy getExecutionStrategy() {
+      return executionStrategy;
    }
 
    /**
-    * Factory for creating job runners.
+    * Execution strategy.
     */
-   public void setJobRunnerFactory(JobRunnerFactory jobRunnerFactory) {
-      this.jobRunnerFactory = jobRunnerFactory;
+   public void setExecutionStrategy(ExecutionStrategy executionStrategy) {
+      this.executionStrategy = executionStrategy;
    }
 
    /**

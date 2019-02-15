@@ -1,5 +1,7 @@
 package com.s24.redjob.channel.command;
 
+import com.s24.redjob.queue.QueueWorker;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -8,6 +10,11 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
  */
 @JsonTypeName
 public class StopJob {
+   /**
+    * Namespace.
+    */
+   private String namespace;
+
    /**
     * Id of job to stop.
     */
@@ -24,11 +31,21 @@ public class StopJob {
    /**
     * Constructor to stop the given job.
     *
+    * @param namespace
+    *           Namespace.
     * @param id
     *           Id of job to stop.
     */
-   public StopJob(long id) {
+   public StopJob(String namespace, long id) {
+      this.namespace = namespace;
       this.id = id;
+   }
+
+   /**
+    * Namespace.
+    */
+   public String getNamespace() {
+      return namespace;
    }
 
    /**
@@ -36,5 +53,12 @@ public class StopJob {
     */
    public long getId() {
       return id;
+   }
+
+   /**
+    * Does the worker match the selectors of the job?.
+    */
+   boolean matches(QueueWorker worker) {
+      return worker.getNamespace().equals(namespace);
    }
 }

@@ -1,6 +1,6 @@
 package com.s24.redjob.channel.command;
 
-import static java.util.Collections.emptyList;
+import com.s24.redjob.queue.QueueWorker;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,7 +9,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.s24.redjob.queue.QueueWorker;
+
+import static java.util.Collections.emptyList;
 
 /**
  * Command to shutdown queue workers.
@@ -20,6 +21,11 @@ public class PauseQueueWorker {
     * Pause (true) or unpause (false) workers?.
     */
    private boolean pause;
+
+   /**
+    * Namespace.
+    */
+   private String namespace;
 
    /**
     * Workers of which queues should be paused.
@@ -36,32 +42,40 @@ public class PauseQueueWorker {
 
    /**
     * Constructor to pause/unpause all workers.
+    *
+    * @param namespace
+    *           Namespace.
     */
-   public PauseQueueWorker(boolean pause) {
-      this(pause, emptyList());
+   public PauseQueueWorker(String namespace, boolean pause) {
+      this(namespace, pause, emptyList());
    }
 
    /**
     * Constructor to pause/unpause workers processing the given queues.
     *
+    * @param namespace
+    *           Namespace.
     * @param pause
     *           Pause (true) or unpause (false)?
     * @param queues
     *           Queues to select workers. If empty, select all workers.
     */
-   public PauseQueueWorker(boolean pause, String... queues) {
-      this(pause, Arrays.asList(queues));
+   public PauseQueueWorker(String namespace, boolean pause, String... queues) {
+      this(namespace, pause, Arrays.asList(queues));
    }
 
    /**
     * Constructor to pause/unpause workers processing the given queues.
     *
+    * @param namespace
+    *           Namespace.
     * @param pause
     *           Pause (true) or unpause (false)?
     * @param queues
     *           Queues to select workers. If empty, select all workers.
     */
-   public PauseQueueWorker(boolean pause, Collection<String> queues) {
+   public PauseQueueWorker(String namespace, boolean pause, Collection<String> queues) {
+      this.namespace = namespace;
       this.pause = pause;
       this.queues.addAll(queues);
    }
@@ -71,6 +85,13 @@ public class PauseQueueWorker {
     */
    public boolean isPause() {
       return pause;
+   }
+
+   /**
+    * Namespace.
+    */
+   public String getNamespace() {
+      return namespace;
    }
 
    /**
@@ -84,7 +105,8 @@ public class PauseQueueWorker {
    /**
     * Does the worker match the selectors of the job?.
     */
-   protected boolean matches(QueueWorker worker) {
-      return queues.isEmpty() || worker.getQueues().stream().anyMatch(queues::contains);
+   boolean matches(QueueWorker worker) {
+      return worker.getNamespace().equals(namespace) &&
+            (queues.isEmpty() || worker.getQueues().stream().anyMatch(queues::contains));
    }
 }

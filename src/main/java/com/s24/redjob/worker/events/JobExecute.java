@@ -2,10 +2,11 @@ package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.util.Assert;
 
 import java.util.Objects;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker executes a job. Can be vetoed. Veto leads to {@link JobSkipped} event.
@@ -27,11 +28,6 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    private final Execution execution;
 
    /**
-    * Job runner.
-    */
-   private final Object runner;
-
-   /**
     * Veto against job execution?.
     */
    private boolean veto = false;
@@ -45,19 +41,15 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
     *           Queue.
     * @param execution
     *           Job execution.
-    * @param runner
-    *           Job runner.
     */
-   public JobExecute(Worker worker, String queue, Execution execution, Object runner) {
+   public JobExecute(Worker worker, String queue, Execution execution) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
       Assert.notNull(execution, "Precondition violated: execution != null.");
-      Assert.notNull(runner, "Precondition violated: runner != null.");
       this.worker = worker;
       this.queue = queue;
       this.execution = execution;
-      this.runner = runner;
    }
 
    @Override
@@ -74,14 +66,6 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
    @Override
    public Execution getExecution() {
       return execution;
-   }
-
-   /**
-    * Job runner.
-    */
-   @SuppressWarnings("unchecked")
-   public <R> R getRunner() {
-      return (R) runner;
    }
 
    /**
@@ -103,8 +87,7 @@ public class JobExecute extends ApplicationEvent implements JobEvent {
       return o instanceof JobExecute &&
             Objects.equals(worker, ((JobExecute) o).worker) &&
             Objects.equals(queue, ((JobExecute) o).queue) &&
-            Objects.equals(execution, ((JobExecute) o).execution) &&
-            Objects.equals(runner, ((JobExecute) o).runner);
+            Objects.equals(execution, ((JobExecute) o).execution);
    }
 
    @Override
