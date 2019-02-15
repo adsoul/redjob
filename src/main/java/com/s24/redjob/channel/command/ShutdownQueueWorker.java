@@ -9,31 +9,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName
 public class ShutdownQueueWorker {
    /**
-    * Namespace.
-    */
-   private String namespace;
-
-   /**
-    * Hidden default constructor for Jackson.
+    * Constructor to shutdown all workers.
     */
    @JsonCreator
-   ShutdownQueueWorker() {
-   }
-
-   /**
-    * Constructor to shutdown all workers.
-    *
-    * @param namespace
-    *           Namespace.
-    */
-   public ShutdownQueueWorker(String namespace) {
-      this.namespace = namespace;
-   }
-
-   /**
-    * Namespace.
-    */
-   public String getNamespace() {
-      return namespace;
-   }
+   public ShutdownQueueWorker() { }
 }

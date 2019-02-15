@@ -9,11 +9,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 @JsonTypeName
 public class StopJob {
    /**
-    * Namespace.
-    */
-   private String namespace;
-
-   /**
     * Id of job to stop.
     */
    private long id;
@@ -29,21 +24,11 @@ public class StopJob {
    /**
     * Constructor to stop the given job.
     *
-    * @param namespace
-    *           Namespace.
     * @param id
     *           Id of job to stop.
     */
-   public StopJob(String namespace, long id) {
-      this.namespace = namespace;
+   public StopJob(long id) {
       this.id = id;
-   }
-
-   /**
-    * Namespace.
-    */
-   public String getNamespace() {
-      return namespace;
    }
 
    /**
