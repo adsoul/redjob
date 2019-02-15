@@ -31,7 +31,7 @@ public class StopJobRunner implements JobRunner<StopJob> {
       log.info("Stopping job {}.", job.getId());
 
       allWorkers.stream()
-            .filter(job::matches)
+            .filter(worker -> matches(worker, job))
             .forEach(worker -> {
                try {
                   worker.stop(job.getId());
@@ -39,5 +39,12 @@ public class StopJobRunner implements JobRunner<StopJob> {
                   log.error("Failed to stop job {} of worker {}: {}.", job.getId(), worker.getName(), e.getMessage());
                }
             });
+   }
+
+   /**
+    * Does the worker match the selectors of the job?.
+    */
+   private boolean matches(QueueWorker worker, StopJob job) {
+      return worker.getNamespace().equals(job.getNamespace());
    }
 }

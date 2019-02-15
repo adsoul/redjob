@@ -29,7 +29,7 @@ public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker>
    @Override
    public void execute(ShutdownQueueWorker job) {
       allWorkers.stream()
-            .filter(job::matches)
+            .filter(worker -> matches(worker, job))
             .forEach(worker -> {
                try {
                   log.info("Shutting down worker {}.", worker.getName());
@@ -38,5 +38,12 @@ public class ShutdownQueueWorkerRunner implements JobRunner<ShutdownQueueWorker>
                   log.error("Failed to stop worker {}: {}.", worker.getName(), e.getMessage());
                }
             });
+   }
+
+   /**
+    * Does the worker match the selectors of the job?.
+    */
+   private boolean matches(QueueWorker worker, ShutdownQueueWorker job) {
+      return worker.getNamespace().equals(job.getNamespace());
    }
 }

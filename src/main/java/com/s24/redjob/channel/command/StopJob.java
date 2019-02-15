@@ -1,7 +1,5 @@
 package com.s24.redjob.channel.command;
 
-import com.s24.redjob.queue.QueueWorker;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -53,12 +51,5 @@ public class StopJob {
     */
    public long getId() {
       return id;
-   }
-
-   /**
-    * Does the worker match the selectors of the job?.
-    */
-   boolean matches(QueueWorker worker) {
-      return worker.getNamespace().equals(namespace);
    }
 }

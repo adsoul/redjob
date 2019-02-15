@@ -33,7 +33,7 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
 
       boolean pause = job.isPause();
       allWorkers.stream()
-            .filter(job::matches)
+            .filter(worker -> matches(worker, job))
             .forEach(worker -> {
                try {
                   log.info("{} worker {}.", pause? "Pausing" : "Unpausing", worker.getName());
@@ -42,5 +42,13 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
                   log.error("Failed to {} worker {}: {}.", pause ? "pause" : "unpause", worker.getName(), e.getMessage());
                }
             });
+   }
+
+   /**
+    * Does the worker match the selectors of the job?.
+    */
+   private boolean matches(QueueWorker worker, PauseQueueWorker job) {
+      return worker.getNamespace().equals(job.getNamespace()) &&
+            (job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains));
    }
 }

@@ -1,7 +1,5 @@
 package com.s24.redjob.channel.command;
 
-import com.s24.redjob.queue.QueueWorker;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -100,13 +98,5 @@ public class PauseQueueWorker {
     */
    public Set<String> getQueues() {
       return queues;
-   }
-
-   /**
-    * Does the worker match the selectors of the job?.
-    */
-   boolean matches(QueueWorker worker) {
-      return worker.getNamespace().equals(namespace) &&
-            (queues.isEmpty() || worker.getQueues().stream().anyMatch(queues::contains));
    }
 }
