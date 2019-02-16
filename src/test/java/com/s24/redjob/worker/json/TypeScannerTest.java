@@ -1,12 +1,14 @@
 package com.s24.redjob.worker.json;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.s24.redjob.mockito.EnableMockito;
-import com.s24.redjob.queue.TestJob;
+import com.s24.redjob.worker.runner.TestJob;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.mockito.Mockito.verify;
 

@@ -1,19 +1,18 @@
 package com.s24.redjob.client;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.util.Assert;
-
 import com.s24.redjob.channel.ChannelDao;
 import com.s24.redjob.lock.LockDao;
 import com.s24.redjob.queue.FifoDao;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WorkerDao;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.util.Assert;
+
+import static java.util.stream.Collectors.toList;
 
 /**
  * Default implementation of {@link Client}.
@@ -43,11 +42,16 @@ public class ClientImpl implements Client {
     * Init.
     */
    @PostConstruct
-   public void afterPropertiesSet() throws Exception {
+   public void afterPropertiesSet() {
       Assert.notNull(workerDao, "Precondition violated: workerDao != null.");
       Assert.notNull(fifoDao, "Precondition violated: fifoDao != null.");
       Assert.notNull(channelDao, "Precondition violated: channelDao != null.");
       Assert.notNull(lockDao, "Precondition violated: lockDao != null.");
+   }
+
+   @Override
+   public String getNamespace() {
+      return workerDao.getNamespace();
    }
 
    @Override

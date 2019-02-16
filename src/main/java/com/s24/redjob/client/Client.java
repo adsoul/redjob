@@ -1,14 +1,19 @@
 package com.s24.redjob.client;
 
+import com.s24.redjob.worker.Execution;
+
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import com.s24.redjob.worker.Execution;
 
 /**
  * Job client.
  */
 public interface Client {
+   /**
+    * Namespace.
+    */
+   String getNamespace();
+
    /**
     * Enqueue the given job to the given queue.
     * Job are considered to be possibly long running.

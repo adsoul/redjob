@@ -2,10 +2,11 @@ package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.util.Assert;
 
 import java.util.Objects;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker failed to execute a job.
@@ -27,11 +28,6 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
    private final Execution execution;
 
    /**
-    * Job runner.
-    */
-   private final Object runner;
-
-   /**
     * Cause of failure.
     */
    private final Throwable cause;
@@ -45,22 +41,18 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
     *           Queue.
     * @param execution
     *           Job execution.
-    * @param runner
-    *           Job runner.
     * @param cause
     *           Cause of failure.
     */
-   public JobFailure(Worker worker, String queue, Execution execution, Object runner, Throwable cause) {
+   public JobFailure(Worker worker, String queue, Execution execution, Throwable cause) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
       Assert.notNull(execution, "Precondition violated: execution != null.");
-      Assert.notNull(runner, "Precondition violated: runner != null.");
       Assert.notNull(cause, "Precondition violated: cause != null.");
       this.worker = worker;
       this.queue = queue;
       this.execution = execution;
-      this.runner = runner;
       this.cause = cause;
    }
 
@@ -80,12 +72,6 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
       return execution;
    }
 
-   @Override
-   @SuppressWarnings("unchecked")
-   public <R> R getRunner() {
-      return (R) runner;
-   }
-
    /**
     * Cause of failure.
     */
@@ -99,7 +85,6 @@ public class JobFailure extends ApplicationEvent implements JobFinished {
             Objects.equals(worker, ((JobFailure) o).worker) &&
             Objects.equals(queue, ((JobFailure) o).queue) &&
             Objects.equals(execution, ((JobFailure) o).execution) &&
-            Objects.equals(runner, ((JobFailure) o).runner) &&
             Objects.equals(cause, ((JobFailure) o).cause);
    }
 

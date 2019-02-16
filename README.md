@@ -41,7 +41,7 @@ Setup of a basic environment for executing jobs, described in Spring XML context
     p:executions-ref="executions"
     p:basePackages="com.s24.myapp" />
 <!-- Factory for creating job runners for jobs. -->     
-<bean id="jobRunnerFactory" class="com.s24.redjob.worker.InterfaceJobRunnerFactory" />
+<bean id="jobRunnerFactory" class="com.s24.redjob.worker.runner.InterfaceJobRunnerFactory" />
 
 <!-- DAO for worker states. -->
 <bean id="workerDao" class="com.s24.redjob.worker.WorkerDaoImpl"

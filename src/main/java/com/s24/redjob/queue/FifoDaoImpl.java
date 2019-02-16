@@ -3,9 +3,6 @@ package com.s24.redjob.queue;
 import com.s24.redjob.AbstractDao;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.json.ExecutionRedisSerializer;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.util.Assert;
 
 import javax.annotation.PostConstruct;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.util.Assert;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
@@ -81,7 +82,7 @@ public class FifoDaoImpl extends AbstractDao implements FifoDao {
    public Execution enqueue(String queue, Object job, boolean front) {
       return redis.execute((RedisConnection connection) -> {
          Long id = connection.incr(key(ID));
-         Execution execution = new Execution(queue, id, job);
+         Execution execution = new Execution(namespace, queue, id, job);
          connection.sAdd(key(QUEUES), value(queue));
          byte[] idBytes = value(id);
          byte[] executionBytes = value(execution);

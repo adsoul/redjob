@@ -42,7 +42,7 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
     * Dummy execution to avoid "not null" checks.
     * Used for synchronizing access to {@link #execution}.
     */
-   private final Execution NO_EXECUTION = new Execution("none", -1, "dummy");
+   private final Execution NO_EXECUTION = new Execution("none", "none", -1, "dummy");
 
    /**
     * Currently processed execution, if any.
@@ -372,11 +372,11 @@ public abstract class AbstractQueueWorker extends AbstractWorker<QueueWorkerStat
    protected abstract void restoreInflight(String queue) throws Throwable;
 
    @Override
-   protected void run(String queue, Execution execution, Runnable runner, Object unwrappedRunner) {
+   protected void run(String queue, Execution execution) {
       try {
          // Save start time.
          update(execution);
-         super.run(queue, execution, runner, unwrappedRunner);
+         super.run(queue, execution);
       } finally {
          // Save stop time.
          update(execution);

@@ -1,4 +1,6 @@
-package com.s24.redjob.worker;
+package com.s24.redjob.worker.runner;
+
+import com.s24.redjob.worker.Execution;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -25,9 +27,10 @@ public class JsonTypeJobRunnerFactory implements JobRunnerFactory, ApplicationCo
    }
 
    @Override
-   public <J> Runnable runnerFor(J job) {
-      Assert.notNull(job, "Pre-condition violated: job != null.");
+   public Runnable runnerFor(Execution execution) {
+      Assert.notNull(execution, "Pre-condition violated: execution != null.");
 
+      Object job = execution.getJob();
       JsonTypeName type = job.getClass().getAnnotation(JsonTypeName.class);
       Assert.notNull(type, "Pre-condition violated: Job has a @JsonTypeName.");
       String jsonType = type.value();

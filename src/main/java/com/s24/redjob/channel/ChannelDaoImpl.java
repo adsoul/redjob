@@ -1,5 +1,10 @@
 package com.s24.redjob.channel;
 
+import com.s24.redjob.AbstractDao;
+import com.s24.redjob.queue.FifoDao;
+import com.s24.redjob.worker.Execution;
+import com.s24.redjob.worker.json.ExecutionRedisSerializer;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.data.redis.connection.Message;
@@ -7,11 +12,6 @@ import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.util.Assert;
-
-import com.s24.redjob.AbstractDao;
-import com.s24.redjob.queue.FifoDao;
-import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.json.ExecutionRedisSerializer;
 
 /**
  * Default implementation of {@link FifoDao}.
@@ -50,7 +50,7 @@ public class ChannelDaoImpl extends AbstractDao implements ChannelDao {
    public Execution publish(String channel, Object job) {
       return redis.execute((RedisConnection connection) -> {
          // Admin jobs do not use ids.
-         Execution execution = new Execution(channel, 0, job);
+         Execution execution = new Execution(namespace, channel, 0, job);
 
          connection.publish(key(CHANNEL, channel), executions.serialize(execution));
 

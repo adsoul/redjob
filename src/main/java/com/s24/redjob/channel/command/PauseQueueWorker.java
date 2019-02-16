@@ -1,15 +1,12 @@
 package com.s24.redjob.channel.command;
 
-import static java.util.Collections.emptyList;
-
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.s24.redjob.queue.QueueWorker;
 
 /**
  * Command to shutdown queue workers.
@@ -36,9 +33,12 @@ public class PauseQueueWorker {
 
    /**
     * Constructor to pause/unpause all workers.
+    *
+    * @param pause
+    *           Pause (true) or unpause (false)?
     */
    public PauseQueueWorker(boolean pause) {
-      this(pause, emptyList());
+      this(pause, List.of());
    }
 
    /**
@@ -50,7 +50,7 @@ public class PauseQueueWorker {
     *           Queues to select workers. If empty, select all workers.
     */
    public PauseQueueWorker(boolean pause, String... queues) {
-      this(pause, Arrays.asList(queues));
+      this(pause, List.of(queues));
    }
 
    /**
@@ -79,12 +79,5 @@ public class PauseQueueWorker {
     */
    public Set<String> getQueues() {
       return queues;
-   }
-
-   /**
-    * Does the worker match the selectors of the job?.
-    */
-   protected boolean matches(QueueWorker worker) {
-      return queues.isEmpty() || worker.getQueues().stream().anyMatch(queues::contains);
    }
 }

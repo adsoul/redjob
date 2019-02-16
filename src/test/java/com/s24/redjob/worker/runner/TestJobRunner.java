@@ -1,9 +1,9 @@
-package com.s24.redjob.queue;
-
-import org.springframework.util.Assert;
+package com.s24.redjob.worker.runner;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+
+import org.springframework.util.Assert;
 
 /**
  * Job runner for {@link TestJob}s.

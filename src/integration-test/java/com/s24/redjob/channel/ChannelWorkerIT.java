@@ -2,9 +2,6 @@ package com.s24.redjob.channel;
 
 import com.s24.redjob.TestEventPublisher;
 import com.s24.redjob.TestRedis;
-import com.s24.redjob.queue.TestJob;
-import com.s24.redjob.queue.TestJobRunner;
-import com.s24.redjob.queue.TestJobRunnerFactory;
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.WorkerDaoImpl;
 import com.s24.redjob.worker.events.JobExecute;
@@ -14,7 +11,11 @@ import com.s24.redjob.worker.events.JobSuccess;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 import com.s24.redjob.worker.events.WorkerStopping;
+import com.s24.redjob.worker.execution.SameThread;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import com.s24.redjob.worker.runner.TestJob;
+import com.s24.redjob.worker.runner.TestJobRunner;
+import com.s24.redjob.worker.runner.TestJobRunnerFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,7 +70,7 @@ class ChannelWorkerIT {
       factory.setChannels("test-channel");
       factory.setListenerContainer(listenerContainer);
       factory.setApplicationEventPublisher(eventBus);
-      factory.setJobRunnerFactory(new TestJobRunnerFactory());
+      factory.setExecutionStrategy(new SameThread(new TestJobRunnerFactory()));
       factory.afterPropertiesSet();
 
       channelWorker = factory.getObject();
@@ -96,14 +97,14 @@ class ChannelWorkerIT {
       Execution execution = channelDao.publish("test-channel", job);
 
       assertEquals(new JobProcess(channelWorker, "test-channel", execution), eventBus.waitForEvent());
-      assertEquals(new JobExecute(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
-      assertEquals(new JobStart(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobExecute(channelWorker, "test-channel", execution), eventBus.waitForEvent());
+      assertEquals(new JobStart(channelWorker, "test-channel", execution), eventBus.waitForEvent());
 
       // Asynchronously stop worker, because stop blocks until the last job finished.
       new Thread(channelWorker::stop).start();
 
       assertEquals(new WorkerStopping(channelWorker), eventBus.waitForEvent());
-      assertEquals(new JobSuccess(channelWorker, "test-channel", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobSuccess(channelWorker, "test-channel", execution), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
 
       // Worker stop should always be published, if the last worker has finished.

@@ -2,10 +2,11 @@ package com.s24.redjob.worker.events;
 
 import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.Worker;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.util.Assert;
 
 import java.util.Objects;
+
+import org.springframework.context.ApplicationEvent;
+import org.springframework.util.Assert;
 
 /**
  * Worker has skipped a job due to a veto.
@@ -27,11 +28,6 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    private final Execution execution;
 
    /**
-    * Job runner.
-    */
-   private final Object runner;
-
-   /**
     * Constructor.
     *
     * @param worker
@@ -40,10 +36,8 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
     *           Queue.
     * @param execution
     *           Job execution.
-    * @param runner
-    *           Job runner, may be null, if execution has been vetoed in process phase.
     */
-   public JobSkipped(Worker worker, String queue, Execution execution, Object runner) {
+   public JobSkipped(Worker worker, String queue, Execution execution) {
       super(worker);
       Assert.notNull(worker, "Precondition violated: worker != null.");
       Assert.hasLength(queue, "Precondition violated: queue has length.");
@@ -51,7 +45,6 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
       this.worker = worker;
       this.queue = queue;
       this.execution = execution;
-      this.runner = runner;
    }
 
    @Override
@@ -71,18 +64,11 @@ public class JobSkipped extends ApplicationEvent implements JobFinished {
    }
 
    @Override
-   @SuppressWarnings("unchecked")
-   public <R> R getRunner() {
-      return (R) runner;
-   }
-
-   @Override
    public boolean equals(Object o) {
       return o instanceof JobSkipped &&
             Objects.equals(worker, ((JobSkipped) o).worker) &&
             Objects.equals(queue, ((JobSkipped) o).queue) &&
-            Objects.equals(execution, ((JobSkipped) o).execution) &&
-            Objects.equals(runner, ((JobSkipped) o).runner);
+            Objects.equals(execution, ((JobSkipped) o).execution);
    }
 
    @Override

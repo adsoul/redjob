@@ -14,7 +14,11 @@ import com.s24.redjob.worker.events.WorkerPoll;
 import com.s24.redjob.worker.events.WorkerStart;
 import com.s24.redjob.worker.events.WorkerStopped;
 import com.s24.redjob.worker.events.WorkerStopping;
+import com.s24.redjob.worker.execution.SameThread;
 import com.s24.redjob.worker.json.TestExecutionRedisSerializer;
+import com.s24.redjob.worker.runner.TestJob;
+import com.s24.redjob.worker.runner.TestJobRunner;
+import com.s24.redjob.worker.runner.TestJobRunnerFactory;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,7 +66,7 @@ class FifoWorkerImplIT {
       factory.setWorkerDao(workerDao);
       factory.setFifoDao(fifoDao);
       factory.setQueues("test-queue");
-      factory.setJobRunnerFactory(new TestJobRunnerFactory());
+      factory.setExecutionStrategy(new SameThread(new TestJobRunnerFactory()));
       factory.setApplicationEventPublisher(eventBus);
       factory.afterPropertiesSet();
 
@@ -91,13 +95,13 @@ class FifoWorkerImplIT {
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
-      assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
-      assertEquals(new JobStart(worker, "test-queue", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution), eventBus.waitForEvent());
 
       worker.stop();
 
       assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
-      assertEquals(new JobSuccess(worker, "test-queue", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobSuccess(worker, "test-queue", execution), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
@@ -119,13 +123,13 @@ class FifoWorkerImplIT {
 
       assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
-      assertEquals(new JobExecute(worker, "test-queue", execution, runner), eventBus.waitForEvent());
-      assertEquals(new JobStart(worker, "test-queue", execution, runner), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution), eventBus.waitForEvent());
 
       worker.stop();
 
       assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
-      assertEquals(new JobFailure(worker, "test-queue", execution, runner, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
+      assertEquals(new JobFailure(worker, "test-queue", execution, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
       assertEquals(job, TestJobRunner.getLastJob());
       assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
       assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());

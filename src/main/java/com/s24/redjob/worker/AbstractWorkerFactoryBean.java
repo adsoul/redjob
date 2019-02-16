@@ -1,6 +1,7 @@
 package com.s24.redjob.worker;
 
 import com.s24.redjob.channel.ChannelWorker;
+import com.s24.redjob.worker.execution.ExecutionStrategy;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.FactoryBean;
@@ -173,18 +174,19 @@ public abstract class AbstractWorkerFactoryBean<W extends AbstractWorker>
    }
 
    /**
-    * Factory for creating job runners.
+    * Execution strategy.
     */
-   public JobRunnerFactory getJobRunnerFactory() {
-      return worker.getJobRunnerFactory();
+   public ExecutionStrategy getExecutionStrategy() {
+      return worker.getExecutionStrategy();
    }
 
    /**
-    * Factory for creating job runners.
+    * Execution strategy.
     */
-   public void setJobRunnerFactory(JobRunnerFactory jobRunnerFactory) {
-      worker.setJobRunnerFactory(jobRunnerFactory);
+   public void setExecutionStrategy(ExecutionStrategy executionStrategy) {
+      worker.setExecutionStrategy(executionStrategy);
    }
+
 
    /**
     * Number of milliseconds the worker pauses, if none of the queues contained a job. Defaults to {@value

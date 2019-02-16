@@ -1,5 +1,6 @@
 package com.s24.redjob.channel.command;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 /**
@@ -10,7 +11,6 @@ public class ShutdownQueueWorker {
    /**
     * Constructor to shutdown all workers.
     */
-   public ShutdownQueueWorker() {
-      super();
-   }
+   @JsonCreator
+   public ShutdownQueueWorker() { }
 }
