@@ -75,7 +75,7 @@ public class CleanUpJobsRunner implements JobRunner<CleanUpJobs> {
     * Does the worker match the selectors of the job?.
     */
    private boolean matches(FifoDao fifoDao, CleanUpJobs job) {
-      return job.getNamespaces().isEmpty() || job.getNamespaces().contains(fifoDao.getNamespace());
+      return fifoDao.getNamespace().equals(namespace);
    }
 
    //
