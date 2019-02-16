@@ -1,5 +1,9 @@
 package com.s24.redjob.worker;
 
+import java.time.Instant;
+
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -7,9 +11,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
-import org.springframework.util.Assert;
-
-import java.time.Instant;
 
 /**
  * Job execution. Stored as JSON in Redis.
@@ -40,6 +41,13 @@ public class Execution {
     */
    @JsonProperty(value = "created", required = true)
    private Instant created;
+
+   /**
+    * Namespace of this execution.
+    */
+   @JsonInclude(value = Include.NON_NULL)
+   @JsonProperty(value = "namespace", required = false)
+   private final String namespace;
 
    /**
     * Queue of this execution.
@@ -73,6 +81,8 @@ public class Execution {
    /**
     * Constructor.
     *
+    * @param namespace
+    *           Namespace.
     * @param queue
     *           Queue.
     * @param id
@@ -80,13 +90,15 @@ public class Execution {
     * @param job
     *           Job.
     */
-   public Execution(String queue, long id, Object job) {
-      this(queue, id, job, new NoResult());
+   public Execution(String namespace, String queue, long id, Object job) {
+      this(namespace, queue, id, job, new NoResult());
    }
 
    /**
     * Constructor.
     *
+    * @param namespace
+    *           Namespace.
     * @param queue
     *           Queue.
     * @param id
@@ -96,8 +108,8 @@ public class Execution {
     * @param result
     *           Job result.
     */
-   public Execution(String queue, long id, Object job, Object result) {
-      this(queue, id, job, result, Instant.now(), null, null, null);
+   public Execution(String namespace, String queue, long id, Object job, Object result) {
+      this(id, job, result, Instant.now(), namespace, queue, null, null, null);
    }
 
    /**
@@ -105,11 +117,12 @@ public class Execution {
     */
    @JsonCreator
    Execution(
-         @JsonProperty(value = "queue", required = true) String queue,
          @JsonProperty(value = "id", required = true) long id,
          @JsonProperty(value = "job", required = true) Object job,
          @JsonProperty(value = "result", required = true) Object result,
          @JsonProperty(value = "created", required = true) Instant created,
+         @JsonProperty(value = "namespace", required = false) String namespace,
+         @JsonProperty(value = "queue", required = true) String queue,
          @JsonProperty(value = "worker", required = false) String worker,
          @JsonProperty(value = "start", required = false) Instant start,
          @JsonProperty(value = "end", required = false) Instant end) {
@@ -122,6 +135,7 @@ public class Execution {
       this.job = job;
       this.result = result;
       this.created = created;
+      this.namespace = namespace;
       this.queue = queue;
       this.worker = worker;
       this.start = start;
