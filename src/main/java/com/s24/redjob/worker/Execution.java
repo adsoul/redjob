@@ -143,6 +143,13 @@ public class Execution {
    }
 
    /**
+    * Namespace of this execution.
+    */
+   public String getNamespace() {
+      return namespace;
+   }
+
+   /**
     * Queue of this execution.
     */
    public String getQueue() {

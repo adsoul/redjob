@@ -53,11 +53,4 @@ public class CleanUpJobs {
    public Set<String> getNamespaces() {
       return namespaces;
    }
-
-   /**
-    * Does the worker match the selectors of the job?.
-    */
-   protected boolean matches(FifoDao fifoDao) {
-      return namespaces.isEmpty() || namespaces.contains(fifoDao.getNamespace());
-   }
 }

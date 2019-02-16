@@ -1,6 +1,7 @@
 package com.s24.redjob.channel.command;
 
 import com.s24.redjob.queue.QueueWorker;
+import com.s24.redjob.worker.Execution;
 import com.s24.redjob.worker.runner.JobRunner;
 import com.s24.redjob.worker.runner.JobRunnerComponent;
 
@@ -22,21 +23,42 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
    private static final Logger log = LoggerFactory.getLogger(PauseQueueWorkerRunner.class);
 
    /**
+    * Namespace.
+    */
+   private final String namespace;
+
+   /**
+    * Job.
+    */
+   private final PauseQueueWorker job;
+
+   /**
     * All {@link QueueWorker}s.
     */
    @Autowired(required = false)
    private List<QueueWorker> allWorkers = List.of();
 
-   @Override
-   public void execute(PauseQueueWorker job) {
-      Assert.notNull(job, "Precondition violated: job != null.");
+   /**
+    * Constructor.
+    *
+    * @param execution
+    *       Job execution.
+    */
+   public PauseQueueWorkerRunner(Execution execution) {
+      Assert.notNull(execution, "Precondition violated: execution != null.");
 
+      this.namespace = execution.getNamespace();
+      this.job = execution.getJob();
+   }
+
+   @Override
+   public void run() {
       boolean pause = job.isPause();
       allWorkers.stream()
             .filter(worker -> matches(worker, job))
             .forEach(worker -> {
                try {
-                  log.info("{} worker {}.", pause? "Pausing" : "Unpausing", worker.getName());
+                  log.info("{} worker {}.", pause ? "Pausing" : "Unpausing", worker.getName());
                   worker.pause(pause);
                } catch (Exception e) {
                   log.error("Failed to {} worker {}: {}.", pause ? "pause" : "unpause", worker.getName(), e.getMessage());
@@ -48,7 +70,7 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
     * Does the worker match the selectors of the job?.
     */
    private boolean matches(QueueWorker worker, PauseQueueWorker job) {
-      // worker.getNamespace().equals(job.getNamespace()) &&
-      return job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains);
+      return worker.getNamespace().equals(namespace) &&
+            (job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains));
    }
 }

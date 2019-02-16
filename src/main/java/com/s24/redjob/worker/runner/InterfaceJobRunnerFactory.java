@@ -1,7 +1,6 @@
 package com.s24.redjob.worker.runner;
 
 import com.s24.redjob.worker.Execution;
-import com.s24.redjob.worker.WrappingRunnable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,15 +59,9 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
       }
 
       @SuppressWarnings("unchecked")
-      JobRunner runner = (JobRunner) applicationContext.getBean(beanName);
+      JobRunner runner = (JobRunner) applicationContext.getBean(beanName, execution);
       Assert.notNull(runner, "Pre-condition violated: runner != null.");
-
-      return new WrappingRunnable(runner) {
-         @Override
-         public void run() {
-            runner.execute(job);
-         }
-      };
+      return runner;
    }
 
    /**
