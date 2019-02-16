@@ -10,7 +10,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 /**
  * {@link JobRunner} for {@link PauseQueueWorker} command.
@@ -23,39 +22,17 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
    private static final Logger log = LoggerFactory.getLogger(PauseQueueWorkerRunner.class);
 
    /**
-    * Namespace.
-    */
-   private final String namespace;
-
-   /**
-    * Job.
-    */
-   private final PauseQueueWorker job;
-
-   /**
     * All {@link QueueWorker}s.
     */
    @Autowired(required = false)
    private List<QueueWorker> allWorkers = List.of();
 
-   /**
-    * Constructor.
-    *
-    * @param execution
-    *       Job execution.
-    */
-   public PauseQueueWorkerRunner(Execution execution) {
-      Assert.notNull(execution, "Precondition violated: execution != null.");
-
-      this.namespace = execution.getNamespace();
-      this.job = execution.getJob();
-   }
-
    @Override
-   public void run() {
+   public void run(Execution execution) {
+      PauseQueueWorker job = execution.getJob();
       boolean pause = job.isPause();
       allWorkers.stream()
-            .filter(worker -> matches(worker, job))
+            .filter(worker -> matches(worker, execution.getNamespace(), job))
             .forEach(worker -> {
                try {
                   log.info("{} worker {}.", pause ? "Pausing" : "Unpausing", worker.getName());
@@ -69,7 +46,7 @@ public class PauseQueueWorkerRunner implements JobRunner<PauseQueueWorker> {
    /**
     * Does the worker match the selectors of the job?.
     */
-   private boolean matches(QueueWorker worker, PauseQueueWorker job) {
+   private boolean matches(QueueWorker worker, String namespace, PauseQueueWorker job) {
       return worker.getNamespace().equals(namespace) &&
             (job.getQueues().isEmpty() || worker.getQueues().stream().anyMatch(job.getQueues()::contains));
    }

@@ -10,7 +10,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Assert;
 
 /**
  * {@link JobRunner} for {@link StopJob} command.
@@ -23,40 +22,18 @@ public class StopJobRunner implements JobRunner<StopJob> {
    private static final Logger log = LoggerFactory.getLogger(StopJobRunner.class);
 
    /**
-    * Namespace.
-    */
-   private final String namespace;
-
-   /**
-    * Job.
-    */
-   private final StopJob job;
-
-   /**
-    * Constructor.
-    *
-    * @param execution
-    *       Job execution.
-    */
-   public StopJobRunner(Execution execution) {
-      Assert.notNull(execution, "Precondition violated: execution != null.");
-
-      this.namespace = execution.getNamespace();
-      this.job = execution.getJob();
-   }
-
-   /**
     * All {@link QueueWorker}s.
     */
    @Autowired(required = false)
    private List<QueueWorker> allWorkers = List.of();
 
    @Override
-   public void run() {
+   public void run(Execution execution) {
+      StopJob job = execution.getJob();
       log.info("Stopping job {}.", job.getId());
 
       allWorkers.stream()
-            .filter(worker -> matches(worker, job))
+            .filter(worker -> matches(worker, execution.getNamespace(), job))
             .forEach(worker -> {
                try {
                   worker.stop(job.getId());
@@ -69,7 +46,7 @@ public class StopJobRunner implements JobRunner<StopJob> {
    /**
     * Does the worker match the selectors of the job?.
     */
-   private boolean matches(QueueWorker worker, StopJob job) {
+   private boolean matches(QueueWorker worker, String namespace, StopJob job) {
       return worker.getNamespace().equals(namespace);
    }
 }
