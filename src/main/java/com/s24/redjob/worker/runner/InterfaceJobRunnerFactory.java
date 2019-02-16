@@ -59,9 +59,9 @@ public class InterfaceJobRunnerFactory implements JobRunnerFactory, ApplicationC
       }
 
       @SuppressWarnings("unchecked")
-      JobRunner runner = (JobRunner) applicationContext.getBean(beanName, execution);
+      JobRunner runner = (JobRunner) applicationContext.getBean(beanName);
       Assert.notNull(runner, "Pre-condition violated: runner != null.");
-      return runner;
+      return () -> runner.run(execution);
    }
 
    /**
