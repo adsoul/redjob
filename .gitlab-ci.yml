@@ -5,6 +5,8 @@ stages:
 
 build and test:
   stage: build
+  except:
+    - master
   services:
     - docker:dind
   cache:
@@ -12,3 +14,16 @@ build and test:
       - .m2/repository/
   script:
     - mvn clean install -s build/settings.xml
+
+build, test and deploy:
+  stage: build
+  only:
+    - master
+  services:
+    - docker:dind
+  cache:
+    paths:
+      - .m2/repository/
+  script:
+    - mvn release:prepare -s build/settings.xml
+    - mvn release:perform -s build/settings.xml
