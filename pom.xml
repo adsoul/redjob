@@ -55,7 +55,7 @@
       <maven.build.timestamp.format>yyyy-MM-dd_HH-mm</maven.build.timestamp.format>
       <docker.image.tag>${git.commit.id.describe}</docker.image.tag>
 
-      <docker.redis.image>hub-adsoul.s24.com/adsoul/redis:5.0.3</docker.redis.image>
+      <docker.redis.image>redis:5.0.4</docker.redis.image>
 
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
