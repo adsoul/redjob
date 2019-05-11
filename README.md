@@ -35,27 +35,27 @@ Setup of a basic environment for executing jobs, described in Spring XML context
 </bean>
 
 <!-- Configure JSON serialization. -->
-<bean id="executions" class="com.s24.redjob.worker.json.ExecutionRedisSerializer" />
+<bean id="executions" class="com.adsoul.redjob.worker.json.ExecutionRedisSerializer" />
 <!-- Search job class in classpath. -->
-<bean id="typeScanner" class="com.s24.redjob.worker.json.TypeScanner"
+<bean id="typeScanner" class="com.adsoul.redjob.worker.json.TypeScanner"
     p:executions-ref="executions"
-    p:basePackages="com.s24.myapp" />
+    p:basePackages="com.adsoul.myapp" />
 <!-- Factory for creating job runners for jobs. -->     
-<bean id="jobRunnerFactory" class="com.s24.redjob.worker.runner.InterfaceJobRunnerFactory" />
+<bean id="jobRunnerFactory" class="com.adsoul.redjob.worker.runner.InterfaceJobRunnerFactory" />
 
 <!-- DAO for worker states. -->
-<bean id="workerDao" class="com.s24.redjob.worker.WorkerDaoImpl"
+<bean id="workerDao" class="com.adsoul.redjob.worker.WorkerDaoImpl"
     p:connectionFactory-ref="jobRedis"
     p:namespace="mynamespace" />
 
 <!-- DAO for queues. -->
-<bean id="fifoDao" class="com.s24.redjob.queue.FifoDaoImpl"
+<bean id="fifoDao" class="com.adsoul.redjob.queue.FifoDaoImpl"
     p:connectionFactory-ref="jobRedis"
     p:namespace="mynamespace"
     p:executions-ref="executions" />
 
 <!-- Worker polling the queue and executing jobs. -->
-<bean id="defaultWorker" class="com.s24.redjob.queue.FifoWorkerFactoryBean"
+<bean id="defaultWorker" class="com.adsoul.redjob.queue.FifoWorkerFactoryBean"
     p:workerDao-ref="workerDao"
     p:name="myworker:[hostname]"
     p:fifoDao-ref="fifoDao"
@@ -63,7 +63,7 @@ Setup of a basic environment for executing jobs, described in Spring XML context
     p:jobRunnerFactory-ref="jobRunnerFactory" />
 
 <!-- Client, e.g. for adding jobs. -->
-<bean id="redjobClient" class="com.s24.redjob.client.ClientFactoryBean"
+<bean id="redjobClient" class="com.adsoul.redjob.client.ClientFactoryBean"
     p:connectionFactory-ref="jobRedis"
     p:namespace="mynamespace"
     p:executions-ref="executions" />

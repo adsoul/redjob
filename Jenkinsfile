@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 
-def DOCKER_IMAGE = 'hub-adsoul.s24.com/adsoul/java-maven:11-3.6.0'
+def DOCKER_IMAGE = 'hub-adsoul.adsoul.com/adsoul/java-maven:11-3.6.0'
 
 pipeline {
    agent any
@@ -13,9 +13,9 @@ pipeline {
       JENKINS_BUILD_URL = "${env.JENKINS_URL}blue/organizations/jenkins/redjob/detail/${BRANCH_NAME_URL}/${env.BUILD_NUMBER}/pipeline"
 
       // https://docs.sonarqube.org/display/SONAR/Analysis+Parameters
-      SONAR_URL = 'https://sonar.s24.com/'
+      SONAR_URL = 'https://sonar.adsoul.com/'
       SONAR_API_TOKEN = credentials('godzilla-sonar-ci')
-      SONAR_PROJECT_KEY = 'com.s24.redjob'
+      SONAR_PROJECT_KEY = 'com.adsoul.redjob'
       SONAR_PROJECT_NAME = 'redjob'
    }
 

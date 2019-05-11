@@ -1,0 +1,137 @@
+package com.adsoul.redjob.queue;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+
+import com.adsoul.redjob.TestEventPublisher;
+import com.adsoul.redjob.TestRedis;
+import com.adsoul.redjob.worker.Execution;
+import com.adsoul.redjob.worker.WorkerDaoImpl;
+import com.adsoul.redjob.worker.events.JobExecute;
+import com.adsoul.redjob.worker.events.JobFailure;
+import com.adsoul.redjob.worker.events.JobProcess;
+import com.adsoul.redjob.worker.events.JobStart;
+import com.adsoul.redjob.worker.events.JobSuccess;
+import com.adsoul.redjob.worker.events.WorkerNext;
+import com.adsoul.redjob.worker.events.WorkerPoll;
+import com.adsoul.redjob.worker.events.WorkerStart;
+import com.adsoul.redjob.worker.events.WorkerStopped;
+import com.adsoul.redjob.worker.events.WorkerStopping;
+import com.adsoul.redjob.worker.execution.SameThread;
+import com.adsoul.redjob.worker.json.TestExecutionRedisSerializer;
+import com.adsoul.redjob.worker.runner.TestJob;
+import com.adsoul.redjob.worker.runner.TestJobRunner;
+import com.adsoul.redjob.worker.runner.TestJobRunnerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+/**
+ * Integration test for {@link FifoWorker}.
+ */
+class FifoWorkerImplIT {
+   /**
+    * Recording event publisher.
+    */
+   private TestEventPublisher eventBus = new TestEventPublisher();
+
+   /**
+    * Queue DAO.
+    */
+   private FifoDao fifoDao;
+
+   /**
+    * Worker under test.
+    */
+   private FifoWorker worker;
+
+   @BeforeEach
+   void setUp() throws Exception {
+      RedisConnectionFactory connectionFactory = TestRedis.connectionFactory();
+
+      WorkerDaoImpl workerDao = new WorkerDaoImpl();
+      workerDao.setConnectionFactory(connectionFactory);
+      workerDao.setNamespace("test");
+      workerDao.afterPropertiesSet();
+
+      FifoDaoImpl fifoDao = new FifoDaoImpl();
+      fifoDao.setConnectionFactory(connectionFactory);
+      fifoDao.setNamespace("test");
+      fifoDao.setExecutions(new TestExecutionRedisSerializer(TestJob.class));
+      fifoDao.afterPropertiesSet();
+
+      FifoWorkerFactoryBean factory = new FifoWorkerFactoryBean();
+      factory.setWorkerDao(workerDao);
+      factory.setFifoDao(fifoDao);
+      factory.setQueues("test-queue");
+      factory.setExecutionStrategy(new SameThread(new TestJobRunnerFactory()));
+      factory.setApplicationEventPublisher(eventBus);
+      factory.afterPropertiesSet();
+
+      worker = factory.getObject();
+      this.fifoDao = worker.getFifoDao();
+   }
+
+   @AfterEach
+   void tearDown() {
+      worker.stop();
+   }
+
+   @Test
+   void testLifecycle() throws Exception {
+      TestJob job = new TestJob();
+      TestJobRunner runner = new TestJobRunner(job);
+
+      assertTrue(eventBus.getEvents().isEmpty());
+      worker.start();
+
+      assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
+      assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
+
+      Execution execution = fifoDao.enqueue("test-queue", job, false);
+
+      assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution), eventBus.waitForEvent());
+
+      worker.stop();
+
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
+      assertEquals(new JobSuccess(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(job, TestJobRunner.getLastJob());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
+   }
+
+   @Test
+   void testJobError() throws Exception {
+      TestJob job = new TestJob(TestJobRunner.EXCEPTION_VALUE);
+      TestJobRunner runner = new TestJobRunner(job);
+
+      assertTrue(eventBus.getEvents().isEmpty());
+      worker.start();
+
+      assertEquals(new WorkerStart(worker), eventBus.waitForEvent());
+      assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
+
+      Execution execution = fifoDao.enqueue("test-queue", job, false);
+
+      assertEquals(new WorkerPoll(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new JobProcess(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobExecute(worker, "test-queue", execution), eventBus.waitForEvent());
+      assertEquals(new JobStart(worker, "test-queue", execution), eventBus.waitForEvent());
+
+      worker.stop();
+
+      assertEquals(new WorkerStopping(worker), eventBus.waitForEvent());
+      assertEquals(new JobFailure(worker, "test-queue", execution, TestJobRunner.EXCEPTION), eventBus.waitForEvent());
+      assertEquals(job, TestJobRunner.getLastJob());
+      assertEquals(new WorkerNext(worker, "test-queue"), eventBus.waitForEvent());
+      assertEquals(new WorkerStopped(worker), eventBus.waitForEvent());
+   }
+}
