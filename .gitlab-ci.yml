@@ -1,0 +1,12 @@
+image: maven:3.6.1-jdk-11
+
+stages:
+  - build
+
+build and test:
+  stage: build
+  cache:
+    paths:
+      - .m2/repository/
+  script:
+    - mvn clean install -s build/settings.xml
