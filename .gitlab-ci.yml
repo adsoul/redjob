@@ -5,6 +5,8 @@ stages:
 
 build and test:
   stage: build
+  services:
+    - docker:dind
   cache:
     paths:
       - .m2/repository/
